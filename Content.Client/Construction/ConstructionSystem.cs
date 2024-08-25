@@ -35,6 +35,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
 
     public List<ConstructionPrototype> Favorites { get; set; } = [];
     public event EventHandler? PlacementChanged;
+    public event EventHandler<string>? ConstructionGuideReceived;
+
+    public event EventHandler? Guide;
 
     private readonly Dictionary<int, EntityUid> _ghosts = new();
     private readonly Dictionary<string, ConstructionGuide> _guideCache = new();
@@ -55,13 +58,23 @@ public sealed class ConstructionSystem : SharedConstructionSystem
 
         SubscribeLocalEvent<ConstructionGhostComponent, ExaminedEvent>(HandleConstructionGhostExamined);
         SubscribeNetworkEvent<AckStructureConstructionMessage>(HandleAckStructure);
+        SubscribeNetworkEvent<ResponseConstructionGuide>(HandleConstructionGuideReceived);
 
-        _placementManager.PlacementChanged += OnPlacementChanged;
+        _placementManager.PlacementChanged += HandlePlacementChanged;
     }
 
-    private void OnPlacementChanged(object? sender, EventArgs e)
+    private void HandleConstructionGuideReceived(ResponseConstructionGuide ev)
     {
-       PlacementChanged?.Invoke(sender, e);
+        _guideCache[ev.ConstructionId] = ev.Guide;
+        ConstructionGuideReceived?.Invoke(this, ev.ConstructionId);
+    }
+
+    /// <summary>
+    /// Forwards the `PlacementChanged` event from <see cref="PlacementManager" />.
+    /// </summary>
+    private void HandlePlacementChanged(object? sender, EventArgs e)
+    {
+        PlacementChanged?.Invoke(sender, e);
     }
 
     /// <inheritdoc />

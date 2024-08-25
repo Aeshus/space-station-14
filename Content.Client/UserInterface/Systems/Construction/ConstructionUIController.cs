@@ -90,6 +90,8 @@ public sealed class ConstructionUIController : UIController, IOnStateChanged<Gam
 
     public void OnStateExited(GameplayState state)
     {
+        // UnloadGui();
+
         CommandBinds.Unregister<ConstructionUIController>();
     }
 
