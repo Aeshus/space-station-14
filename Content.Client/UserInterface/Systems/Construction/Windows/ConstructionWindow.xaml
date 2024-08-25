@@ -1,0 +1,41 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      MinSize="720 320"
+                      Title="{Loc 'construction-menu-title'}">
+    <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="0.4" Margin="0 0 5 0">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 0 0 5">
+                <LineEdit Name="SearchBar" PlaceHolder="Search" HorizontalExpand="True" />
+                <OptionButton Name="OptionCategories" Access="Public" MinSize="130 0" />
+            </BoxContainer>
+            <ItemList Name="Recipes" Access="Public" SelectMode="Single" VerticalExpand="True" />
+        </BoxContainer>
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True" SizeFlagsStretchRatio="0.6">
+            <Button Name="FavoriteButton" Visible="false" HorizontalExpand="False"
+                    HorizontalAlignment="Right" Margin="0 0 0 15" />
+            <Control>
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" Margin="0 0 0 5">
+                    <BoxContainer Orientation="Horizontal" Align="Center">
+                        <TextureRect Name="RecipeTexture" HorizontalAlignment="Right" Stretch="Keep" Margin="0 0 10 0" />
+                        <BoxContainer Orientation="Vertical">
+                            <RichTextLabel Name="RecipeName" />
+                            <RichTextLabel Name="RecipeDescription" />
+                        </BoxContainer>
+                    </BoxContainer>
+                </BoxContainer>
+            </Control>
+            <ItemList Name="RecipeStepList" Access="Public" VerticalExpand="True" Margin="0 0 0 5" />
+            <BoxContainer Orientation="Vertical">
+                <Button Name="BuildButton" Disabled="True" ToggleMode="True"
+                        VerticalExpand="True" SizeFlagsStretchRatio="0.5"
+                        Text="{Loc 'construction-menu-place-ghost'}" />
+                <BoxContainer Orientation="Horizontal" VerticalExpand="True" SizeFlagsStretchRatio="0.5">
+                    <Button Name="EraseButton" ToggleMode="True" Text="{Loc 'construction-menu-eraser-mode'}"
+                            HorizontalExpand="True" SizeFlagsStretchRatio="0.7" />
+                    <Button Name="ClearButton" HorizontalExpand="True" SizeFlagsStretchRatio="0.3"
+                            Text="{Loc 'construction-menu-clear-all'}" />
+                </BoxContainer>
+            </BoxContainer>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>
