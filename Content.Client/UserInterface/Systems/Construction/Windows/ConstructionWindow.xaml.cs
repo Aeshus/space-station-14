@@ -295,6 +295,9 @@ public sealed partial class ConstructionWindow : FancyWindow
 
         _constructionSystem.PlacementChanged += DisableAll;
         _constructionSystem.ConstructionGuideReceived += RedrawSteps;
+
+        // Make sure there's no old ghosts when loading the system.
+        _constructionSystem.ClearAllGhosts();
     }
 
     private void OnSystemUnloaded(IEntitySystem sys)
