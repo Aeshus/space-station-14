@@ -34,10 +34,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
     [Dependency] private readonly PopupSystem _popupSystem = default!;
 
     public List<ConstructionPrototype> Favorites { get; set; } = [];
+
     public event EventHandler? PlacementChanged;
     public event EventHandler<string>? ConstructionGuideReceived;
-
-    public event EventHandler? Guide;
 
     private readonly Dictionary<int, EntityUid> _ghosts = new();
     private readonly Dictionary<string, ConstructionGuide> _guideCache = new();
