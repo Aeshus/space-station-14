@@ -51,8 +51,6 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         CommandBinds.Builder
             .Bind(EngineKeyFunctions.Use,
                 new PointerInputCmdHandler(HandleUse, outsidePrediction: true))
-            //.Bind(ContentKeyFunctions.EditorFlipObject,
-            //new PointerInputCmdHandler(HandleFlip, outsidePrediction: true))
             .Register<ConstructionSystem>();
 
         SubscribeLocalEvent<ConstructionGhostComponent, ExaminedEvent>(HandleConstructionGhostExamined);
@@ -95,22 +93,6 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         RaiseNetworkEvent(new RequestConstructionGuide(prototype.ID));
         return null;
     }
-
-    /// <summary>
-    /// Handle flipping a prototype.
-    /// </summary>
-    /*
-    private bool HandleFlip(in PointerInputCmdHandler.PointerInputCmdArgs args)
-    {
-        if (!_placementManager.IsActive || _placementManager.Eraser || ?.Mirror == null)
-        return false;
-
-        _selection = _prototypeManager.Index<ConstructionPrototype>(_selection.Mirror);
-        UpdateGhostPlacement();
-
-        return true;
-    }
-    */
 
     /// <summary>
     /// Start building the ghost structure.
