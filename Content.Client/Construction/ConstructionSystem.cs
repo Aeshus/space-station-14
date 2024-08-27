@@ -4,8 +4,6 @@ using Content.Client.Popups;
 using Content.Shared.Construction;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Examine;
-using Content.Shared.Input;
-using Content.Shared.Popups;
 using Content.Shared.Wall;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
@@ -16,7 +14,6 @@ using Robust.Shared.Input;
 using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
-using YamlDotNet.Serialization.NodeTypeResolvers;
 
 namespace Content.Client.Construction;
 
@@ -35,7 +32,14 @@ public sealed class ConstructionSystem : SharedConstructionSystem
 
     public List<ConstructionPrototype> Favorites { get; set; } = [];
 
+    /// <summary>
+    /// PlacementManager's state has changed (e.g. building stopped).
+    /// </summary>
     public event EventHandler? PlacementChanged;
+
+    /// <summary>
+    /// Construction guide was received, cached, and needs to be displayed.
+    /// </summary>
     public event EventHandler<string>? ConstructionGuideReceived;
 
     private readonly Dictionary<int, EntityUid> _ghosts = new();
@@ -107,6 +111,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         return true;
     }
 
+    /// <summary>
+    /// Tells the server to actually start building it when the ghost is interacted with.
+    /// </summary>
     private void TryStartConstruction(EntityUid ghostId)
     {
         ConstructionGhostComponent? ghostComp = null;
@@ -124,6 +131,7 @@ public sealed class ConstructionSystem : SharedConstructionSystem
             ghostComp.Prototype.ID,
             transform.LocalRotation,
             ghostId.GetHashCode());
+
         RaiseNetworkEvent(msg);
     }
 
@@ -183,6 +191,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         _ghosts.Clear();
     }
 
+    /// <summary>
+    /// Creates a construction ghost at the given location.
+    /// </summary>
     public void SpawnGhost(ConstructionPrototype prototype, EntityCoordinates loc, Direction dir)
     {
         TrySpawnGhost(prototype, loc, dir, out _);
@@ -217,7 +228,7 @@ public sealed class ConstructionSystem : SharedConstructionSystem
     }
 
     /// <summary>
-    /// Builds the actual ghost entity
+    /// Builds the actual ghost entity.
     /// </summary>
     public bool CreateGhostEntity(ConstructionPrototype prototype,
         EntityCoordinates loc,
@@ -252,6 +263,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         return true;
     }
 
+    /// <summary>
+    /// Checks the individual conditions for the recipe.
+    /// </summary>
     private bool CheckConstructionConditions(ConstructionPrototype prototype,
         EntityCoordinates loc,
         Direction dir,
@@ -265,8 +279,7 @@ public sealed class ConstructionSystem : SharedConstructionSystem
             var message = condition.GenerateGuideEntry()?.Localization;
             if (message is not null)
             {
-                // was: PopupCoordinates(Loc.GetString(message), loc);
-                _popupSystem.PopupCursor(Loc.GetString(message));
+                _popupSystem.PopupCoordinates(Loc.GetString(message), loc);
             }
 
             return false;
@@ -306,6 +319,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
             Favorites.Add(selection);
     }
 
+    /// <summary>
+    /// Selects and updates the current ghost placement.
+    /// </summary>
     public void Select(ConstructionPrototype prototype)
     {
         UpdateGhostPlacement(prototype);
@@ -357,11 +373,17 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         RaiseNetworkEvent(new TryStartItemConstructionMessage(selection.ID));
     }
 
+    /// <summary>
+    /// Try start building by creating the ghost.
+    /// </summary>
     public void TryStartStructureConstruction(ConstructionPrototype? selection)
     {
         UpdateGhostPlacement(selection);
     }
 
+    /// <summary>
+    /// Clears <see cref="PlacementManager"/> of any placement (e.g. building/eraser).
+    /// </summary>
     public void ClearPlacement()
     {
         _placementManager.Clear();
