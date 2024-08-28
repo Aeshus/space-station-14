@@ -55,15 +55,18 @@ namespace Content.Client.Construction
             base.StartHijack(manager);
             manager.CurrentTextures = _prototype?.Layers.Select(sprite => sprite.DirFrame0()).ToList();
 
+            // Ensures other hijacks aren't also bound to it.
+            CommandBinds.Unregister<ConstructionPlacementHijack>();
+
             CommandBinds.Builder
                 .Bind(ContentKeyFunctions.EditorFlipObject,
                     new PointerInputCmdHandler(HandleFlip, outsidePrediction: true))
-                .Register<PlacementManager>();
+                .Register<ConstructionPlacementHijack>();
         }
 
         private bool HandleFlip(ICommonSession? session, EntityCoordinates coords, EntityUid uid)
         {
-            if (_prototype?.Mirror == null)
+            if (!Manager.IsActive || Manager.Eraser || _prototype?.Mirror == null)
                 return false;
 
             _constructionSystem.Select(_prototypeManager.Index<ConstructionPrototype>(_prototype.Mirror));
