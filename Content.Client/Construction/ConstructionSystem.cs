@@ -64,6 +64,9 @@ public sealed class ConstructionSystem : SharedConstructionSystem
         _placementManager.PlacementChanged += HandlePlacementChanged;
     }
 
+    /// <summary>
+    /// Cache the entry when it is sent from the server.
+    /// </summary>
     private void HandleConstructionGuideReceived(ResponseConstructionGuide ev)
     {
         _guideCache[ev.ConstructionId] = ev.Guide;
@@ -114,7 +117,7 @@ public sealed class ConstructionSystem : SharedConstructionSystem
     /// <summary>
     /// Tells the server to actually start building it when the ghost is interacted with.
     /// </summary>
-    private void TryStartConstruction(EntityUid ghostId)
+    public void TryStartConstruction(EntityUid ghostId)
     {
         ConstructionGhostComponent? ghostComp = null;
 
@@ -230,7 +233,7 @@ public sealed class ConstructionSystem : SharedConstructionSystem
     /// <summary>
     /// Builds the actual ghost entity.
     /// </summary>
-    public bool CreateGhostEntity(ConstructionPrototype prototype,
+    private bool CreateGhostEntity(ConstructionPrototype prototype,
         EntityCoordinates loc,
         Direction dir,
         [NotNullWhen(true)] ref EntityUid? ghost)

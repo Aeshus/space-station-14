@@ -17,7 +17,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Client.UserInterface.Systems.Construction;
 
 /// <summary>
-/// Handles loading and unloading the <see cref="ConstructionWindow"/>
+/// Handles loading and unloading the <see cref="ConstructionWindow"/>.
 /// </summary>
 [UsedImplicitly]
 public sealed class ConstructionUIController : UIController, IOnStateChanged<GameplayState>
@@ -90,7 +90,7 @@ public sealed class ConstructionUIController : UIController, IOnStateChanged<Gam
 
     public void OnStateExited(GameplayState state)
     {
-        // UnloadGui();
+        UnloadGui();
 
         CommandBinds.Unregister<ConstructionUIController>();
     }
