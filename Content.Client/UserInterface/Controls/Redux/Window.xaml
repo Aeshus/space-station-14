@@ -1,0 +1,23 @@
+<controls:Window
+    xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls.Redux"
+    MouseFilter="Stop"
+    MinSize="200 160">
+    <PanelContainer StyleClasses="WindowPanel" />
+
+    <BoxContainer Orientation="Vertical">
+
+        <!-- Header -->
+        <PanelContainer Name="HeaderPanel" StyleClasses="WindowHeader">
+            <BoxContainer Orientation="Horizontal">
+                <Label Name="TitleLabel" HorizontalExpand="True" Text="{Loc 'window-title-placeholder'}"
+                       VAlign="Center" StyleClasses="WindowTitle" />
+
+                <TextureButton Name="CloseButton" StyleClasses="WindowCloseButton" VerticalAlignment="Center" />
+            </BoxContainer>
+        </PanelContainer>
+
+        <!-- Content -->
+        <Control Name="ContentsContainer" Margin="4" RectClipContent="True" VerticalExpand="True" />
+    </BoxContainer>
+</controls:Window>

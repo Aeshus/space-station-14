@@ -7,6 +7,7 @@ using Content.Client.Resources;
 using Content.Client.Silicons.Laws.SiliconLawEditUi;
 using Content.Client.UserInterface.Controls;
 using Content.Client.UserInterface.Controls.FancyTree;
+using Content.Client.UserInterface.Controls.Redux;
 using Content.Client.Verbs.UI;
 using Content.Shared.Verbs;
 using Robust.Client.Graphics;
@@ -16,6 +17,9 @@ using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
 using Robust.Shared.Graphics;
 using static Robust.Client.UserInterface.StylesheetHelpers;
+using Slider = Robust.Client.UserInterface.Controls.Slider;
+using StripeBack = Content.Client.UserInterface.Controls.StripeBack;
+using Tooltip = Robust.Client.UserInterface.CustomControls.Tooltip;
 
 namespace Content.Client.Stylesheets
 {
@@ -159,7 +163,7 @@ namespace Content.Client.Stylesheets
 
         public override Stylesheet Stylesheet { get; }
 
-        public StyleNano(IResourceCache resCache) : base(resCache)
+        public StyleNano(IResourceCache resCache, IUserInterfaceManager userInterfaceManager) : base(resCache, userInterfaceManager)
         {
             var notoSans8 = resCache.NotoStack(size: 8);
             var notoSans10 = resCache.NotoStack(size: 10);
@@ -538,6 +542,43 @@ namespace Content.Client.Stylesheets
 
             Stylesheet = new Stylesheet(BaseRules.Concat(new[]
             {
+                Element<PanelContainer>()
+                    .Class(Window.StyleClassWindowPanel)
+                    .Prop(PanelContainer.StylePropertyPanel, new StyleBoxFlat
+                {
+                    BackgroundColor = Color.FromHex("#25252A"),
+                }),
+
+                Element<PanelContainer>()
+                    .Class(Window.StyleClassWindowHeader)
+                    .Prop(PanelContainer.StylePropertyPanel, new StyleBoxFlat
+                {
+                    BackgroundColor = Color.FromHex("#1F1F23"),
+                    ContentMarginLeftOverride = 4,
+                    ContentMarginRightOverride = 4,
+                    ContentMarginTopOverride = 4,
+                    ContentMarginBottomOverride = 4,
+                }),
+
+                Element<Label>().Class(Window.StyleClassWindowTitle).Prop(Label.StylePropertyFont, boxFont13)
+                    .Prop(Label.StylePropertyFontColor, NanoGold),
+
+                Element<TextureButton>().Class(Window.StyleClassWindowCloseButton)
+                    .Prop(TextureButton.StylePropertyTexture, resCache.GetTexture("/Textures/Interface/Nano/cross.svg.png"))
+                    .Prop(Control.StylePropertyModulateSelf, Color.FromHex("#4B596A")),
+
+                Element<TextureButton>()
+                    .Class(Window.StyleClassWindowCloseButton)
+                    .Pseudo(TextureButton.StylePseudoClassHover)
+                    .Prop(Control.StylePropertyModulateSelf, Color.FromHex("#7F3636")),
+
+                Element<TextureButton>()
+                    .Class(Window.StyleClassWindowCloseButton)
+                    .Pseudo(TextureButton.StylePseudoClassPressed)
+                    .Prop(Control.StylePropertyModulateSelf, Color.FromHex("#753131")),
+
+                // Old
+
                 Element().Class("monospace")
                     .Prop("font", notoSansMono),
                 // Window title.
@@ -1632,7 +1673,7 @@ namespace Content.Client.Stylesheets
                     new[]
                     {
                         new StyleProperty(TextureButton.StylePropertyTexture, resCache.GetTexture("/Textures/Interface/Bwoink/un_pinned.png"))
-                    })
+                    }),
             }).ToList());
         }
     }

@@ -24,7 +24,7 @@ namespace Content.Client.Stylesheets
 
         public override Stylesheet Stylesheet { get; }
 
-        public StyleSpace(IResourceCache resCache) : base(resCache)
+        public StyleSpace(IResourceCache resCache, IUserInterfaceManager userInterfaceManager) : base(resCache, userInterfaceManager)
         {
             var notoSans10 = resCache.GetFont
             (

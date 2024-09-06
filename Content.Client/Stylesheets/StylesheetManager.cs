@@ -14,8 +14,8 @@ namespace Content.Client.Stylesheets
 
         public void Initialize()
         {
-            SheetNano = new StyleNano(_resourceCache).Stylesheet;
-            SheetSpace = new StyleSpace(_resourceCache).Stylesheet;
+            SheetNano = new StyleNano(_resourceCache, _userInterfaceManager).Stylesheet;
+            SheetSpace = new StyleSpace(_resourceCache, _userInterfaceManager).Stylesheet;
 
             _userInterfaceManager.Stylesheet = SheetNano;
         }
