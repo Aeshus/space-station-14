@@ -6,40 +6,34 @@ using Robust.Client.UserInterface.XAML;
 
 namespace Content.Client.UserInterface.Controls.Redux;
 
-[GenerateTypedNameReferences]
-public sealed partial class Tabs : Control
+public sealed partial class Tabs : BoxContainer
 {
     // Button group?
 
-    private BoxContainer _rootContainer;
     private BoxContainer _contentContainer;
     private BoxContainer _buttonContainer;
 
     public Tabs()
     {
-        RobustXamlLoader.Load(this);
-
-        _rootContainer = new BoxContainer();
-
         _buttonContainer = new BoxContainer();
-        _rootContainer.AddChild(_buttonContainer);
+        AddChild(_buttonContainer);
 
-        _contentContainer = new BoxContainer();
-        _rootContainer.AddChild(_contentContainer);
+        _contentContainer = new BoxContainer { VerticalExpand = true };
+        AddChild(_contentContainer);
 
         XamlChildren = _contentContainer.Children;
 
         foreach (var child in Children)
         {
-            if (child is Tab t)
-            {
-                var btn = new Button
-                {
-                    Text = t.Key,
-                };
+            if (child is not Tab t)
+                continue;
 
-                _buttonContainer.AddChild(btn);
-            }
+            var btn = new Button
+            {
+                Text = t.Key,
+            };
+
+            _buttonContainer.AddChild(btn);
         }
     }
 
@@ -55,16 +49,18 @@ public sealed partial class Tabs : Control
     //     <Label Title="Bye" />
     //   </tab>
     // </tabs>
+}
 
-    public sealed partial class Tab : Container
+public sealed partial class Tab : BoxContainer
+{
+    // Tab title
+    // Tab content
+
+    public string? Key { get; set; }
+    public string? Title { get; set; }
+
+    public Tab()
     {
-        // Tab title
-        // Tab content
-
-        public string? Key { get; set; }
-
-        public Tab()
-        {
-        }
+        VerticalExpand = true;
     }
 }
