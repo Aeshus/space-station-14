@@ -21,6 +21,7 @@ using Content.Client.Replay;
 using Content.Client.Screenshot;
 using Content.Client.Singularity;
 using Content.Client.Stylesheets;
+using Content.Client.Stylesheets.Fonts;
 using Content.Client.UserInterface;
 using Content.Client.Viewport;
 using Content.Client.Voting;
@@ -78,6 +79,7 @@ namespace Content.Client.Entry
         [Dependency] private TitleWindowManager _titleWindowManager = default!;
         [Dependency] private IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private ClientsidePlaytimeTrackingManager _clientsidePlaytimeManager = default!;
+        [Dependency] private IFontSelectionManager _fontSelectionManager = default!;
         [Dependency] private ClientFeedbackManager _feedbackManager = null!;
 
         public override void PreInit()
@@ -130,6 +132,8 @@ namespace Content.Client.Entry
             _prototypeManager.RegisterIgnore("ghostRoleRaffleDecider");
             _prototypeManager.RegisterIgnore("codewordGenerator");
             _prototypeManager.RegisterIgnore("codewordFaction");
+
+            _fontSelectionManager.Initialize();
 
             _componentFactory.GenerateNetIds();
             _adminManager.Initialize();

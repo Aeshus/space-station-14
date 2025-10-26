@@ -1,5 +1,5 @@
+using Content.Client.Stylesheets.Fonts;
 using Robust.Client.Graphics;
-using Robust.Client.ResourceManagement;
 using Robust.Shared.Console;
 
 namespace Content.Client.Access.Commands;
@@ -7,7 +7,7 @@ namespace Content.Client.Access.Commands;
 public sealed partial class ShowAccessReadersCommand : LocalizedEntityCommands
 {
     [Dependency] private IOverlayManager _overlay = default!;
-    [Dependency] private IResourceCache _cache = default!;
+    [Dependency] private IFontSelectionManager _fontSelection = default!;
     [Dependency] private SharedTransformSystem _xform = default!;
 
     public override string Command => "showaccessreaders";
@@ -16,7 +16,7 @@ public sealed partial class ShowAccessReadersCommand : LocalizedEntityCommands
     {
         var existing = _overlay.RemoveOverlay<AccessOverlay>();
         if (!existing)
-            _overlay.AddOverlay(new AccessOverlay(EntityManager, _cache, _xform));
+            _overlay.AddOverlay(new AccessOverlay(EntityManager, _fontSelection, _xform));
 
         shell.WriteLine(Loc.GetString($"cmd-showaccessreaders-status", ("status", !existing)));
     }
