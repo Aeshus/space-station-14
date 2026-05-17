@@ -16,12 +16,10 @@ public sealed class FontFamilyStack
     [Access(typeof(FontFamilyStackBuilder))]
     internal FontFamilyStack(FrozenDictionary<FontKind, ResPath[]> fontPaths)
     {
-        if (!fontPaths.ContainsKey(FontKind.Regular)
-            || !fontPaths.ContainsKey(FontKind.Italic)
-            || !fontPaths.ContainsKey(FontKind.Bold)
-            || !fontPaths.ContainsKey(FontKind.BoldItalic))
+        foreach (var kind in Enum.GetValues<FontKind>())
         {
-            throw new ArgumentException("Font Family Stack must contain all font kinds");
+            if (!fontPaths.ContainsKey(kind))
+                throw new ArgumentException("Font Family Stack must contain all font kinds");
         }
 
         _fontPaths = fontPaths;

@@ -10,9 +10,6 @@ namespace Content.Client.Stylesheets;
 
 public abstract partial class BaseStylesheet : IStyleResources
 {
-    private static readonly FontKind[] AllFontKinds =
-        [FontKind.Regular, FontKind.Bold, FontKind.Italic, FontKind.BoldItalic];
-
     [Dependency] protected ISandboxHelper SandboxHelper = default!;
     [Dependency] protected IReflectionManager ReflectionManager = default!;
     [Dependency] protected internal IResourceCache ResCache = default!;
@@ -86,7 +83,7 @@ public abstract partial class BaseStylesheet : IStyleResources
 
         foreach (var (name, size) in sizes)
         {
-            foreach (var kind in AllFontKinds)
+            foreach (var kind in Enum.GetValues<FontKind>())
             {
                 var builder = E().Class(GetFontClass(kind, prefix));
 
