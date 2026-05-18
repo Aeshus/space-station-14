@@ -382,6 +382,7 @@ ui-options-decorative-font = Decorative font
 ui-options-monospace-font = Monospace font
 
 ui-options-font-selector-default = <default>
+ui-options-font-selector-missing = {$fontName} (NOT FOUND)
 ui-options-font-selector-preview-text = Preview Text
 
 ## Admin menu
