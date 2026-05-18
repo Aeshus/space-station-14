@@ -40,6 +40,7 @@ namespace Content.Client.UserInterface.Controls
 
         private string? _stylesheet;
 
+        [Obsolete("Use StylesheetManager's UseStylesheet/StopStylesheet instead")]
         public new string? Stylesheet
         {
             get => _stylesheet;
