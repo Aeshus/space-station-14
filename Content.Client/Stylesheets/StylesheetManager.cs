@@ -160,7 +160,11 @@ namespace Content.Client.Stylesheets
                 if (!owner._initialized)
                     ThrowNotInitialized();
 
-                return owner._stylesheets.TryGetValue(name, out stylesheet);
+                if (owner._stylesheets.TryGetValue(name, out stylesheet))
+                    return true;
+
+                owner._sawmill.Warning($"Tried to fetch missing stylesheet '{name}'.");
+                return false;
             }
 
             private static Stylesheet GetOrThrow(Stylesheet? sheet)
