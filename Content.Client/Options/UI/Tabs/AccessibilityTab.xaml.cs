@@ -31,8 +31,8 @@ public sealed partial class AccessibilityTab : Control
         Control.AddOptionFontFamilyName(FontCVars.MainFamilyName, MainFontSelector);
         Control.AddOptionFontScale(FontCVars.TitleScale, TitleFontSelector);
         Control.AddOptionFontFamilyName(FontCVars.TitleFamilyName, TitleFontSelector);
-        Control.AddOptionFontScale(FontCVars.MachineTitleScale, MachineTitleFontSelector);
-        Control.AddOptionFontFamilyName(FontCVars.MachineTitleFamilyName, MachineTitleFontSelector);
+        Control.AddOptionFontScale(FontCVars.DecorativeScale, DecorativeFontSelector);
+        Control.AddOptionFontFamilyName(FontCVars.DecorativeFamilyName, DecorativeFontSelector);
         Control.AddOptionFontScale(FontCVars.MonospaceScale, MonospaceFontSelector);
         Control.AddOptionFontFamilyName(FontCVars.MonospaceFamilyName, MonospaceFontSelector);
 

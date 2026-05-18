@@ -20,9 +20,9 @@ public enum StandardFontType : byte
     Title,
 
     /// <summary>
-    /// Font used for titles of IC UIs like machines.
+    /// Font used for decorative elements, suhc as titles of IC UIs like machines.
     /// </summary>
-    MachineTitle,
+    Decorative,
 
     /// <summary>
     /// Monospace font.

@@ -38,16 +38,16 @@ public static class FontCVars
         CVarDef.Create<float>("font.title_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
-    /// The user-selected font family name for <see cref="StandardFontType.MachineTitle"/>.
+    /// The user-selected font family name for <see cref="StandardFontType.Decorative"/>.
     /// </summary>
-    public static readonly CVarDef<string> MachineTitleFamilyName =
-        CVarDef.Create<string>("font.machine_title_family_name", "", CVar.ARCHIVE | CVar.CLIENTONLY);
+    public static readonly CVarDef<string> DecorativeFamilyName =
+        CVarDef.Create<string>("font.decorative_family_name", "", CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
-    /// The user-selected font scale for <see cref="StandardFontType.MachineTitle"/>.
+    /// The user-selected font scale for <see cref="StandardFontType.Decorative"/>.
     /// </summary>
-    public static readonly CVarDef<float> MachineTitleScale =
-        CVarDef.Create<float>("font.machine_title_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
+    public static readonly CVarDef<float> DecorativeScale =
+        CVarDef.Create<float>("font.decorative_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
     /// The user-selected font family name for <see cref="StandardFontType.Monospace"/>.

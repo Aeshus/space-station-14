@@ -30,7 +30,7 @@ internal sealed partial class FontSelectionManager
         .AddExtra(new ResPath("/Fonts/NotoEmoji.ttf"))
         .Build();
 
-    private static readonly FontFamilyStack DefaultFontMachineTitle = FontFamilyStack.New()
+    private static readonly FontFamilyStack DefaultFontDecorative = FontFamilyStack.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/Boxfont-round/Boxfont Round.ttf"))
         .Build();
 

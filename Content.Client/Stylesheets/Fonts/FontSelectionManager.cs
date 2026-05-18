@@ -84,10 +84,10 @@ internal sealed partial class FontSelectionManager : IFontSelectionManager, IPos
             FontCVars.TitleScale);
 
         InitializeFont(
-            StandardFontType.MachineTitle,
-            DefaultFontMachineTitle,
-            FontCVars.MachineTitleFamilyName,
-            FontCVars.MachineTitleScale);
+            StandardFontType.Decorative,
+            DefaultFontDecorative,
+            FontCVars.DecorativeFamilyName,
+            FontCVars.DecorativeScale);
 
         InitializeFont(
             StandardFontType.Monospace,

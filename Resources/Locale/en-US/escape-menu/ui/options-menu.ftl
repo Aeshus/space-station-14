@@ -378,7 +378,7 @@ ui-options-censor-nudity = Censor character nudity
 
 ui-options-main-font = Main font
 ui-options-title-font = Title font
-ui-options-machine-title-font = Machine title font
+ui-options-decorative-font = Decorative font
 ui-options-monospace-font = Monospace font
 
 ui-options-font-selector-default = <default>
