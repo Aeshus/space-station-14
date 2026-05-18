@@ -20,11 +20,11 @@ public sealed class LabelSheetlet : Sheetlet<PalettedStylesheet>
         [
             E<Label>()
                 .Class(StyleClass.LabelHeading)
-                .Font(sheet.Fonts.GetFont(StandardFontType.Title, 16, FontKind.Bold))
+                .Font(sheet.Fonts.GetFont(StandardFontType.Display, 16, FontKind.Bold))
                 .FontColor(sheet.HighlightPalette.Text),
             E<Label>()
                 .Class(StyleClass.LabelHeadingBigger)
-                .Font(sheet.Fonts.GetFont(StandardFontType.Title, 20, FontKind.Bold))
+                .Font(sheet.Fonts.GetFont(StandardFontType.Display, 20, FontKind.Bold))
                 .FontColor(sheet.HighlightPalette.Text),
             E<Label>()
                 .Class(StyleClass.LabelSubText)

@@ -26,8 +26,8 @@
 
                 <ui:OptionFontSelector Name="MainFontSelector" StandardType="Main"
                                        Title="{Loc 'ui-options-main-font'}" />
-                <ui:OptionFontSelector Name="TitleFontSelector" StandardType="Title"
-                                       Title="{Loc 'ui-options-title-font'}" />
+                <ui:OptionFontSelector Name="DisplayFontSelector" StandardType="Display"
+                                       Title="{Loc 'ui-options-display-font'}" />
                 <ui:OptionFontSelector Name="DecorativeFontSelector" StandardType="Decorative"
                                        Title="{Loc 'ui-options-decorative-font'}" />
                 <ui:OptionFontSelector Name="MonospaceFontSelector" StandardType="Monospace"

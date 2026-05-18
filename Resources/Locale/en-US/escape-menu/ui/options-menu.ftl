@@ -377,7 +377,7 @@ ui-options-speech-bubble-background-opacity = Speech bubble background opacity
 ui-options-censor-nudity = Censor character nudity
 
 ui-options-main-font = Main font
-ui-options-title-font = Title font
+ui-options-display-font = Display font
 ui-options-decorative-font = Decorative font
 ui-options-monospace-font = Monospace font
 

@@ -17,7 +17,7 @@ public enum StandardFontType : byte
     /// <summary>
     /// Font used for titles of things.
     /// </summary>
-    Title,
+    Display,
 
     /// <summary>
     /// Font used for decorative elements, suhc as titles of IC UIs like machines.

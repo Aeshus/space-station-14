@@ -17,7 +17,7 @@ internal sealed partial class FontSelectionManager
         .AddExtra(new ResPath("/Fonts/NotoEmoji.ttf"))
         .Build();
 
-    private static readonly FontFamilyStack DefaultFontTitle = FontFamilyStack.New()
+    private static readonly FontFamilyStack DefaultFontDisplay = FontFamilyStack.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSansDisplay/NotoSansDisplay-Regular.ttf"))
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSans/NotoSansSymbols-Regular.ttf"))
         .AddKind(FontKind.Bold, new ResPath("/Fonts/NotoSansDisplay/NotoSansDisplay-Bold.ttf"))

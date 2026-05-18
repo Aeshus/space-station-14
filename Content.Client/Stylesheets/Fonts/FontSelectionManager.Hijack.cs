@@ -13,10 +13,10 @@ internal sealed partial class FontSelectionManager
         { "DefaultBold", (StandardFontType.Main, FontKind.Bold) },
         { "DefaultBoldItalic", (StandardFontType.Main, FontKind.BoldItalic) },
 
-        { "NotoSansDisplay", (StandardFontType.Title, FontKind.Regular) },
-        { "NotoSansDisplayItalic", (StandardFontType.Title, FontKind.Italic) },
-        { "NotoSansDisplayBold", (StandardFontType.Title, FontKind.Bold) },
-        { "NotoSansDisplayBoldItalic", (StandardFontType.Title, FontKind.BoldItalic) },
+        { "NotoSansDisplay", (StandardFontType.Display, FontKind.Regular) },
+        { "NotoSansDisplayItalic", (StandardFontType.Display, FontKind.Italic) },
+        { "NotoSansDisplayBold", (StandardFontType.Display, FontKind.Bold) },
+        { "NotoSansDisplayBoldItalic", (StandardFontType.Display, FontKind.BoldItalic) },
 
         { "BoxRound", (StandardFontType.Decorative, FontKind.Regular) },
         { "Monospace", (StandardFontType.Monospace, FontKind.Regular) },

@@ -26,16 +26,16 @@ public static class FontCVars
         CVarDef.Create<float>("font.main_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
-    /// The user-selected font family name for <see cref="StandardFontType.Title"/>.
+    /// The user-selected font family name for <see cref="StandardFontType.Display"/>.
     /// </summary>
-    public static readonly CVarDef<string> TitleFamilyName =
-        CVarDef.Create<string>("font.title_family_name", "", CVar.ARCHIVE | CVar.CLIENTONLY);
+    public static readonly CVarDef<string> DisplayFamilyName =
+        CVarDef.Create<string>("font.display_family_name", "", CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
-    /// The user-selected font scale for <see cref="StandardFontType.Title"/>.
+    /// The user-selected font scale for <see cref="StandardFontType.Display"/>.
     /// </summary>
-    public static readonly CVarDef<float> TitleScale =
-        CVarDef.Create<float>("font.title_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
+    public static readonly CVarDef<float> DisplayScale =
+        CVarDef.Create<float>("font.display_scale", 1, CVar.ARCHIVE | CVar.CLIENTONLY);
 
     /// <summary>
     /// The user-selected font family name for <see cref="StandardFontType.Decorative"/>.
