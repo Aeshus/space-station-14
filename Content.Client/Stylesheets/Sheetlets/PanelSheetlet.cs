@@ -11,7 +11,7 @@ namespace Content.Client.Stylesheets.Sheetlets;
 public sealed class PanelSheetlet<T> : ISheetlet<T>
     where T : IButtonConfig, IPaletteConfig
 {
-    public StyleRule[] GetRules(StylesheetFactory factory, T config)
+    public StyleRule[] GetRules(StylesheetFactory sheet, T config)
     {
         var boxLight = new StyleBoxFlat
         {
@@ -69,15 +69,15 @@ public sealed class PanelSheetlet<T> : ISheetlet<T>
             // panels that have the same corner bezels as buttons
             E()
                 .Class(StyleClass.BackgroundPanel)
-                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.BaseStyleBox(factory, config))
+                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.BaseStyleBox(sheet, config))
                 .Modulate(config.SecondaryPalette.Background),
             E()
                 .Class(StyleClass.BackgroundPanelDark)
-                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.BaseStyleBox(factory, config))
+                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.BaseStyleBox(sheet, config))
                 .Modulate(config.SecondaryPalette.BackgroundDark),
             E()
                 .Class(StyleClass.BackgroundPanelOpenLeft)
-                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.OpenLeftStyleBox(factory, config))
+                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.OpenLeftStyleBox(sheet, config))
                 .Modulate(config.SecondaryPalette.Background),
             E()
                 .Class(StyleClass.BackgroundPanelOpenRight)
