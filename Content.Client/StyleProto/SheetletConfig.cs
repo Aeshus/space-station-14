@@ -1,3 +1,3 @@
 namespace Content.Client.StyleProto;
 
-public sealed class ISheetletConfig;
+public sealed class SheetletConfig;
