@@ -9,11 +9,9 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     [IdDataField]
     public string ID { get; private set; }
 
-    [ViewVariables]
     [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<StylesheetPrototype>))]
     public string[]? Parents { get; private set; }
 
-    [ViewVariables]
     [NeverPushInheritance]
     [AbstractDataField]
     public bool Abstract { get; private set; }

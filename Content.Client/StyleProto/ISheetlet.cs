@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 
 namespace Content.Client.StyleProto;
@@ -13,5 +14,5 @@ public interface ISheetlet
     /// </summary>
     /// <param name="configs">Configuration registry</param>
     /// <returns>Generates rules, or an empty array if config requirements not met.</returns>
-    StyleRule[] Generate(SheetletConfigRegistry configs);
+    StyleRule[]? Generate(SheetletConfigRegistry configs);
 }

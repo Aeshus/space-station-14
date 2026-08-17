@@ -25,21 +25,20 @@ public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
     /// <typeparam name="T">Type of the specific config</typeparam>
     /// <param name="config">Config instance from registry</param>
     /// <returns>True if found, false is not</returns>
-    public bool TryGetConfig<T>([NotNullWhen(true)] out SheetletConfig? config)
+    public bool TryGetConfig<T>([NotNullWhen(true)] out T? config)
+        where T : SheetletConfig
     {
-        return TryGetConfig(typeof(T), out config);
+        config = null;
+
+        var attempt = TryGetValue(CalculateConfigName(typeof(T)), out var c);
+
+        if (!attempt)
+            return false;
+
+        config = (T)c!;
+        return true;
     }
 
-    /// <summary>
-    /// Gets the specified config from the registry, or returns false.
-    /// </summary>
-    /// <param name="type">Type of the specific config</param>
-    /// <param name="config">Config instance from registry</param>
-    /// <returns>True if found, false is not</returns>
-    public bool TryGetConfig(Type type, [NotNullWhen(true)] out SheetletConfig? config)
-    {
-        return TryGetValue(CalculateConfigName(type), out config);
-    }
 
     /// <summary>
     /// Calculates the name for the sheetlet config.
