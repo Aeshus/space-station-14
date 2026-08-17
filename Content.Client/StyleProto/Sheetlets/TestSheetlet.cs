@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Content.Client.StyleProto.SheetletConfigs;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
