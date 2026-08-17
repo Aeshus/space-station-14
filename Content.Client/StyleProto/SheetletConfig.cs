@@ -1,5 +1,4 @@
 using JetBrains.Annotations;
-using Robust.Shared.Serialization.Manager.Definition;
 
 namespace Content.Client.StyleProto;
 

@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 
 namespace Content.Client.StyleProto;

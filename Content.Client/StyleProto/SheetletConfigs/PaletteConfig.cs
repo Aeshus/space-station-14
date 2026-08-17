@@ -1,5 +1,3 @@
-using Robust.Shared.Serialization.Manager.Definition;
-
 namespace Content.Client.StyleProto.SheetletConfigs;
 
 [DataDefinition]
