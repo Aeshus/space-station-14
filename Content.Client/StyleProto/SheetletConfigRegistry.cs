@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
@@ -8,45 +9,52 @@ namespace Content.Client.StyleProto;
 public sealed class SheetletConfigRegistry : Dictionary<string, ISheetletConfig>
 {
     /// <summary>
-    ///
+    /// Gets the specified config from the registry, or returns false.
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="config"></param>
-    /// <returns></returns>
-    public bool TryGetConfig(string name, [NotNullWhen(true)] ISheetletConfig? config)
+    /// <typeparam name="T">Type of the specific config</typeparam>
+    /// <param name="config">Config instance from registry</param>
+    /// <returns>True if found, false is not</returns>
+    public bool TryGetConfig<T>([NotNullWhen(true)] out ISheetletConfig? config)
     {
-        return TryGetValue(name, out config);
+        return TryGetConfig(typeof(T), out config);
     }
 
     /// <summary>
-    ///
+    /// Gets the specified config from the registry, or returns false.
     /// </summary>
-    /// <param name="config"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public bool TryGetConfig<T>([NotNullWhen(true)] ISheetletConfig? config)
+    /// <param name="type">Type of the specific config</param>
+    /// <param name="config">Config instance from registry</param>
+    /// <returns>True if found, false is not</returns>
+    public bool TryGetConfig(Type type, [NotNullWhen(true)] out ISheetletConfig? config)
     {
-        return TryGetConfig(typeof(T), config);
+        return TryGetValue(CalculateConfigName(type), out config);
     }
 
     /// <summary>
-    ///
+    /// Calculates the name for the sheetlet config.
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="config"></param>
-    /// <returns></returns>
-    public bool TryGetConfig(Type type, [NotNullWhen(true)] ISheetletConfig? config)
-    {
-        return TryGetConfig(CalculateConfigName(type), config);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="type"></param>
+    /// <param name="type">Type of the sheetlet config</param>
     /// <returns></returns>
     private static string CalculateConfigName(Type type)
     {
-        return string.Empty;
+        DebugTools.Assert(Attribute.GetCustomAttribute(type, typeof(SheetletConfigAttribute)) != null);
+
+        if (Attribute.GetCustomAttribute(type, typeof(SheetletConfigAttribute)) is SheetletConfigAttribute
+            {
+                Name: not null,
+            } attribute)
+            return attribute.Name;
+
+        const string config = "Config";
+        var typeName = type.Name;
+        if (!typeName.EndsWith(config))
+        {
+            throw new ArgumentException($"Config {type} must end with the word Config");
+        }
+
+        var name = typeName[..^config.Length];
+        DebugTools.Assert(name != string.Empty, $"Config {type} has invalid name {type.Name}");
+
+        return name;
     }
 }
