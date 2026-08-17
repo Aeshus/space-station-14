@@ -9,6 +9,17 @@ namespace Content.Client.StyleProto;
 public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 {
     /// <summary>
+    /// Registers the config with the sheetlet config registry.
+    /// </summary>
+    /// <param name="config">Concrete config object to save</param>
+    /// <typeparam name="T">Type of the config</typeparam>
+    public void RegisterConfig<T>(T config)
+        where T : SheetletConfig
+    {
+        Add(CalculateConfigName(config.GetType()), config);
+    }
+
+    /// <summary>
     /// Gets the specified config from the registry, or returns false.
     /// </summary>
     /// <typeparam name="T">Type of the specific config</typeparam>
