@@ -1,3 +1,12 @@
+using JetBrains.Annotations;
+
 namespace Content.Client.StyleProto;
 
-public sealed class SheetletConfig;
+/// <summary>
+/// A sheetlet config, which holds datafields that can be populated via YAML and then requested and interpreted by sheetlets.
+/// </summary>
+/// <seealso cref="SheetletConfigAttribute"/>
+/// <seealso cref="ISheetlet"/>
+[DataDefinition]
+[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
+public sealed partial class SheetletConfig;
