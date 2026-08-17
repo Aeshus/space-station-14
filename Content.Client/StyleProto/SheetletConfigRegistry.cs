@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Robust.Shared.Utility;
 
@@ -32,13 +33,12 @@ public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 
         var attempt = TryGetValue(CalculateConfigName(typeof(T)), out var c);
 
-        if (!attempt)
+        if (!attempt || c == null)
             return false;
 
-        config = (T)c!;
+        config = (T)c;
         return true;
     }
-
 
     /// <summary>
     /// Calculates the name for the sheetlet config.
