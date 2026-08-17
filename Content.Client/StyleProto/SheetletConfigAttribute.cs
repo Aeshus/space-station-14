@@ -6,7 +6,7 @@ namespace Content.Client.StyleProto;
 /// Marks a sheetlet config for registration for prototype-based stylesheet generation.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-[BaseTypeRequired(typeof(ISheetletConfig))]
+[BaseTypeRequired(typeof(SheetletConfig))]
 public sealed class SheetletConfigAttribute : Attribute
 {
     /// <summary>

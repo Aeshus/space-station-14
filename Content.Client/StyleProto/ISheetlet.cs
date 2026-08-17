@@ -5,7 +5,7 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet that generates specific style rules after being provided the appropriate sheetlet configs.
 /// </summary>
-/// <seealso cref="ISheetletConfig"/>
+/// <seealso cref="SheetletConfig"/>
 public interface ISheetlet
 {
     /// <summary>

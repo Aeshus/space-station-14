@@ -6,7 +6,7 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
-public sealed class SheetletConfigRegistry : Dictionary<string, ISheetletConfig>
+public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 {
     /// <summary>
     /// Gets the specified config from the registry, or returns false.
@@ -14,7 +14,7 @@ public sealed class SheetletConfigRegistry : Dictionary<string, ISheetletConfig>
     /// <typeparam name="T">Type of the specific config</typeparam>
     /// <param name="config">Config instance from registry</param>
     /// <returns>True if found, false is not</returns>
-    public bool TryGetConfig<T>([NotNullWhen(true)] out ISheetletConfig? config)
+    public bool TryGetConfig<T>([NotNullWhen(true)] out SheetletConfig? config)
     {
         return TryGetConfig(typeof(T), out config);
     }
@@ -25,7 +25,7 @@ public sealed class SheetletConfigRegistry : Dictionary<string, ISheetletConfig>
     /// <param name="type">Type of the specific config</param>
     /// <param name="config">Config instance from registry</param>
     /// <returns>True if found, false is not</returns>
-    public bool TryGetConfig(Type type, [NotNullWhen(true)] out ISheetletConfig? config)
+    public bool TryGetConfig(Type type, [NotNullWhen(true)] out SheetletConfig? config)
     {
         return TryGetValue(CalculateConfigName(type), out config);
     }
