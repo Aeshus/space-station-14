@@ -9,4 +9,4 @@ namespace Content.Client.StyleProto;
 /// <seealso cref="ISheetlet"/>
 [DataDefinition]
 [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
-public sealed partial class SheetletConfig;
+public abstract partial class SheetletConfig;
