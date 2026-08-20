@@ -18,25 +18,25 @@ public sealed partial class FontFamilyPrototype : IPrototype
     /// Fonts used for <see cref="FontKind.Regular"/>
     /// </summary>
     [DataField(required: true)]
-    public ResPath[] Regular { get; private set; }
+    public ResPath[] Regular { get; private set; } = [];
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.Italic"/>
     /// </summary>
     [DataField]
-    public ResPath[] Italic { get; private set; }
+    public ResPath[] Italic { get; private set; } = [];
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.Bold"/>
     /// </summary>
     [DataField]
-    public ResPath[] Bold { get; private set; }
+    public ResPath[] Bold { get; private set; } = [];
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.BoldItalic"/>
     /// </summary>
     [DataField]
-    public ResPath[] BoldItalic { get; private set; }
+    public ResPath[] BoldItalic { get; private set; } = [];
 
     /// <summary>
     /// Fonts used in for every font kind.
