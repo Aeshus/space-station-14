@@ -189,7 +189,7 @@ public abstract class CommonStylesheetDefinition : StylesheetDefinition, IButton
     };
 
     /// <inheritdoc/>
-    public FontFamilyStack BaseFont => FontFamilyStack.New()
+    public FontFamily BaseFont => FontFamily.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSans/NotoSans-Regular.ttf"))
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSans/NotoSansSymbols-Regular.ttf"))
         .AddKind(FontKind.Bold, new ResPath("/Fonts/NotoSans/NotoSans-Bold.ttf"))
@@ -203,7 +203,7 @@ public abstract class CommonStylesheetDefinition : StylesheetDefinition, IButton
         .Build();
 
     /// <inheritdoc/>
-    public FontFamilyStack DisplayFont => FontFamilyStack.New()
+    public FontFamily DisplayFont => FontFamily.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSansDisplay/NotoSansDisplay-Regular.ttf"))
         .AddKind(FontKind.Regular, new ResPath("/Fonts/NotoSans/NotoSansSymbols-Regular.ttf"))
         .AddKind(FontKind.Bold, new ResPath("/Fonts/NotoSansDisplay/NotoSansDisplay-Bold.ttf"))
@@ -217,12 +217,12 @@ public abstract class CommonStylesheetDefinition : StylesheetDefinition, IButton
         .Build();
 
     /// <inheritdoc/>
-    public FontFamilyStack DecorativeFont => FontFamilyStack.New()
+    public FontFamily DecorativeFont => FontFamily.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/Boxfont-round/Boxfont Round.ttf"))
         .Build();
 
     /// <inheritdoc/>
-    public FontFamilyStack MonoFont => FontFamilyStack.New()
+    public FontFamily MonoFont => FontFamily.New()
         .AddKind(FontKind.Regular, new ResPath("/Fonts/RobotoMono/RobotoMono-Regular.ttf"))
         .AddKind(FontKind.Bold, new ResPath("/Fonts/RobotoMono/RobotoMono-Bold.ttf"))
         .AddKind(FontKind.Italic, new ResPath("/Fonts/RobotoMono/RobotoMono-Italic.ttf"))

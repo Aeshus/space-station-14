@@ -5,7 +5,7 @@ using Content.Client.Stylesheets.Fonts;
 namespace Content.Client.StyleProto;
 
 /// <summary>
-/// Prototype representing a font family stack, which combines multiple font files into a single FontFamilyStack interface.
+/// Prototype representing a font family stack, which combines multiple font files into a single FontFamily interface.
 /// </summary>
 [Prototype]
 public sealed partial class FontFamilyPrototype : IPrototype
@@ -45,12 +45,12 @@ public sealed partial class FontFamilyPrototype : IPrototype
     public ResPath[] Extra { get; private set; } = [];
 
     /// <summary>
-    /// Builds the FontFamilyStack that this prototype represents.
+    /// Builds the FontFamily that this prototype represents.
     /// </summary>
     /// <returns>Generated font family stack</returns>
-    public FontFamilyStack Build()
+    public FontFamily Build()
     {
-        var builder = FontFamilyStack.New();
+        var builder = FontFamily.New();
 
         builder.AddKind(FontKind.Regular, Regular);
 
