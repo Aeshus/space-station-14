@@ -23,7 +23,7 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     public bool Abstract { get; private set; }
 
     /// <summary>
-    /// The sheetlet configs
+    /// The sheetlet configs.
     /// </summary>
     [AlwaysPushInheritance]
     [DataField(required: true)]
