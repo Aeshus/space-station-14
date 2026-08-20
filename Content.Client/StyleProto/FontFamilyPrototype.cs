@@ -18,29 +18,54 @@ public sealed partial class FontFamilyPrototype : IPrototype
     /// Fonts used for <see cref="FontKind.Regular"/>
     /// </summary>
     [DataField(required: true)]
-    public ResPath[] Regular;
+    public ResPath[] Regular { get; private set; }
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.Italic"/>
     /// </summary>
-    [DataField(required: true)]
-    public ResPath[] Italic;
+    [DataField]
+    public ResPath[] Italic { get; private set; }
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.Bold"/>
     /// </summary>
-    [DataField(required: true)]
-    public ResPath[] Bold;
+    [DataField]
+    public ResPath[] Bold { get; private set; }
 
     /// <summary>
     /// Fonts used for <see cref="FontKind.BoldItalic"/>
     /// </summary>
-    [DataField(required: true)]
-    public ResPath[] BoldItalic;
+    [DataField]
+    public ResPath[] BoldItalic { get; private set; }
 
     /// <summary>
     /// Fonts used in for every font kind.
     /// </summary>
     [DataField]
-    public ResPath[] Extra;
+    public ResPath[] Extra { get; private set; } = [];
+
+    /// <summary>
+    /// Builds the FontFamilyStack that this prototype represents.
+    /// </summary>
+    /// <returns>Generated font family stack</returns>
+    public FontFamilyStack Build()
+    {
+        var builder = FontFamilyStack.New();
+
+        builder.AddKind(FontKind.Regular, Regular);
+
+        if (Italic.Length != 0)
+            builder.AddKind(FontKind.Italic, Italic);
+
+        if (Bold.Length != 0)
+            builder.AddKind(FontKind.Bold, Bold);
+
+        if (BoldItalic.Length != 0)
+            builder.AddKind(FontKind.BoldItalic, BoldItalic);
+
+        if (Extra.Length != 0)
+            builder.AddExtra(Extra);
+
+        return builder.Build();
+    }
 }
