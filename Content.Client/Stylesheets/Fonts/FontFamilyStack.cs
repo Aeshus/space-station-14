@@ -22,12 +22,10 @@ public sealed partial class FontFamilyStack
     {
         IoCManager.InjectDependencies(this);
 
-        if (!fontPaths.ContainsKey(FontKind.Regular)
-            || !fontPaths.ContainsKey(FontKind.Italic)
-            || !fontPaths.ContainsKey(FontKind.Bold)
-            || !fontPaths.ContainsKey(FontKind.BoldItalic))
+        foreach (var kind in Enum.GetValues<FontKind>())
         {
-            throw new ArgumentException("Font Family Stack must contain all font kinds");
+            if (!fontPaths.ContainsKey(kind))
+                throw new ArgumentException($"Font Family Stack is missing key {kind}");
         }
 
         _fontPaths = fontPaths;
