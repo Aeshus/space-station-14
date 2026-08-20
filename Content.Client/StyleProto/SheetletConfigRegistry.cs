@@ -6,17 +6,44 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
+/// <remarks>
+/// Sheetlet configs also register the types they inherit from.
+/// </remarks>
 public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 {
     /// <summary>
     /// Registers the config with the sheetlet config registry.
     /// </summary>
+    /// <remarks>
+    /// This also registers all types this type inherits from, recursively.
+    /// </remarks>
     /// <param name="config">Concrete config object to save</param>
     /// <typeparam name="T">Type of the config</typeparam>
     public void RegisterConfig<T>(T config)
         where T : SheetletConfig
     {
-        Add(CalculateConfigName(config.GetType()), config);
+        var ty = typeof(T);
+
+        while (ty is not null && ty != typeof(SheetletConfig))
+        {
+            Add(CalculateConfigName(ty), config);
+            ty = ty.BaseType;
+        }
+    }
+
+    /// <summary>
+    /// Gets the specified config from the registry, or throws.
+    /// </summary>
+    /// <typeparam name="T">Type of the specific config</typeparam>
+    /// <returns>Config instance from registry</returns>
+    /// <exception cref="KeyNotFoundException">If the config was not found</exception>
+    public T GetConfig<T>()
+        where T : SheetletConfig
+    {
+        if (TryGetValue(CalculateConfigName(typeof(T)), out var config))
+            return (T)config;
+
+        throw new KeyNotFoundException($"Config {nameof(T)} was not registered.");
     }
 
     /// <summary>
