@@ -1,6 +1,5 @@
 namespace Content.Client.StyleProto.SheetletConfigs;
 
-[DataDefinition]
 [SheetletConfig]
 [Virtual]
 public partial class PaletteConfig : SheetletConfig

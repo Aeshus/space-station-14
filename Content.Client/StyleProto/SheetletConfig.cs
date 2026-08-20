@@ -7,6 +7,6 @@ namespace Content.Client.StyleProto;
 /// </summary>
 /// <seealso cref="SheetletConfigAttribute"/>
 /// <seealso cref="ISheetlet"/>
-[DataDefinition]
+[ImplicitDataDefinitionForInheritors]
 [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 public abstract partial class SheetletConfig;
