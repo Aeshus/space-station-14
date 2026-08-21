@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using Robust.Shared.Utility;
 
@@ -6,8 +7,14 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
-public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
+/// <param name="configs">Configs</param>
+public sealed class SheetletConfigRegistry(FrozenDictionary<Type, SheetletConfig> configs)
 {
+    /// <summary>
+    /// Concrete configs referenceable by their type.
+    /// </summary>
+    private FrozenDictionary<Type, SheetletConfig> _configs = configs;
+
     /// <summary>
     /// Gets the specified config from the registry, or throws.
     /// </summary>
@@ -17,7 +24,7 @@ public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
     public T GetConfig<T>()
         where T : SheetletConfig
     {
-        if (TryGetValue(CalculateConfigName(typeof(T)), out var config))
+        if (_configs.TryGetValue(typeof(T), out var config))
             return (T)config;
 
         throw new KeyNotFoundException($"Config {nameof(T)} was not registered.");
@@ -34,40 +41,10 @@ public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
     {
         config = null;
 
-        var attempt = TryGetValue(CalculateConfigName(typeof(T)), out var c);
-
-        if (!attempt || c == null)
+        if (!_configs.TryGetValue(typeof(T), out var c))
             return false;
 
         config = (T)c;
         return true;
-    }
-
-    /// <summary>
-    /// Calculates the name for the sheetlet config.
-    /// </summary>
-    /// <param name="type">Type of the sheetlet config</param>
-    /// <returns></returns>
-    private static string CalculateConfigName(Type type)
-    {
-        DebugTools.Assert(Attribute.GetCustomAttribute(type, typeof(SheetletConfigAttribute)) != null);
-
-        if (Attribute.GetCustomAttribute(type, typeof(SheetletConfigAttribute)) is SheetletConfigAttribute
-            {
-                Name: not null,
-            } attribute)
-            return attribute.Name;
-
-        const string config = "Config";
-        var typeName = type.Name;
-        if (!typeName.EndsWith(config))
-        {
-            throw new ArgumentException($"Config {type} must end with the word Config");
-        }
-
-        var name = typeName[..^config.Length];
-        DebugTools.Assert(name != string.Empty, $"Config {type} has invalid name {type.Name}");
-
-        return name;
     }
 }
