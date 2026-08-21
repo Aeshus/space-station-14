@@ -12,26 +12,6 @@ namespace Content.Client.StyleProto;
 public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 {
     /// <summary>
-    /// Registers the config with the sheetlet config registry.
-    /// </summary>
-    /// <remarks>
-    /// This also registers all types this type inherits from, recursively.
-    /// </remarks>
-    /// <param name="config">Concrete config object to save</param>
-    /// <typeparam name="T">Type of the config</typeparam>
-    public void RegisterConfig<T>(T config)
-        where T : SheetletConfig
-    {
-        var ty = typeof(T);
-
-        while (ty is not null && ty != typeof(SheetletConfig))
-        {
-            Add(CalculateConfigName(ty), config);
-            ty = ty.BaseType;
-        }
-    }
-
-    /// <summary>
     /// Gets the specified config from the registry, or throws.
     /// </summary>
     /// <typeparam name="T">Type of the specific config</typeparam>
