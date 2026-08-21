@@ -6,9 +6,6 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
-/// <remarks>
-/// Sheetlet configs also register the types they inherit from.
-/// </remarks>
 public sealed class SheetletConfigRegistry : Dictionary<string, SheetletConfig>
 {
     /// <summary>
