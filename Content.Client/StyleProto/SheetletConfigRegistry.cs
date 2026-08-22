@@ -27,14 +27,14 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     private Dictionary<Type, SheetletConfig> _configs = configs;
 
     /// <summary>
-    ///
+    /// Removes the config from the registry.
     /// </summary>
-    /// <param name="type"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public bool RemoveConfig<T>(Type type)
+    public bool RemoveConfig<T>()
+        where T : SheetletConfig
     {
-        return _configs.Remove(type);
+        return _configs.Remove(typeof(T));
     }
 
     /// <summary>
@@ -46,6 +46,17 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
         where T : SheetletConfig
     {
         _configs.Add(typeof(T), config);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public bool HasConfig<T>()
+        where T : SheetletConfig
+    {
+        return _configs.TryGetValue(typeof(T), out var config);
     }
 
     /// <summary>

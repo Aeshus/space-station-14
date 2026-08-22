@@ -13,7 +13,8 @@ namespace Content.Client.StyleProto;
 /// </summary>
 [TypeSerializer]
 public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerializer,
-    ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>, ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>,
+    ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>,
+    ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>,
     ITypeCopier<SheetletConfigRegistry>
 {
     /// <inheritdoc/>
@@ -53,7 +54,9 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         IDependencyCollection dependencies,
         ISerializationContext? context)
     {
-        throw new NotImplementedException();
+        var result = child.Copy();
+
+        return result;
     }
 
     /// <inheritdoc/>
