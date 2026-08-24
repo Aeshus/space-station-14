@@ -10,17 +10,6 @@ namespace Content.Client.StyleProto;
 /// <param name="configs">Configs</param>
 public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> configs)
 {
-    // So, you'd need to reapply each change on prototype rload?
-    // Or tbh, it would make more sense to treat it like one does entities where they don't actually respond to prototype reloads...
-    // So you could add new ones via prototypes reload but not stylesheets.
-
-    // To make stylesheet changes, do SheetletConfigRegistry.GetConfig<PaletteConfig>().Primary = Color.FromHex("#00ff00")
-    // and then call SheetletManager.Dirty() or whatever to make it redraw all dependents.
-
-    // And I guess it would be fine to add/remove configs at runtime
-
-    // Oh god, I really am just reimplementing components.
-
     /// <summary>
     /// Concrete configs referenceable by their type.
     /// </summary>
