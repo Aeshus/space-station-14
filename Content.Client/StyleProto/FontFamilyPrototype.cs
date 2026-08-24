@@ -44,6 +44,8 @@ public sealed partial class FontFamilyPrototype : IPrototype
     [DataField]
     public ResPath[] Extra { get; private set; } = [];
 
+    // TODO: add a FontManager that caches all of these built FontFamilies and their resulting fonts
+
     /// <summary>
     /// Builds the FontFamily that this prototype represents.
     /// </summary>
