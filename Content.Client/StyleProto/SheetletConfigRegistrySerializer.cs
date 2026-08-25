@@ -1,9 +1,14 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Reflection;
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown;
+using Robust.Shared.Serialization.Markdown.Mapping;
 using Robust.Shared.Serialization.Markdown.Sequence;
 using Robust.Shared.Serialization.Markdown.Validation;
+using Robust.Shared.Serialization.Markdown.Value;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
 namespace Content.Client.StyleProto;
@@ -17,13 +22,50 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>,
     ITypeCopier<SheetletConfigRegistry>
 {
+    [Dependency] private IReflectionManager _reflectionManager = default!;
+
+    private const string ConfigSuffix = "Config";
+
     /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
         SequenceDataNode node,
         IDependencyCollection dependencies,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        var list = new List<ValidationNode>();
+        var seen = new HashSet<string>();
+        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
+            .ToDictionary(ty => ty.Name);
+
+        foreach (var sequenceEntry in node.Sequence)
+        {
+            if (sequenceEntry is not MappingDataNode configMapping)
+            {
+                list.Add(new ErrorNode(sequenceEntry, $"Expected {nameof(MappingDataNode)}"));
+                continue;
+            }
+
+            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
+
+            if (!validTypes.TryGetValue(name, out var type))
+            {
+                list.Add(new ErrorNode(configMapping,
+                    $"Unknown type {name} (may not have proper attribute)"));
+                continue;
+            }
+
+            if (!seen.Add(name))
+            {
+                list.Add(new ErrorNode(configMapping, "Duplicate sheetlet config."));
+                continue;
+            }
+
+            var copy = configMapping.Copy();
+            copy.Remove("type");
+            list.Add(serializationManager.ValidateNode(type, copy, context));
+        }
+
+        return new ValidatedSequenceNode(list);
     }
 
     /// <inheritdoc/>
@@ -68,5 +110,16 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null)
     {
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Tries to get the config type based on the string name.
+    /// </summary>
+    /// <param name="name">Name (excluding "Config")</param>
+    /// <param name="type">Type</param>
+    /// <returns></returns>
+    private bool TryGetConfigType(string name, [NotNullWhen(true)] Type? type)
+    {
+        return
     }
 }
