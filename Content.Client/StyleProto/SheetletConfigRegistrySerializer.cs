@@ -23,6 +23,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     ITypeCopier<SheetletConfigRegistry>
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
+    [Dependency] private IDynamicTypeFactory _dynamicTypeFactory = default!;
 
     private const string ConfigSuffix = "Config";
 
@@ -76,7 +77,39 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null,
         ISerializationManager.InstantiationDelegate<SheetletConfigRegistry>? instanceProvider = null)
     {
-        throw new NotImplementedException();
+        var configs = new Dictionary<Type, SheetletConfig>();
+        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
+            .ToDictionary(ty => ty.Name);
+
+        foreach (var sequenceEntry in node.Sequence)
+        {
+            if (sequenceEntry is not MappingDataNode configMapping)
+            {
+                throw new InvalidCastException($"Expected {nameof(MappingDataNode)}");
+            }
+
+            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
+
+            if (!validTypes.TryGetValue(name, out var type))
+            {
+                Log.Error($"Unknown config {name} (may not have proper attribute)");
+                continue;
+            }
+
+            var copy = configMapping.Copy();
+            copy.Remove("type");
+
+            var config = (SheetletConfig)serializationManager.Read(
+                type,
+                copy,
+                hookCtx,
+                context,
+                notNullableOverride: true)!;
+
+            configs[type] = config;
+        }
+
+        return new SheetletConfigRegistry(configs);
     }
 
     /// <inheritdoc/>
