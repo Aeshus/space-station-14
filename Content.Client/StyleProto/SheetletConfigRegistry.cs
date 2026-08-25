@@ -1,6 +1,4 @@
-using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
-using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
@@ -13,7 +11,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     /// <summary>
     /// Concrete configs referenceable by their type.
     /// </summary>
-    private Dictionary<Type, SheetletConfig> _configs = configs;
+    private readonly Dictionary<Type, SheetletConfig> _configs = configs;
 
     /// <summary>
     /// Checks if the specified config exists on this registry.
