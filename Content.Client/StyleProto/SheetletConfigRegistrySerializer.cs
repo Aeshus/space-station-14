@@ -119,7 +119,23 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         bool alwaysWrite = false,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        var configSequence = new SequenceDataNode();
+        foreach (var (type, config) in value.Configs)
+        {
+            var node = serializationManager.WriteValue(
+                type,
+                config,
+                alwaysWrite,
+                context);
+
+            if (node is not MappingDataNode mapping)
+                throw new InvalidNodeTypeException();
+
+            mapping.Add("type", new ValueDataNode(type.Name));
+            configSequence.Add(mapping);
+        }
+
+        return configSequence;
     }
 
     /// <inheritdoc/>
