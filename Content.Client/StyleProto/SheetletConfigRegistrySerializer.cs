@@ -160,15 +160,4 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         throw new NotImplementedException();
     }
-
-    /// <summary>
-    /// Tries to get the config type based on the string name.
-    /// </summary>
-    /// <param name="name">Name (excluding "Config")</param>
-    /// <param name="type">Type</param>
-    /// <returns></returns>
-    private bool TryGetConfigType(string name, [NotNullWhen(true)] Type? type)
-    {
-        return
-    }
 }
