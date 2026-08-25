@@ -11,7 +11,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     /// <summary>
     /// Concrete configs referenceable by their type.
     /// </summary>
-    private readonly Dictionary<Type, SheetletConfig> _configs = configs;
+    public readonly Dictionary<Type, SheetletConfig> Configs = configs;
 
     /// <summary>
     /// Checks if the specified config exists on this registry.
@@ -21,7 +21,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     public bool HasConfig<T>()
         where T : SheetletConfig
     {
-        return _configs.TryGetValue(typeof(T), out var _config);
+        return Configs.TryGetValue(typeof(T), out var _config);
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     public T GetConfig<T>()
         where T : SheetletConfig
     {
-        if (_configs.TryGetValue(typeof(T), out var config))
+        if (Configs.TryGetValue(typeof(T), out var config))
             return (T)config;
 
         throw new KeyNotFoundException($"Config {nameof(T)} was not registered.");
@@ -50,7 +50,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     {
         config = null;
 
-        if (!_configs.TryGetValue(typeof(T), out var c))
+        if (!Configs.TryGetValue(typeof(T), out var c))
             return false;
 
         config = (T)c;
