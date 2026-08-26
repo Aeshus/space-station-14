@@ -118,11 +118,11 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var configSequence = new SequenceDataNode();
 
-        foreach (var (type, _) in value.Configs)
+        foreach (var (type, config) in value.Configs)
         {
             var node = serializationManager.WriteValue(
                 type,
-                configSequence,
+                config,
                 alwaysWrite,
                 context);
 
