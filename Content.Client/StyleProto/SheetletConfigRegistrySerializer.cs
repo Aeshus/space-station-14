@@ -21,7 +21,6 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     ITypeCopier<SheetletConfigRegistry>
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
-    [Dependency] private IDynamicTypeFactory _dynamicTypeFactory = default!;
 
     private const string ConfigSuffix = "Config";
 
@@ -119,7 +118,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var configSequence = new SequenceDataNode();
 
-        foreach (var (type, config) in value.Configs)
+        foreach (var (type, _) in value.Configs)
         {
             var node = serializationManager.WriteValue(
                 type,
