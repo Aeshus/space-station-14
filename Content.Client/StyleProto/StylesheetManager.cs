@@ -134,46 +134,31 @@ public sealed class StylesheetManager : IStylesheetManager, IPostInjectInit
     {
         public Stylesheet GetStylesheet(ProtoId<StylesheetPrototype> id)
         {
-            throw new NotImplementedException();
+            return TryGetStylesheet(id, out var stylesheet)
+                ? stylesheet
+                : throw new KeyNotFoundException($"Stylesheet {id} was not found!");
         }
 
         public bool TryGetStylesheet(ProtoId<StylesheetPrototype> id, [NotNullWhen(true)] out Stylesheet? stylesheet)
         {
-            if (!owner._initialized)
-                ThrowNotInitialized<Stylesheet>();
-
-            return owner._data.TryGetValue(id, out stylesheet));
-        }
-
-        public Stylesheet GetStylesheetOrDefault(ProtoId<StylesheetPrototype> id, Stylesheet defaultStylesheet)
-        {
-            throw new NotImplementedException();
+            return !owner._initialized
+                ? throw new InvalidOperationException("Stylesheets not initialized yet!")
+                : owner._stylesheets.TryGetValue(id, out stylesheet);
         }
 
         public SheetletConfigRegistry GetConfigs(ProtoId<StylesheetPrototype> id)
         {
-            throw new NotImplementedException();
+            return TryGetConfigs(id, out var config)
+                ? config
+                : throw new KeyNotFoundException($"Config {id} was not found!");
         }
 
-        public bool TryGetConfigs(ProtoId<StylesheetPrototype> id, [NotNullWhen(true)] out Stylesheet? stylesheet)
+        public bool TryGetConfigs(ProtoId<StylesheetPrototype> id,
+            [NotNullWhen(true)] out SheetletConfigRegistry? stylesheet)
         {
-            throw new NotImplementedException();
-        }
-
-        public SheetletConfigRegistry GetConfigsOrDefault(ProtoId<StylesheetPrototype> id, Stylesheet defaultStylesheet)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Throws a not initialized error.
-        /// </summary>
-        /// <returns>Does not return</returns>
-        /// <exception cref="InvalidOperationException">Style object not initialized yet.</exception>
-        [DoesNotReturn]
-        private static T ThrowNotInitialized<T>()
-        {
-            throw new InvalidOperationException("Stylesheets not initialized yet!");
+            return !owner._initialized
+                ? throw new InvalidOperationException("Stylesheets not initialized yet!")
+                : owner._configs.TryGetValue(id, out stylesheet);
         }
     }
 }
