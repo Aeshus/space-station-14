@@ -1,41 +1,39 @@
 - type: stylesheet
-  id: styleCommon
+  id: StyleCommon
   configs:
-  - type: palette
+  - type: Palette
     primary: '#00ff00'
     secondary: '#00ff00'
     tertiary: '#0000ff'
-  - type: font
+  - type: Font
     fontSizes:
       small: 12
       base: 14
       large: 16
     families:
-    - baseFont
-  - type: panel
+    - BaseFont
+  - type: Panel
 
 - type: stylesheet
-  parent: styleCommon
-  id: styleNano
+  parent: StyleCommon
+  id: StyleNano
   configs:
-  - type: palette
+  - type: Palette
     primary: '#ff0000'
     secondary: '#00ff00'
     tertiary: '#0000ff'
   sheetlets:
-  - type: label
+  - type: Label
 
 - type: fontFamily
-  id: baseFont
-  sources:
-  - type: regular
-    path: "/Fonts/NotoSans/NotoSans-Regular.ttf"
-  - type: bold
-    path: "/Fonts/NotoSans/NotoSans-Bold.ttf"
-  - type: italic
-    path: "/Fonts/NotoSans/NotoSans-Italic.ttf"
-  - type: bolditalic
-    path: "/Fonts/NotoSans/NotoSans-BoldItalic.ttf"
-  - type: extra
-    path: "/Fonts/NotoSans/NotoSansSymbols2-Regular.ttf"
-
+  id: BaseFont
+  regular:
+  - "/Fonts/NotoSans/NotoSans-Regular.ttf"
+  bold:
+  - "/Fonts/NotoSans/NotoSans-Bold.ttf"
+  italic:
+  - "/Fonts/NotoSans/NotoSans-Italic.ttf"
+  boldItalic:
+  - "/Fonts/NotoSans/NotoSans-BoldItalic.ttf"
+  extra:
+  - "/Fonts/NotoSans/NotoSansSymbols2-Regular.ttf"
