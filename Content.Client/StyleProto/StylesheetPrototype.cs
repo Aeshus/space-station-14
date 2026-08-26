@@ -1,5 +1,6 @@
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Generic;
 
 namespace Content.Client.StyleProto;
 
@@ -33,6 +34,6 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     /// The sheetlet names that will be used to generate a stylesheet using the sheetlet config registry.
     /// </summary>
     [AlwaysPushInheritance]
-    [DataField(required: true)]
-    public List<string> Sheetlets;
+    [DataField(required: true, customTypeSerializer: typeof(SheetletListSerializer))]
+    public List<ISheetlet> Sheetlets;
 }

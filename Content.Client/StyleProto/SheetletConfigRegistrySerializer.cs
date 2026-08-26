@@ -134,7 +134,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
             if (!name.EndsWith(ConfigSuffix))
                 Log.Error($"Config {name} must end with {ConfigSuffix}");
 
-            mapping.Add("type", new ValueDataNode(name[..^name.Length]));
+            mapping.Add("type", new ValueDataNode(name[..^ConfigSuffix.Length]));
             configSequence.Add(mapping);
         }
 

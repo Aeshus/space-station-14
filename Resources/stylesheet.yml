@@ -12,7 +12,9 @@
       large: 16
     families:
     - BaseFont
-  - type: Panel
+  sheetlets:
+  - Label
+  - Panel
 
 - type: stylesheet
   parent: StyleCommon
@@ -23,7 +25,7 @@
     secondary: '#00ff00'
     tertiary: '#0000ff'
   sheetlets:
-  - type: Label
+  - Label
 
 - type: fontFamily
   id: BaseFont
