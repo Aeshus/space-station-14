@@ -7,6 +7,7 @@ namespace Content.Client.StyleProto;
 public interface IStylesheetManager
 {
     event Action<IStylesheetAccessor> StyleChanged;
+    void Dirty();
     void Initialize();
 }
 
