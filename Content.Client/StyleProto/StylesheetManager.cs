@@ -7,7 +7,7 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
-public sealed class StylesheetManager : IStylesheetManager, IPostInjectInit
+public sealed partial class StylesheetManager : IStylesheetManager, IPostInjectInit
 {
     [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private ILogManager _log = default!;
