@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Robust.Shared.Prototypes;
 using Robust.Shared.Reflection;
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.Manager;
@@ -120,20 +118,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null)
     {
         var configSequence = new SequenceDataNode();
-        foreach (var (type, config) in value.Configs)
-        {
-            var node = serializationManager.WriteValue(
-                type,
-                config,
-                alwaysWrite,
-                context);
 
-            if (node is not MappingDataNode mapping)
-                throw new InvalidNodeTypeException();
-
-            mapping.Add("type", new ValueDataNode(type.Name));
-            configSequence.Add(mapping);
-        }
 
         return configSequence;
     }
@@ -147,6 +132,17 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var result = child.Copy();
 
+        var c = ToTypeIndexedDictionary(child);
+        var p = ToTypeIndexedDictionary(parent);
+
+        foreach (var (parentType, parentIndex) in p)
+        {
+            if (!c.TryGetValue(parentType, out var childIndex))
+                continue;
+
+            result[childIndex] = serializationManager.CombineMappings((MappingDataNode)child[childIndex], (MappingDataNode)parent[parentIndex]);
+        }
+
         return result;
     }
 
@@ -158,6 +154,47 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         SerializationHookContext hookCtx,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        target.Configs.Clear();
+        target.Configs.EnsureCapacity(source.Configs.Count);
+
+        foreach (var (type, config) in source.Configs)
+        {
+            var copy = serializationManager.CreateCopy(config, context, notNullableOverride: true);
+        }
+    }
+
+    /// <summary>
+    /// Converts the sequence node into dictionary mapping types to their index in the sequence.
+    /// </summary>
+    /// <param name="node">Sequence node</param>
+    /// <returns>Dictionary between types and their sequence index</returns>
+    /// <exception cref="InvalidCastException">Non-MappingDataNode in sequence</exception>
+    private Dictionary<Type, int> ToTypeIndexedDictionary(SequenceDataNode node)
+    {
+        var result = new Dictionary<Type, int>();
+
+        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
+            .ToDictionary(ty => ty.Name);
+
+        for (var i = 0; i < node.Count; i++)
+        {
+            var sequenceEntry = node[i];
+            if (sequenceEntry is not MappingDataNode configMapping)
+            {
+                throw new InvalidCastException($"Expected {nameof(MappingDataNode)}");
+            }
+
+            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
+
+            if (!validTypes.TryGetValue(name, out var type))
+            {
+                Log.Error($"Unknown config {name} (may not have proper attribute)");
+                continue;
+            }
+
+            result.Add(type, i);
+        }
+
+        return result;
     }
 }
