@@ -83,7 +83,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         {
             if (sequenceEntry is not MappingDataNode configMapping)
             {
-                throw new InvalidCastException($"Expected {nameof(MappingDataNode)}");
+                throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
             }
 
             var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
@@ -119,6 +119,25 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var configSequence = new SequenceDataNode();
 
+        foreach (var (type, config) in value.Configs)
+        {
+            var node = serializationManager.WriteValue(
+                type,
+                configSequence,
+                alwaysWrite,
+                context);
+
+            if (node is not MappingDataNode mapping)
+                throw new InvalidNodeTypeException();
+
+            var name = type.Name;
+
+            if (!name.EndsWith(ConfigSuffix))
+                Log.Error($"Config {name} must end with {ConfigSuffix}");
+
+            mapping.Add("type", new ValueDataNode(name[..^name.Length]));
+            configSequence.Add(mapping);
+        }
 
         return configSequence;
     }
@@ -137,10 +156,17 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
 
         foreach (var (parentType, parentIndex) in p)
         {
-            if (!c.TryGetValue(parentType, out var childIndex))
-                continue;
-
-            result[childIndex] = serializationManager.CombineMappings((MappingDataNode)child[childIndex], (MappingDataNode)parent[parentIndex]);
+            if (c.TryGetValue(parentType, out var childIndex))
+            {
+                result[childIndex] = serializationManager.PushCompositionWithGenericNode(parentType,
+                    (MappingDataNode)child[childIndex],
+                    (MappingDataNode)parent[parentIndex],
+                    context);
+            }
+            else
+            {
+                result.Add((MappingDataNode)parent[parentIndex]);
+            }
         }
 
         return result;
@@ -160,6 +186,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         foreach (var (type, config) in source.Configs)
         {
             var copy = serializationManager.CreateCopy(config, context, notNullableOverride: true);
+            target.Configs.Add(type, copy);
         }
     }
 
@@ -168,7 +195,6 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     /// </summary>
     /// <param name="node">Sequence node</param>
     /// <returns>Dictionary between types and their sequence index</returns>
-    /// <exception cref="InvalidCastException">Non-MappingDataNode in sequence</exception>
     private Dictionary<Type, int> ToTypeIndexedDictionary(SequenceDataNode node)
     {
         var result = new Dictionary<Type, int>();
@@ -181,7 +207,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
             var sequenceEntry = node[i];
             if (sequenceEntry is not MappingDataNode configMapping)
             {
-                throw new InvalidCastException($"Expected {nameof(MappingDataNode)}");
+                throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
             }
 
             var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
