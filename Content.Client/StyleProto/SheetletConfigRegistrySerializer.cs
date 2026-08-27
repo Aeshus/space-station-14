@@ -22,6 +22,9 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
 
+    /// <summary>
+    /// Config type name suffix.
+    /// </summary>
     private const string ConfigSuffix = "Config";
 
     /// <inheritdoc/>
@@ -149,11 +152,10 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
                     (MappingDataNode)child[childIndex],
                     (MappingDataNode)parent[parentIndex],
                     context);
+                continue;
             }
-            else
-            {
-                result.Add((MappingDataNode)parent[parentIndex]);
-            }
+
+            result.Add((MappingDataNode)parent[parentIndex]);
         }
 
         return result;
@@ -185,37 +187,47 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     private Dictionary<Type, int> ToTypeIndexedDictionary(SequenceDataNode node)
     {
         var result = new Dictionary<Type, int>();
-        var validTypes = ConfigTypes();
+        var types = ConfigTypes();
 
         for (var i = 0; i < node.Count; i++)
         {
             var sequenceEntry = node[i];
-            if (sequenceEntry is not MappingDataNode configMapping)
+
+            try
             {
-                throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
+                var (type, _) = ParseSheetletConfig(types, sequenceEntry);
+                result.Add(type, i);
             }
-
-            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
-
-            if (!validTypes.TryGetValue(name, out var type))
+            catch (Exception e)
             {
-                Log.Error($"Unknown config {name} (may not have proper attribute)");
-                continue;
+                Log.Error(e.Message);
             }
-
-            result.Add(type, i);
         }
 
         return result;
     }
 
+    /// <summary>
+    /// Resolves all configuration types.
+    /// </summary>
+    /// <returns>A dictionary matching string name to type.</returns>
     private Dictionary<string, Type> ConfigTypes()
     {
+        // TODO: sourcegen?
         return _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
             .ToDictionary(ty => ty.Name);
     }
 
-    private (Type, MappingDataNode) ParseSheetletConfig(Dictionary<string, Type> types, DataNode sequenceEntry)
+    /// <summary>
+    /// Parses a sheetlet config from a list of types and a DataNode.
+    /// </summary>
+    /// <param name="types">All valid config types.</param>
+    /// <param name="sequenceEntry">DataNode to parse</param>
+    /// <returns>Type of the mapping, and the mapping node</returns>
+    /// <exception cref="InvalidNodeTypeException">Invalid node type</exception>
+    /// <exception cref="KeyNotFoundException">No 'type' found</exception>
+    /// <exception cref="TypeAccessException">'type' value not found in dictionary</exception>
+    private static (Type, MappingDataNode) ParseSheetletConfig(Dictionary<string, Type> types, DataNode sequenceEntry)
     {
         if (sequenceEntry is not MappingDataNode configMapping)
         {
