@@ -31,36 +31,29 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null)
     {
         var list = new List<ValidationNode>();
-        var seen = new HashSet<string>();
-        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
-            .ToDictionary(ty => ty.Name);
+        var seen = new HashSet<Type>();
+        var types = ConfigTypes();
 
         foreach (var sequenceEntry in node.Sequence)
         {
-            if (sequenceEntry is not MappingDataNode configMapping)
+            try
             {
-                list.Add(new ErrorNode(sequenceEntry, $"Expected {nameof(MappingDataNode)}"));
-                continue;
+                var (type, mapping) = ParseSheetletConfig(types, sequenceEntry);
+
+                if (!seen.Add(type))
+                {
+                    throw new ArgumentException($"Config {sequenceEntry} is already defined");
+                }
+
+                var copy = mapping.Copy();
+                copy.Remove("type");
+
+                list.Add(serializationManager.ValidateNode(type, copy, context));
             }
-
-            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
-
-            if (!validTypes.TryGetValue(name, out var type))
+            catch (Exception e)
             {
-                list.Add(new ErrorNode(configMapping,
-                    $"Unknown type {name} (may not have proper attribute)"));
-                continue;
+                list.Add(new ErrorNode(sequenceEntry, e.Message));
             }
-
-            if (!seen.Add(name))
-            {
-                list.Add(new ErrorNode(configMapping, "Duplicate sheetlet config."));
-                continue;
-            }
-
-            var copy = configMapping.Copy();
-            copy.Remove("type");
-            list.Add(serializationManager.ValidateNode(type, copy, context));
         }
 
         return new ValidatedSequenceNode(list);
@@ -75,35 +68,30 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationManager.InstantiationDelegate<SheetletConfigRegistry>? instanceProvider = null)
     {
         var configs = new Dictionary<Type, SheetletConfig>();
-        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
-            .ToDictionary(ty => ty.Name);
+        var types = ConfigTypes();
 
         foreach (var sequenceEntry in node.Sequence)
         {
-            if (sequenceEntry is not MappingDataNode configMapping)
+            try
             {
-                throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
+                var (type, mapping) = ParseSheetletConfig(types, sequenceEntry);
+
+                var copy = mapping.Copy();
+                copy.Remove("type");
+
+                var config = (SheetletConfig)serializationManager.Read(
+                    type,
+                    copy,
+                    hookCtx,
+                    context,
+                    notNullableOverride: true)!;
+
+                configs[type] = config;
             }
-
-            var name = ((ValueDataNode)configMapping.Get("type")).Value + ConfigSuffix;
-
-            if (!validTypes.TryGetValue(name, out var type))
+            catch (Exception e)
             {
-                Log.Error($"Unknown config {name} (may not have proper attribute)");
-                continue;
+                Log.Error(e.Message);
             }
-
-            var copy = configMapping.Copy();
-            copy.Remove("type");
-
-            var config = (SheetletConfig)serializationManager.Read(
-                type,
-                copy,
-                hookCtx,
-                context,
-                notNullableOverride: true)!;
-
-            configs[type] = config;
         }
 
         return new SheetletConfigRegistry(configs);
@@ -197,9 +185,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     private Dictionary<Type, int> ToTypeIndexedDictionary(SequenceDataNode node)
     {
         var result = new Dictionary<Type, int>();
-
-        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
-            .ToDictionary(ty => ty.Name);
+        var validTypes = ConfigTypes();
 
         for (var i = 0; i < node.Count; i++)
         {
@@ -221,5 +207,33 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         }
 
         return result;
+    }
+
+    private Dictionary<string, Type> ConfigTypes()
+    {
+        return _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>()
+            .ToDictionary(ty => ty.Name);
+    }
+
+    private (Type, MappingDataNode) ParseSheetletConfig(Dictionary<string, Type> types, DataNode sequenceEntry)
+    {
+        if (sequenceEntry is not MappingDataNode configMapping)
+        {
+            throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
+        }
+
+        if (!configMapping.TryGet("type", out ValueDataNode? typeNode))
+        {
+            throw new KeyNotFoundException("The given key 'type' was not present in the dictionary.");
+        }
+
+        var name = typeNode.Value + ConfigSuffix;
+
+        if (!types.TryGetValue(name, out var type))
+        {
+            throw new TypeAccessException($"Type {type} was not found");
+        }
+
+        return (type, configMapping);
     }
 }
