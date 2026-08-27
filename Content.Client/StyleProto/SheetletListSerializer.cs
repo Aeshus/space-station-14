@@ -15,7 +15,6 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// (De)serializes YAML to/from Sheetlet lists
 /// </summary>
-[TypeSerializer]
 public sealed partial class SheetletListSerializer : BaseTypeSerializer,
     ITypeSerializer<List<ISheetlet>, SequenceDataNode>,
     ITypeInheritanceHandler<List<ISheetlet>, SequenceDataNode>,
