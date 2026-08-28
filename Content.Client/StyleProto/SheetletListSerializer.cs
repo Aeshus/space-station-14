@@ -43,7 +43,7 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
 
                 if (!seen.Add(type))
                 {
-                    throw new ArgumentException($"Config {sequenceEntry} is already defined");
+                    throw new ArgumentException($"Sheetlet {type.Name} is already defined");
                 }
 
                 list.Add(new ValidatedValueNode(sequenceEntry));
@@ -185,7 +185,7 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
 
         if (!types.TryGetValue(name, out var type))
         {
-            throw new TypeAccessException($"Type {type} was not found");
+            throw new TypeAccessException($"Type {name} was not found");
         }
 
         return (type, valueNode);
