@@ -243,7 +243,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
 
         if (!types.TryGetValue(name, out var type))
         {
-            throw new TypeAccessException($"Type {type} was not found");
+            throw new TypeAccessException($"Type {name} was not found");
         }
 
         return (type, configMapping);
