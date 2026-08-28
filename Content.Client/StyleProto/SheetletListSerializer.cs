@@ -25,46 +25,39 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
 
     private const string SheetletSuffix = "Sheetlet";
 
+    /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
         SequenceDataNode node,
         IDependencyCollection dependencies,
         ISerializationContext? context = null)
     {
         var list = new List<ValidationNode>();
-        var seen = new HashSet<string>();
-        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletAttribute>()
-            .ToDictionary(ty => ty.Name);
+        var seen = new HashSet<Type>();
+        var types = SheetletTypes();
 
         foreach (var sequenceEntry in node.Sequence)
         {
-            if (sequenceEntry is not ValueDataNode sheetletNode)
+            try
             {
-                list.Add(new ErrorNode(sequenceEntry, $"Expected {nameof(ValueDataNode)}"));
-                continue;
+                var (type, mapping) = ParseSheetlet(types, sequenceEntry);
+
+                if (!seen.Add(type))
+                {
+                    throw new ArgumentException($"Config {sequenceEntry} is already defined");
+                }
+
+                list.Add(new ValidatedValueNode(sequenceEntry));
             }
-
-            var name = sheetletNode.Value + SheetletSuffix;
-
-            if (!validTypes.TryGetValue(name, out var type))
+            catch (Exception e)
             {
-                list.Add(new ErrorNode(sheetletNode,
-                    $"Unknown type {name} (may not have proper attribute)"));
-                continue;
+                list.Add(new ErrorNode(sequenceEntry, e.Message));
             }
-
-            if (!seen.Add(name))
-            {
-                list.Add(new ErrorNode(sheetletNode, "Duplicate sheetlet."));
-                continue;
-            }
-
-            var copy = sheetletNode.Copy();
-            list.Add(serializationManager.ValidateNode(type, copy, context));
         }
 
         return new ValidatedSequenceNode(list);
     }
 
+    /// <inheritdoc/>
     public List<ISheetlet> Read(ISerializationManager serializationManager,
         SequenceDataNode node,
         IDependencyCollection dependencies,
@@ -73,27 +66,22 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
         ISerializationManager.InstantiationDelegate<List<ISheetlet>>? instanceProvider = null)
     {
         var configs = new List<ISheetlet>();
-        var validTypes = _reflectionManager.FindTypesWithAttribute<SheetletAttribute>()
-            .ToDictionary(ty => ty.Name);
+        var types = SheetletTypes();
 
         foreach (var sequenceEntry in node.Sequence)
         {
-            if (sequenceEntry is not ValueDataNode sheetletNode)
+            try
             {
-                throw new InvalidNodeTypeException($"Expected {nameof(MappingDataNode)}");
+                var (type, _) = ParseSheetlet(types, sequenceEntry);
+
+                var sheetlet = _dynamicTypeFactory.CreateInstance<ISheetlet>(type);
+
+                configs.Add(sheetlet);
             }
-
-            var name = sheetletNode.Value + SheetletSuffix;
-
-            if (!validTypes.TryGetValue(name, out var type))
+            catch (Exception e)
             {
-                Log.Error($"Unknown config {name} (may not have proper attribute)");
-                continue;
+                Log.Error(e.Message);
             }
-
-            var sheetlet = _dynamicTypeFactory.CreateInstance<ISheetlet>(type);
-
-            configs.Add(sheetlet);
         }
 
         return configs;
@@ -107,12 +95,15 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
     {
         var configSequence = new SequenceDataNode();
 
-        foreach (var type in value)
+        foreach (var sheetlet in value)
         {
-            var name = type.GetType().Name;
+            var name = sheetlet.GetType().Name;
 
             if (!name.EndsWith(SheetletSuffix))
+            {
                 Log.Error($"Sheetlet {name} must end with {SheetletSuffix}");
+                continue;
+            }
 
             var node = serializationManager.WriteValue(
                 name[..^SheetletSuffix.Length],
@@ -163,4 +154,40 @@ public sealed partial class SheetletListSerializer : BaseTypeSerializer,
     }
 
 
+    /// <summary>
+    /// Resolves all configuration types.
+    /// </summary>
+    /// <returns>A dictionary matching string name to type.</returns>
+    private Dictionary<string, Type> SheetletTypes()
+    {
+        // TODO: sourcegen?
+        return _reflectionManager.FindTypesWithAttribute<SheetletAttribute>()
+            .ToDictionary(ty => ty.Name);
+    }
+
+    /// <summary>
+    /// Parses a sheetlet config from a list of types and a DataNode.
+    /// </summary>
+    /// <param name="types">All valid config types.</param>
+    /// <param name="sequenceEntry">DataNode to parse</param>
+    /// <returns>Type of the mapping, and the mapping node</returns>
+    /// <exception cref="InvalidNodeTypeException">Invalid node type</exception>
+    /// <exception cref="KeyNotFoundException">No 'type' found</exception>
+    /// <exception cref="TypeAccessException">'type' value not found in dictionary</exception>
+    private static (Type, ValueDataNode) ParseSheetlet(Dictionary<string, Type> types, DataNode sequenceEntry)
+    {
+        if (sequenceEntry is not ValueDataNode valueNode)
+        {
+            throw new InvalidNodeTypeException($"Expected {nameof(ValueDataNode)}");
+        }
+
+        var name = valueNode.Value + SheetletSuffix;
+
+        if (!types.TryGetValue(name, out var type))
+        {
+            throw new TypeAccessException($"Type {type} was not found");
+        }
+
+        return (type, valueNode);
+    }
 }
