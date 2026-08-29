@@ -7,7 +7,7 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
-public sealed partial class StylesheetManager : IPostInjectInit
+public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetManager
 {
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private ILogManager _logManager = default!;
@@ -34,9 +34,7 @@ public sealed partial class StylesheetManager : IPostInjectInit
 
     public void ReloadStylesheets()
     {
-        var protos = _prototypeManager.EnumeratePrototypes<StylesheetPrototype>();
-
-        foreach (var proto in protos)
+        foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
         {
             // Let subscribers mutate configs before loading
             OnStyleReload?.Invoke(proto.Configs);
@@ -65,7 +63,7 @@ public sealed partial class StylesheetManager : IPostInjectInit
         return _styleAccessors.TryGetValue(proto, out accessor);
     }
 
-    public sealed class StylesheetAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs)
+    public sealed class StylesheetAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs) : IStylesheetAccessor
     {
         public Stylesheet Stylesheet { get; private set; } = stylesheet;
         public SheetletConfigRegistry Configs { get; private set; } = configs;
