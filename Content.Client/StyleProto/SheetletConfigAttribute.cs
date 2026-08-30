@@ -7,4 +7,16 @@ namespace Content.Client.StyleProto;
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 [BaseTypeRequired(typeof(SheetletConfig))]
-public sealed class SheetletConfigAttribute : Attribute;
+public sealed class SheetletConfigAttribute : Attribute
+{
+    public string? Name;
+
+    public SheetletConfigAttribute()
+    {
+    }
+
+    public SheetletConfigAttribute(string name)
+    {
+        Name = name;
+    }
+}
