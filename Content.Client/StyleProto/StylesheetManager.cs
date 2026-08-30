@@ -67,37 +67,88 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
 
     /// <inheritdoc/>
     public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
-        [NotNullWhen(true)] out StyleAccessor? accessor)
+        [NotNullWhen(true)] out IStyleAccessor? accessor)
     {
-        return _styleAccessors.TryGetValue(proto, out accessor);
+        accessor = null;
+
+        if (!_styleAccessors.TryGetValue(proto, out var acc))
+            return false;
+
+        accessor = acc;
+        return true;
     }
 
     /// <inheritdoc/>
-    public StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
+    public IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
     {
         return _styleAccessors[proto];
     }
 
+    /// <summary>
+    /// Allows for accessing/subscribing to the current stylesheet and registry for a protoid.
+    /// </summary>
+    public interface IStyleAccessor
+    {
+        /// <summary>
+        /// Event called when styles change.
+        /// </summary>
+        /// <remarks>
+        /// This will also immediately call the specified delegate.
+        /// </remarks>
+        event Action<Stylesheet, SheetletConfigRegistry> StyleChanged;
+    }
 
     /// <inheritdoc/>
     public sealed class StyleAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs) : IStyleAccessor
     {
-        /// <inheritdoc/>
-        public Stylesheet Stylesheet { get; private set; } = stylesheet;
+        /// <summary>
+        /// The current stylesheet.
+        /// </summary>
+        private Stylesheet Stylesheet { get; set; } = stylesheet;
+
+        /// <summary>
+        /// The current sheetlet configs.
+        /// </summary>
+        /// <remarks>
+        /// We assume these will be immutable after they are placed in here.
+        /// </remarks>
+        private SheetletConfigRegistry Configs { get; set; } = configs;
+
+        /// <summary>
+        /// The actual internal event that users subscribe to.
+        /// </summary>
+        private event Action<Stylesheet, SheetletConfigRegistry>? StyleChangedInternal;
 
         /// <inheritdoc/>
-        public SheetletConfigRegistry Configs { get; private set; } = configs;
+        public event Action<Stylesheet, SheetletConfigRegistry> StyleChanged
+        {
+            add
+            {
+                try
+                {
+                    value(Stylesheet, Configs);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
 
-        /// <inheritdoc/>
-        public event Action? StyleChanged;
+                StyleChangedInternal += value;
+            }
+            remove => StyleChangedInternal -= value;
+        }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Updates the internal stylesheet and configs.
+        /// </summary>
+        /// <param name="stylesheet">The stylesheet</param>
+        /// <param name="configs">The sheetlet configs</param>
         public void Update(Stylesheet stylesheet, SheetletConfigRegistry configs)
         {
             Stylesheet = stylesheet;
             Configs = configs;
 
-            StyleChanged?.Invoke();
+            StyleChangedInternal?.Invoke(stylesheet, configs);
         }
     }
 
