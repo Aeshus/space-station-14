@@ -31,12 +31,12 @@ public interface IStylesheetManager
     /// <param name="accessor">Accessor, not null if true, null if false</param>
     /// <returns>True means accessor is not null, false means is null</returns>
     bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
-        [NotNullWhen(true)] out StylesheetManager.StyleAccessor? accessor);
+        [NotNullWhen(true)] out StylesheetManager.IStyleAccessor? accessor);
 
     /// <summary>
     /// Gets the style subscription for the provided prototype.
     /// </summary>
     /// <param name="proto">Stylesheet ProtoID</param>
     /// <returns>Accessor</returns>
-    StylesheetManager.StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto);
+    StylesheetManager.IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto);
 }
