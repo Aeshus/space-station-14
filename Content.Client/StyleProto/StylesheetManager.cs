@@ -12,7 +12,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private ILogManager _logManager = default!;
 
-    private Dictionary<ProtoId<StylesheetPrototype>, StylesheetAccessor> _styleAccessors = [];
+    private Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
     public event Action<SheetletConfigRegistry>? OnStyleReload;
@@ -47,7 +47,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
 
             if (!_styleAccessors.ContainsKey(proto))
             {
-                _styleAccessors.Add(proto, new StylesheetAccessor(new Stylesheet(rules), proto.Configs));
+                _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), proto.Configs));
             }
             else
             {
@@ -57,18 +57,31 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         }
     }
 
-    public bool TryStyleSubscription(ProtoId<StylesheetPrototype> proto,
-        [NotNullWhen(true)] out StylesheetAccessor? accessor)
+    public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
+        [NotNullWhen(true)] out StyleAccessor? accessor)
     {
         return _styleAccessors.TryGetValue(proto, out accessor);
     }
 
-    public sealed class StylesheetAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs) : IStylesheetAccessor
+    public StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
     {
+        return _styleAccessors[proto];
+    }
+
+
+    /// <inheritdoc/>
+    public sealed class StyleAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs) : IStyleAccessor
+    {
+        /// <inheritdoc/>
         public Stylesheet Stylesheet { get; private set; } = stylesheet;
+
+        /// <inheritdoc/>
         public SheetletConfigRegistry Configs { get; private set; } = configs;
+
+        /// <inheritdoc/>
         public event Action? StyleChanged;
 
+        /// <inheritdoc/>
         public void Update(Stylesheet stylesheet, SheetletConfigRegistry configs)
         {
             Stylesheet = stylesheet;
@@ -78,6 +91,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         }
     }
 
+    /// <inheritdoc/>
     public void PostInject()
     {
         _sawmill = _logManager.GetSawmill("stylesheet");

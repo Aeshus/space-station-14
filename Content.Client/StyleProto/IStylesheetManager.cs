@@ -12,7 +12,7 @@ public interface IStylesheetManager
     /// <summary>
     /// Called on all styles being reloaded for mutations to occur.
     /// </summary>
-    event Action<Dictionary<Type, ISheetletConfig>?> OnStyleReload;
+    event Action<SheetletConfigRegistry>? OnStyleReload;
 
     /// <summary>
     /// Initializes the stylesheet manager.
@@ -30,6 +30,6 @@ public interface IStylesheetManager
     /// <param name="proto"></param>
     /// <param name="accessor"></param>
     /// <returns></returns>
-    bool TryStyleSubscription(ProtoId<StylesheetPrototype> proto,
-        [NotNullWhen(true)] out StylesheetManager.StylesheetAccessor? accessor);
+    bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
+        [NotNullWhen(true)] out StylesheetManager.StyleAccessor? accessor);
 }
