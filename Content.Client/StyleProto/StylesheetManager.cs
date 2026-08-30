@@ -27,7 +27,10 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         _prototypeManager.PrototypesReloaded += OnPrototypesReloaded;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Reloads the stylesheets when stylesheet prototypes are modified.
+    /// </summary>
+    /// <param name="eventArgs">Event's arguments</param>
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs eventArgs)
     {
         if (!eventArgs.WasModified<StylesheetPrototype>())
@@ -69,11 +72,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         return _styleAccessors.TryGetValue(proto, out accessor);
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="proto"></param>
-    /// <returns></returns>
+    /// <inheritdoc/>
     public StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
     {
         return _styleAccessors[proto];
