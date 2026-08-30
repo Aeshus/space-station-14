@@ -25,18 +25,18 @@ public interface IStylesheetManager
     void ReloadStylesheets();
 
     /// <summary>
-    ///
+    /// Tries to get the style subscription for the provided prototype.
     /// </summary>
-    /// <param name="proto"></param>
-    /// <param name="accessor"></param>
-    /// <returns></returns>
+    /// <param name="proto">Stylesheet ProtoId</param>
+    /// <param name="accessor">Accessor, not null if true, null if false</param>
+    /// <returns>True means accessor is not null, false means is null</returns>
     bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
         [NotNullWhen(true)] out StylesheetManager.StyleAccessor? accessor);
 
     /// <summary>
-    ///
+    /// Gets the style subscription for the provided prototype.
     /// </summary>
-    /// <param name="proto"></param>
-    /// <returns></returns>
-    StylesheetManager.StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
+    /// <param name="proto">Stylesheet ProtoID</param>
+    /// <returns>Accessor</returns>
+    StylesheetManager.StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto);
 }
