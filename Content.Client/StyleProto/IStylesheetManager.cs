@@ -22,7 +22,7 @@ public interface IStylesheetManager
     /// <summary>
     /// Reloads all current prototypes,
     /// </summary>
-    void ReloadStylesheets();
+    void DirtyAll();
 
     /// <summary>
     /// Tries to get the style subscription for the provided prototype.

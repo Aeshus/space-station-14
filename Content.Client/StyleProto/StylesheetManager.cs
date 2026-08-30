@@ -22,7 +22,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     /// <inheritdoc/>
     public void Initialize()
     {
-        ReloadStylesheets();
+        DirtyAll();
 
         _prototypeManager.PrototypesReloaded += OnPrototypesReloaded;
     }
@@ -36,32 +36,39 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         if (!eventArgs.WasModified<StylesheetPrototype>())
             return;
 
-        ReloadStylesheets();
+        DirtyAll();
     }
 
     /// <inheritdoc/>
-    public void ReloadStylesheets()
+    public void DirtyAll()
     {
         foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
         {
-            // Let subscribers mutate configs before loading
-            OnStyleReload?.Invoke(proto.Configs);
+            UpdateStylesheet(proto);
+        }
+    }
 
-            var rules = new List<StyleRule>();
-            foreach (var sheetlet in proto.Sheetlets)
-            {
-                rules.AddRange(sheetlet.Generate(proto.Configs));
-            }
+    public void Dirty(ProtoId<StylesheetPrototype> proto)
+    {
+        UpdateStylesheet(_prototypeManager.Index(proto));
+    }
 
-            if (!_styleAccessors.ContainsKey(proto))
-            {
-                _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), proto.Configs));
-            }
-            else
-            {
-                // Implicitly calls StyleChanged for subscribers
-                _styleAccessors[proto].Update(new Stylesheet(rules), proto.Configs);
-            }
+    private void UpdateStylesheet(StylesheetPrototype proto)
+    {
+        var rules = new List<StyleRule>();
+        foreach (var sheetlet in proto.Sheetlets)
+        {
+            rules.AddRange(sheetlet.Generate(proto.Configs));
+        }
+
+        if (!_styleAccessors.ContainsKey(proto))
+        {
+            _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), proto.Configs));
+        }
+        else
+        {
+            // Implicitly calls StyleChanged for subscribers
+            _styleAccessors[proto].Update(new Stylesheet(rules), proto.Configs);
         }
     }
 
