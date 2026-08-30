@@ -32,4 +32,11 @@ public interface IStylesheetManager
     /// <returns></returns>
     bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
         [NotNullWhen(true)] out StylesheetManager.StyleAccessor? accessor);
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="proto"></param>
+    /// <returns></returns>
+    StylesheetManager.StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
 }

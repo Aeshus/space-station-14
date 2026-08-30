@@ -7,6 +7,7 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
+/// <inheritdoc cref="IStylesheetManager"/>
 public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetManager
 {
     [Dependency] private IPrototypeManager _prototypeManager = default!;
@@ -15,8 +16,10 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     private Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
+    /// <inheritdoc/>
     public event Action<SheetletConfigRegistry>? OnStyleReload;
 
+    /// <inheritdoc/>
     public void Initialize()
     {
         ReloadStylesheets();
@@ -24,6 +27,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         _prototypeManager.PrototypesReloaded += OnPrototypesReloaded;
     }
 
+    /// <inheritdoc/>
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs eventArgs)
     {
         if (!eventArgs.WasModified<StylesheetPrototype>())
@@ -32,6 +36,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         ReloadStylesheets();
     }
 
+    /// <inheritdoc/>
     public void ReloadStylesheets()
     {
         foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
@@ -57,12 +62,18 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         }
     }
 
+    /// <inheritdoc/>
     public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
         [NotNullWhen(true)] out StyleAccessor? accessor)
     {
         return _styleAccessors.TryGetValue(proto, out accessor);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="proto"></param>
+    /// <returns></returns>
     public StyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
     {
         return _styleAccessors[proto];
