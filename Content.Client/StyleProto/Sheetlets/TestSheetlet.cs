@@ -10,10 +10,9 @@ namespace Content.Client.StyleProto.Sheetlets;
 [UsedImplicitly]
 public sealed class TestSheetlet : ISheetlet
 {
-    public StyleRule[]? Generate(SheetletConfigRegistry configs)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        if (!configs.TryGetConfig<PaletteConfig>(out var palette))
-            return null;
+        var palette = configs.GetConfig<PaletteConfig>();
 
         return
         [
