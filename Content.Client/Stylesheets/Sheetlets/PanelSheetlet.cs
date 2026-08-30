@@ -9,32 +9,32 @@ namespace Content.Client.Stylesheets.Sheetlets;
 
 [Sheetlet(typeof(CommonStylesheetDefinition))]
 public sealed class PanelSheetlet<T> : ISheetlet<T>
-    where T : IButtonConfig, IPaletteConfig
+    where T : IButtonConfig, IPaletteConfig, IPanelConfig
 {
     public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
     {
         var boxLight = new StyleBoxFlat
         {
-            BackgroundColor = sheet.SecondaryPalette.BackgroundLight
+            BackgroundColor = config.SecondaryPalette.BackgroundLight
         };
         var boxDark = new StyleBoxFlat
         {
-            BackgroundColor = sheet.SecondaryPalette.BackgroundDark
+            BackgroundColor = config.SecondaryPalette.BackgroundDark
         };
         var boxInsetDark = new StyleBoxFlat
         {
-            BackgroundColor = sheet.SecondaryPalette.BackgroundDark,
-            BorderColor = sheet.PrimaryPalette.Background,
+            BackgroundColor = config.SecondaryPalette.BackgroundDark,
+            BorderColor = config.PrimaryPalette.Background,
             BorderThickness = new Thickness(2f)
         };
         var boxDeep = new StyleBoxFlat
         {
-            BackgroundColor = sheet.DeepPanelBackgroundColor
+            BackgroundColor = config.DeepPanelBackgroundColor
         };
         var boxInsetDeep = new StyleBoxFlat
         {
-            BackgroundColor = sheet.DeepPanelBackgroundColor,
-            BorderColor = sheet.DeepPanelBorderColor,
+            BackgroundColor = config.DeepPanelBackgroundColor,
+            BorderColor = config.DeepPanelBorderColor,
             BorderThickness = new Thickness(2f)
         };
 
@@ -81,8 +81,8 @@ public sealed class PanelSheetlet<T> : ISheetlet<T>
                 .Modulate(config.SecondaryPalette.Background),
             E()
                 .Class(StyleClass.BackgroundPanelOpenRight)
-                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.OpenRightStyleBox(sheet))
-                .Modulate(sheet.SecondaryPalette.Background)
+                .Prop(PanelContainer.StylePropertyPanel, StyleBoxHelpers.OpenRightStyleBox(sheet, config))
+                .Modulate(config.SecondaryPalette.Background)
         ];
     }
 }
