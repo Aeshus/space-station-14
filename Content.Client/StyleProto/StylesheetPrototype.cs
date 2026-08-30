@@ -33,6 +33,6 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     /// The sheetlet names that will be used to generate a stylesheet using the sheetlet config registry.
     /// </summary>
     [AlwaysPushInheritance]
-    [DataField(required: true, customTypeSerializer: typeof(SheetletListSerializer))]
+    [DataField(required: true)]
     public List<ISheetlet> Sheetlets;
 }
