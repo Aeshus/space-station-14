@@ -14,28 +14,6 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     public readonly Dictionary<Type, SheetletConfig> Configs = configs;
 
     /// <summary>
-    ///
-    /// </summary>
-    /// <param name="config"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <exception cref="ArgumentException"></exception>
-    public void AddConfig<T>(T config)
-        where T : SheetletConfig
-    {
-        Configs.Add(typeof(T), config);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public void RemoveConfig<T>()
-        where T : SheetletConfig
-    {
-        Configs.Remove(typeof(T));
-    }
-
-    /// <summary>
     /// Checks if the specified config exists on this registry.
     /// </summary>
     /// <typeparam name="T">Type of the specific config</typeparam>
