@@ -33,7 +33,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
         where T : SheetletConfig
     {
         if (!_configTypes.Contains(typeof(T)))
-            throw new ArgumentException($"Type {typeof(T).Name} is not registered.");
+            throw new ArgumentException($"Sheetlet Config type is not registered: {nameof(T)}");
 
         return _typeFactory.CreateInstance<T>(typeof(T));
     }
@@ -41,18 +41,24 @@ public sealed partial class SheetletFactory : ISheetletFactory
     public SheetletConfig GetConfig(string name)
     {
         if (!_configNames.TryGetValue(name, out var type))
-            throw new ArgumentException($"Config name {name} is not registered.", nameof(name));
+            throw new ArgumentException($"Sheetlet Config name is not registered: {name}");
 
         return _typeFactory.CreateInstance<SheetletConfig>(type);
     }
 
     public T GetSheetlet<T>() where T : ISheetlet
     {
+        if (!_sheetletTypes.ContainsKey(typeof(T)))
+            throw new ArgumentException($"Sheetlet type is not registered: {nameof(T)}");
+
         return (T)_sheetletTypes[typeof(T)];
     }
 
     public ISheetlet GetSheetlet(string name)
     {
+        if (!_sheetletNames.TryGetValue(name, out var type))
+            throw new ArgumentException($"Sheetlet name is not registered: {name}");
+
         return _sheetletNames[name];
     }
 
