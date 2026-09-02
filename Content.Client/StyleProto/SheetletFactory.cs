@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 using Robust.Shared.Reflection;
 using Robust.Shared.Utility;
 
@@ -44,6 +45,11 @@ public sealed partial class SheetletFactory : ISheetletFactory
             throw new ArgumentException($"Sheetlet Config name is not registered: {name}");
 
         return _typeFactory.CreateInstance<SheetletConfig>(type);
+    }
+
+    public bool TryGetConfigType(string name, [NotNullWhen(true)] out Type? type)
+    {
+        return _configNames.TryGetValue(name, out type);
     }
 
     public T GetSheetlet<T>() where T : ISheetlet
