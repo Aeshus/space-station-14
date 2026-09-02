@@ -7,28 +7,25 @@ using Robust.Shared.Serialization.Manager.Attributes;
 namespace Content.IntegrationTests.Tests.Stylesheets;
 
 [TestOf(typeof(SheetletFactory))]
-public sealed class SheetletFactoryTest : GameTest
+public sealed partial class SheetletFactoryTest : GameTest
 {
     [SidedDependency(Side.Client)] private readonly ISheetletFactory _sheetletFactory = default!;
 
     [SheetletConfig]
-    [Virtual]
-    public partial class TestConfig : SheetletConfig
+    public sealed partial class TestConfig : SheetletConfig
     {
         [DataField]
         public int Test { get; set; }
     }
 
-    [SheetletConfig]
-    [Virtual]
-    public partial class Test2Config : SheetletConfig
+    [SheetletConfig("Override")]
+    public sealed partial class TestOverrideConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
     }
 
-    [Virtual]
-    public partial class BadConfig : SheetletConfig
+    public sealed partial class BadConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
@@ -39,18 +36,30 @@ public sealed class SheetletFactoryTest : GameTest
     [RunOnSide(Side.Client)]
     public void TestConfigsGet()
     {
-        var test1 = _sheetletFactory.GetConfig<TestConfig>();
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.Not.SameAs(test1));
-        test1.Test = 10;
+        var config = _sheetletFactory.GetConfig<TestConfig>();
+        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.Not.SameAs(config));
+        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.EqualTo(config));
+        Assert.That(_sheetletFactory.GetConfig("Test"), Is.Not.SameAs(config));
+        Assert.That(_sheetletFactory.GetConfig("Test"), Is.EqualTo(config));
+        config.Test = 10;
+        Assert.That(_sheetletFactory.GetConfig<TestConfig>().Test, Is.Not.EqualTo(config.Test));
+    }
 
-        var test2 = (Test2Config)_sheetletFactory.GetConfig("test2");
-        test2.Test2 = 10.0;
+    [Test]
+    [Description("Checks the sheetlet config name override functionality of SheetletFactory")]
+    [RunOnSide(Side.Client)]
+    public void TestConfigNameOverride()
+    {
+        var config = _sheetletFactory.GetConfig<TestOverrideConfig>();
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("TestOverride"));
+        Assert.That(_sheetletFactory.GetConfig("Override"), Is.Not.SameAs(config));
+        Assert.That(_sheetletFactory.GetConfig("Override"), Is.EqualTo(config));
     }
 
     [Test]
     [Description("Checks the unknown sheetlets/config SheetletFactory")]
     [RunOnSide(Side.Client)]
-    public void TestUnknown()
+    public void TestConfigUnknown()
     {
         Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig<BadConfig>());
         Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig<SheetletConfig>());
