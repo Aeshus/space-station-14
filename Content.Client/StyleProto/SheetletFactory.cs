@@ -33,7 +33,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
         where T : SheetletConfig
     {
         if (!_configTypes.Contains(typeof(T)))
-            throw new InvalidOperationException($"Type {typeof(T).Name} is not registered.");
+            throw new ArgumentException($"Type {typeof(T).Name} is not registered.");
 
         return _typeFactory.CreateInstance<T>(typeof(T));
     }
@@ -86,6 +86,9 @@ public sealed partial class SheetletFactory : ISheetletFactory
             types.Add(sheetlet, instance);
             names.Add(name, instance);
         }
+
+        _sheetletNames = names.ToFrozenDictionary();
+        _sheetletTypes = types.ToFrozenDictionary();
     }
 
     private void RegisterConfigs()
