@@ -10,7 +10,7 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 namespace Content.Client.StyleProto;
 
 [TypeSerializer]
-public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
+public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>,
     ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>, ITypeCopier<SheetletConfigRegistry>
 {
