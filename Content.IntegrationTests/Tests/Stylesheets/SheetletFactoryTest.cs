@@ -64,9 +64,11 @@ public sealed partial class SheetletFactoryTest : GameTest
     {
         var config = _sheetletFactory.GetConfig<TestConfig>();
         Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.EqualTo(config));
+        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.TypeOf<TestConfig>());
+        Assert.That(_sheetletFactory.GetConfig<TestConfig>().Test, Is.EqualTo(config.Test));
         Assert.That(_sheetletFactory.GetConfig("Test"), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig("Test"), Is.EqualTo(config));
+        Assert.That(_sheetletFactory.GetConfig("Test"), Is.TypeOf<TestConfig>());
+        Assert.That(((TestConfig)_sheetletFactory.GetConfig("Test")).Test, Is.EqualTo(config.Test));
         config.Test = 10;
         Assert.That(_sheetletFactory.GetConfig<TestConfig>().Test, Is.Not.EqualTo(config.Test));
     }
@@ -79,7 +81,7 @@ public sealed partial class SheetletFactoryTest : GameTest
         var config = _sheetletFactory.GetConfig<TestNamedConfig>();
         Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("TestNamed"));
         Assert.That(_sheetletFactory.GetConfig("Named"), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig("Named"), Is.EqualTo(config));
+        Assert.That(((TestNamedConfig)_sheetletFactory.GetConfig("Named")).Test2, Is.EqualTo(config.Test2));
     }
 
     [Test]
@@ -101,7 +103,6 @@ public sealed partial class SheetletFactoryTest : GameTest
         Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.SameAs(sheetlet));
         Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.EqualTo(sheetlet));
         Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.SameAs(sheetlet));
-        Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.EqualTo(sheetlet));
     }
 
     [Test]
@@ -112,7 +113,6 @@ public sealed partial class SheetletFactoryTest : GameTest
         var sheetlet = _sheetletFactory.GetSheetlet<TestNamedSheetlet>();
         Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("TestNamed"));
         Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.SameAs(sheetlet));
-        Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.EqualTo(sheetlet));
     }
 
     [Test]
