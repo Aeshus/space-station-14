@@ -8,7 +8,7 @@ namespace Content.Client.StyleProto.Sheetlets;
 
 [Sheetlet]
 [UsedImplicitly]
-public sealed class TestSheetlet : ISheetlet
+public sealed class PaletteSheetlet : ISheetlet
 {
     public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
