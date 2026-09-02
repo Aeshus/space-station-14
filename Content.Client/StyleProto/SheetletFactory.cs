@@ -121,7 +121,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
         }
 
         _configNames = names.ToFrozenDictionary();
-        _configTypes = types.ToFrozenSet();
+        _configTypes = types.ToFrozenDictionary();
     }
 
     private static string CalculateName(
