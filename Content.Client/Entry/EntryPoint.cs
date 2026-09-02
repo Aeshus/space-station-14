@@ -21,6 +21,7 @@ using Content.Client.Radiation.Overlays;
 using Content.Client.Replay;
 using Content.Client.Screenshot;
 using Content.Client.Singularity;
+using Content.Client.StyleProto;
 using Content.Client.Stylesheets;
 using Content.Client.UserInterface;
 using Content.Client.Viewport;
@@ -55,6 +56,7 @@ namespace Content.Client.Entry
         [Dependency] private IParallaxManager _parallaxManager = default!;
         [Dependency] private IConfigurationManager _configManager = default!;
         [Dependency] private IStylesheetManager _stylesheetManager = default!;
+        [Dependency] private ISheetletFactory _sheetletFactory = default!;
         [Dependency] private IScreenshotHook _screenshotHook = default!;
         [Dependency] private FullscreenHook _fullscreenHook = default!;
         [Dependency] private ChangelogManager _changelogManager = default!;
@@ -100,6 +102,7 @@ namespace Content.Client.Entry
             _contentLoc.Initialize();
             _componentFactory.DoAutoRegistrations();
             _componentFactory.IgnoreMissingComponents();
+            _sheetletFactory.Initialize();
 
             // Do not add to these, they are legacy.
             _componentFactory.RegisterClass<SharedAmeControllerComponent>();
