@@ -16,7 +16,8 @@ public sealed partial class SheetletFactory : ISheetletFactory
     private FrozenDictionary<string, ISheetlet> _sheetletNames
         = FrozenDictionary<string, ISheetlet>.Empty;
 
-    private FrozenSet<Type> _configTypes = FrozenSet<Type>.Empty;
+    private FrozenDictionary<Type, string> _configTypes
+        = FrozenDictionary<Type, string>.Empty;
 
     private FrozenDictionary<Type, ISheetlet> _sheetletTypes
         = FrozenDictionary<Type, ISheetlet>.Empty;
@@ -30,21 +31,9 @@ public sealed partial class SheetletFactory : ISheetletFactory
         RegisterConfigs();
     }
 
-    public T GetConfig<T>()
-        where T : SheetletConfig
+    public bool TryGetConfigName(Type type, [NotNullWhen(true)] out string? name)
     {
-        if (!_configTypes.Contains(typeof(T)))
-            throw new ArgumentException($"Sheetlet Config type is not registered: {nameof(T)}");
-
-        return _typeFactory.CreateInstance<T>(typeof(T));
-    }
-
-    public SheetletConfig GetConfig(string name)
-    {
-        if (!_configNames.TryGetValue(name, out var type))
-            throw new ArgumentException($"Sheetlet Config name is not registered: {name}");
-
-        return _typeFactory.CreateInstance<SheetletConfig>(type);
+        return _configTypes.TryGetValue(type, out name);
     }
 
     public bool TryGetConfigType(string name, [NotNullWhen(true)] out Type? type)
@@ -62,7 +51,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
     public ISheetlet GetSheetlet(string name)
     {
-        if (!_sheetletNames.TryGetValue(name, out var type))
+        if (!_sheetletNames.TryGetValue(name, out _))
             throw new ArgumentException($"Sheetlet name is not registered: {name}");
 
         return _sheetletNames[name];
@@ -108,13 +97,10 @@ public sealed partial class SheetletFactory : ISheetletFactory
         var configs = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>();
 
         var names = new Dictionary<string, Type>();
-        var types = new HashSet<Type>();
+        var types = new Dictionary<Type, string>();
 
         foreach (var config in configs)
         {
-            if (!types.Add(config))
-                throw new InvalidOperationException($"Config type is already registered: {config}");
-
             var attribute =
                 (SheetletConfigAttribute)Attribute.GetCustomAttribute(config, typeof(SheetletConfigAttribute))!;
 
@@ -126,6 +112,9 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
             // TODO: add more checking
             var name = CalculateName(config, ConfigSuffix, attribute.Name);
+
+            if (!types.TryAdd(config, name))
+                throw new InvalidOperationException($"Config type is already registered: {config}");
 
             if (!names.TryAdd(name, config))
                 throw new InvalidOperationException($"Config name is already registered: {name}");
