@@ -109,7 +109,32 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         bool alwaysWrite = false,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        var sequence = new SequenceDataNode();
+        foreach (var (type, config) in value)
+        {
+            if (!_factory.TryGetConfigName(type, out var name))
+            {
+                Log.Error($"{type} is not a registered sheetlet config");
+                continue;
+            }
+
+            var node = serializationManager.WriteValue(
+                config,
+                alwaysWrite,
+                context,
+                true);
+
+            if (node is not MappingDataNode mapping)
+            {
+                Log.Error($"{node} is not a mapping data node");
+                continue;
+            }
+
+            mapping.Add("type", new ValueDataNode(name));
+            sequence.Add(mapping);
+        }
+
+        return sequence;
     }
 
     public SequenceDataNode PushInheritance(ISerializationManager serializationManager,
