@@ -1,7 +1,7 @@
 using Content.Client.StyleProto;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
-using Robust.Shared.Analyzers;
+using Robust.Client.UserInterface;
 using Robust.Shared.Serialization.Manager.Attributes;
 
 namespace Content.IntegrationTests.Tests.Stylesheets;
@@ -18,8 +18,8 @@ public sealed partial class SheetletFactoryTest : GameTest
         public int Test { get; set; }
     }
 
-    [SheetletConfig("Override")]
-    public sealed partial class TestOverrideConfig : SheetletConfig
+    [SheetletConfig("Named")]
+    public sealed partial class TestNamedConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
@@ -29,6 +29,32 @@ public sealed partial class SheetletFactoryTest : GameTest
     {
         [DataField]
         public double Test2 { get; set; }
+    }
+
+    [Sheetlet]
+    public sealed class TestSheetlet : ISheetlet
+    {
+        public StyleRule[] Generate(SheetletConfigRegistry configs)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [Sheetlet("Named")]
+    public sealed class TestNamedSheetlet : ISheetlet
+    {
+        public StyleRule[] Generate(SheetletConfigRegistry configs)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class BadSheetlet : ISheetlet
+    {
+        public StyleRule[] Generate(SheetletConfigRegistry configs)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [Test]
@@ -48,16 +74,16 @@ public sealed partial class SheetletFactoryTest : GameTest
     [Test]
     [Description("Checks the sheetlet config name override functionality of SheetletFactory")]
     [RunOnSide(Side.Client)]
-    public void TestConfigNameOverride()
+    public void TestConfigNamed()
     {
-        var config = _sheetletFactory.GetConfig<TestOverrideConfig>();
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("TestOverride"));
-        Assert.That(_sheetletFactory.GetConfig("Override"), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig("Override"), Is.EqualTo(config));
+        var config = _sheetletFactory.GetConfig<TestNamedConfig>();
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("TestNamed"));
+        Assert.That(_sheetletFactory.GetConfig("Named"), Is.Not.SameAs(config));
+        Assert.That(_sheetletFactory.GetConfig("Named"), Is.EqualTo(config));
     }
 
     [Test]
-    [Description("Checks the unknown sheetlets/config SheetletFactory")]
+    [Description("Checks the unknown config SheetletFactory")]
     [RunOnSide(Side.Client)]
     public void TestConfigUnknown()
     {
@@ -69,7 +95,33 @@ public sealed partial class SheetletFactoryTest : GameTest
     [Test]
     [Description("Checks the sheetlet functionality of SheetletFactory")]
     [RunOnSide(Side.Client)]
-    public void TestSheetlet()
+    public void TestSheetletGet()
     {
+        var sheetlet = _sheetletFactory.GetSheetlet<TestSheetlet>();
+        Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.SameAs(sheetlet));
+        Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.EqualTo(sheetlet));
+        Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.SameAs(sheetlet));
+        Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.EqualTo(sheetlet));
+    }
+
+    [Test]
+    [Description("Checks the sheetlet name override functionality of SheetletFactory")]
+    [RunOnSide(Side.Client)]
+    public void TestSheetletNamed()
+    {
+        var sheetlet = _sheetletFactory.GetSheetlet<TestNamedSheetlet>();
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("TestNamed"));
+        Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.SameAs(sheetlet));
+        Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.EqualTo(sheetlet));
+    }
+
+    [Test]
+    [Description("Checks the unknown sheetlets SheetletFactory")]
+    [RunOnSide(Side.Client)]
+    public void TestSheetletUnknown()
+    {
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<BadSheetlet>());
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<ISheetlet>());
+        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("NotARealSheetlet"));
     }
 }
