@@ -40,7 +40,10 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
     public SheetletConfig GetConfig(string name)
     {
-        return _typeFactory.CreateInstance<SheetletConfig>(_configNames[name]);
+        if (!_configNames.TryGetValue(name, out var type))
+            throw new ArgumentException($"Config name {name} is not registered.", nameof(name));
+
+        return _typeFactory.CreateInstance<SheetletConfig>(type);
     }
 
     public T GetSheetlet<T>() where T : ISheetlet
@@ -64,7 +67,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
         {
             var attribute = (SheetletAttribute)Attribute.GetCustomAttribute(sheetlet, typeof(SheetletAttribute))!;
 
-            if (typeof(ISheetlet).IsAssignableFrom(sheetlet))
+            if (!typeof(ISheetlet).IsAssignableFrom(sheetlet))
             {
                 throw new InvalidOperationException(
                     $"Type {sheetlet} has {nameof(ISheetlet)}'s Attribute but does not implement {nameof(ISheetlet)}.");
@@ -75,16 +78,13 @@ public sealed partial class SheetletFactory : ISheetletFactory
             // Sheetlets are stateless, so we can share one instance across all users.
             var instance = _typeFactory.CreateInstance<ISheetlet>(sheetlet);
 
-            if (types.TryAdd(sheetlet, instance))
+            if (!types.TryAdd(sheetlet, instance))
                 throw new InvalidOperationException($"Sheetlet type is already registered: {sheetlet}");
 
             var name = CalculateName(sheetlet, SheetletSuffix, attribute.Name);
 
-            if (names.TryAdd(name, instance))
+            if (!names.TryAdd(name, instance))
                 throw new InvalidOperationException($"Sheetlet name is already registered: {name}");
-
-            types.Add(sheetlet, instance);
-            names.Add(name, instance);
         }
 
         _sheetletNames = names.ToFrozenDictionary();
@@ -100,13 +100,13 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
         foreach (var config in configs)
         {
-            if (types.Add(config))
+            if (!types.Add(config))
                 throw new InvalidOperationException($"Config type is already registered: {config}");
 
             var attribute =
                 (SheetletConfigAttribute)Attribute.GetCustomAttribute(config, typeof(SheetletConfigAttribute))!;
 
-            if (typeof(SheetletConfig).IsAssignableFrom(config))
+            if (!typeof(SheetletConfig).IsAssignableFrom(config))
             {
                 throw new InvalidOperationException(
                     $"Type {config} has {nameof(SheetletConfig)}'s Attribute but does not extend {nameof(SheetletConfig)}.");
@@ -115,7 +115,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
             // TODO: add more checking
             var name = CalculateName(config, ConfigSuffix, attribute.Name);
 
-            if (names.TryAdd(name, config))
+            if (!names.TryAdd(name, config))
                 throw new InvalidOperationException($"Config name is already registered: {name}");
         }
 
