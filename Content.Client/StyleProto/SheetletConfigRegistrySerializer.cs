@@ -67,7 +67,40 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         ISerializationContext? context = null,
         ISerializationManager.InstantiationDelegate<SheetletConfigRegistry>? instanceProvider = null)
     {
-        throw new NotImplementedException();
+        var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
+
+        foreach (var entry in node.Sequence)
+        {
+            if (entry is not MappingDataNode mapping)
+            {
+                Log.Error($"{entry} is not a mapping data node");
+                continue;
+            }
+
+            if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
+            {
+                Log.Error("Missing sheetlet config type.");
+                continue;
+            }
+
+            if (!_factory.TryGetConfigType(typeNode.Value, out var type))
+            {
+                Log.Error($"Unknown sheetlet config '{typeNode.Value}'.");
+                continue;
+            }
+
+            var copy = mapping.Copy();
+            copy.Remove("type");
+            var config = serializationManager.Read<SheetletConfig>(
+                copy,
+                hookCtx,
+                context,
+                notNullableOverride: true);
+
+            configs[type] = config;
+        }
+
+        return configs;
     }
 
     public DataNode Write(ISerializationManager serializationManager,
