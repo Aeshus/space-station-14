@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Content.Client.StyleProto;
 
 public interface ISheetletFactory
@@ -9,5 +11,6 @@ public interface ISheetletFactory
 
     SheetletConfig GetConfig(string name);
     T GetSheetlet<T>() where T : ISheetlet;
+    bool TryGetConfigType(string name, [NotNullWhen(true)] out Type? type);
     ISheetlet GetSheetlet(string name);
 }
