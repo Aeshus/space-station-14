@@ -4,7 +4,7 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
-public sealed partial class SheetletFactory
+public sealed partial class SheetletFactory : ISheetletFactory
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
     [Dependency] private IDynamicTypeFactory _typeFactory = default!;

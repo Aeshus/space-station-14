@@ -23,6 +23,7 @@ using Content.Client.Voting;
 using Content.Shared.Administration.Logs;
 using Content.Client.Lobby;
 using Content.Client.Players.RateLimiting;
+using Content.Client.StyleProto;
 using Content.Shared.Administration.Managers;
 using Content.Shared.Chat;
 using Content.Shared.FeedbackSystem;
@@ -42,7 +43,7 @@ namespace Content.Client.IoC
             collection.Register<IChatManager, ChatManager>();
             collection.Register<ISharedChatManager, ChatManager>();
             collection.Register<IClientPreferencesManager, ClientPreferencesManager>();
-            collection.Register<IStylesheetManager, StylesheetManager>();
+            collection.Register<IStylesheetManager, Stylesheets.StylesheetManager>();
             collection.Register<IScreenshotHook, ScreenshotHook>();
             collection.Register<FullscreenHook, FullscreenHook>();
             collection.Register<IClickMapManager, ClickMapManager>();
@@ -68,6 +69,7 @@ namespace Content.Client.IoC
             collection.Register<ClientFeedbackManager>();
             collection.Register<ISharedFeedbackManager, ClientFeedbackManager>();
             collection.Register<MidiFileCollectionManager>();
+            collection.Register<ISheetletFactory, SheetletFactory>();
         }
     }
 }
