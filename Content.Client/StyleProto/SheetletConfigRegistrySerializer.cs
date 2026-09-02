@@ -72,22 +72,13 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         foreach (var entry in node.Sequence)
         {
             if (entry is not MappingDataNode mapping)
-            {
-                Log.Error($"{entry} is not a mapping data node");
-                continue;
-            }
+                throw new InvalidNodeTypeException($"{entry} is not a mapping data node");
 
             if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
-            {
-                Log.Error("Missing sheetlet config type.");
-                continue;
-            }
+                throw new KeyNotFoundException("The given key 'type' was not present in the dictionary.");
 
             if (!_factory.TryGetConfigType(typeNode.Value, out var type))
-            {
-                Log.Error($"Unknown sheetlet config '{typeNode.Value}'.");
-                continue;
-            }
+                throw new InvalidOperationException($"Unknown sheetlet config '{typeNode.Value}' in prototype!");
 
             var copy = mapping.Copy();
             copy.Remove("type");
@@ -113,10 +104,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         foreach (var (type, config) in value)
         {
             if (!_factory.TryGetConfigName(type, out var name))
-            {
-                Log.Error($"{type} is not a registered sheetlet config");
-                continue;
-            }
+                throw new InvalidOperationException($"{type} is not a registered sheetlet config");
 
             var node = serializationManager.WriteValue(
                 config,
@@ -125,10 +113,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
                 true);
 
             if (node is not MappingDataNode mapping)
-            {
-                Log.Error($"{node} is not a mapping data node");
-                continue;
-            }
+                throw new InvalidNodeTypeException($"{node} is not a mapping data node");
 
             mapping.Add("type", new ValueDataNode(name));
             sequence.Add(mapping);
