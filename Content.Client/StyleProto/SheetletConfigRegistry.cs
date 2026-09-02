@@ -6,13 +6,8 @@ namespace Content.Client.StyleProto;
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
 /// <param name="configs">Configs</param>
-public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> configs)
+public sealed class SheetletConfigRegistry : Dictionary<Type, SheetletConfig>
 {
-    /// <summary>
-    /// Concrete configs referenceable by their type.
-    /// </summary>
-    public readonly Dictionary<Type, SheetletConfig> Configs = configs;
-
     /// <summary>
     /// Checks if the specified config exists on this registry.
     /// </summary>
@@ -21,7 +16,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     public bool HasConfig<T>()
         where T : SheetletConfig
     {
-        return Configs.TryGetValue(typeof(T), out var _config);
+        return TryGetValue(typeof(T), out var _config);
     }
 
     /// <summary>
@@ -33,7 +28,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     public T GetConfig<T>()
         where T : SheetletConfig
     {
-        if (Configs.TryGetValue(typeof(T), out var config))
+        if (TryGetValue(typeof(T), out var config))
             return (T)config;
 
         throw new KeyNotFoundException($"Config {nameof(T)} was not registered.");
@@ -50,7 +45,7 @@ public sealed class SheetletConfigRegistry(Dictionary<Type, SheetletConfig> conf
     {
         config = null;
 
-        if (!Configs.TryGetValue(typeof(T), out var c))
+        if (!TryGetValue(typeof(T), out var c))
             return false;
 
         config = (T)c;
