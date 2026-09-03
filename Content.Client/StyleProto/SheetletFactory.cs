@@ -9,6 +9,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
     [Dependency] private IDynamicTypeFactory _typeFactory = default!;
+    [Dependency] private IDependencyCollection _dependencyCollection = default!;
 
     private FrozenDictionary<string, Type> _configNames
         = FrozenDictionary<string, Type>.Empty;
@@ -92,6 +93,7 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
             // Sheetlets are stateless, so we can share one instance across all users.
             var instance = _typeFactory.CreateInstance<ISheetlet>(sheetlet);
+            _dependencyCollection.InjectDependencies(instance);
 
             var name = CalculateName(sheetlet, SheetletSuffix, attribute.Name);
 
@@ -103,7 +105,6 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
             if (!instances.TryAdd(sheetlet, instance))
                 throw new InvalidOperationException($"Sheetlet instance is already registered: {name}");
-
         }
 
         _sheetletNames = names.ToFrozenDictionary();

@@ -8,7 +8,7 @@ namespace Content.Client.StyleProto.Sheetlets;
 
 [Sheetlet]
 [UsedImplicitly]
-public sealed class PaletteSheetlet : ISheetlet
+public sealed partial class PaletteSheetlet : ISheetlet
 {
     public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
@@ -16,7 +16,7 @@ public sealed class PaletteSheetlet : ISheetlet
 
         return
         [
-            Element<Label>().Prop(Label.StylePropertyFontColor, palette.Primary),
+            Element<Label>().Prop(Label.StylePropertyFontColor, palette.PrimaryPalette.Text),
         ];
     }
 }
