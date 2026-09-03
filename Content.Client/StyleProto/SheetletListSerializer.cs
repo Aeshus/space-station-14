@@ -1,3 +1,5 @@
+using System.Linq;
+using Robust.Shared.Physics;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown.Sequence;
 using Robust.Shared.Serialization.Markdown.Validation;
@@ -44,6 +46,14 @@ public sealed class SheetletListSerializer : ITypeValidator<List<ISheetlet>, Seq
         IDependencyCollection dependencies,
         ISerializationContext? context)
     {
-        throw new NotImplementedException();
+        var result = child.Copy();
+
+        foreach (var entry in parent.Reverse())
+        {
+            if (!result.Contains(entry))
+                result.Insert(0, entry.Copy());
+        }
+
+        return result;
     }
 }
