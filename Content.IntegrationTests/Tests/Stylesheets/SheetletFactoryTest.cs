@@ -1,6 +1,7 @@
 using Content.Client.StyleProto;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 using Robust.Shared.Serialization.Manager.Attributes;
 
@@ -11,6 +12,7 @@ public sealed partial class SheetletFactoryTest : GameTest
 {
     [SidedDependency(Side.Client)] private readonly ISheetletFactory _sheetletFactory = default!;
 
+    [UsedImplicitly]
     [SheetletConfig]
     private sealed partial class TestConfig : SheetletConfig
     {
@@ -18,6 +20,7 @@ public sealed partial class SheetletFactoryTest : GameTest
         public int Test { get; set; }
     }
 
+    [UsedImplicitly]
     [SheetletConfig("Named")]
     private sealed partial class TestNamedConfig : SheetletConfig
     {
@@ -25,12 +28,14 @@ public sealed partial class SheetletFactoryTest : GameTest
         public double Test2 { get; set; }
     }
 
+    [UsedImplicitly]
     private sealed partial class BadConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
     }
 
+    [UsedImplicitly]
     [Sheetlet]
     private sealed class TestSheetlet : ISheetlet
     {
@@ -40,6 +45,7 @@ public sealed partial class SheetletFactoryTest : GameTest
         }
     }
 
+    [UsedImplicitly]
     [Sheetlet("Named")]
     private sealed class TestNamedSheetlet : ISheetlet
     {
@@ -49,6 +55,7 @@ public sealed partial class SheetletFactoryTest : GameTest
         }
     }
 
+    [UsedImplicitly]
     private sealed class BadSheetlet : ISheetlet
     {
         public StyleRule[] Generate(SheetletConfigRegistry configs)
