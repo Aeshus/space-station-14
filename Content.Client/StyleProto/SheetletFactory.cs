@@ -13,13 +13,16 @@ public sealed partial class SheetletFactory : ISheetletFactory
     private FrozenDictionary<string, Type> _configNames
         = FrozenDictionary<string, Type>.Empty;
 
-    private FrozenDictionary<string, ISheetlet> _sheetletNames
-        = FrozenDictionary<string, ISheetlet>.Empty;
+    private FrozenDictionary<string, Type> _sheetletNames
+        = FrozenDictionary<string, Type>.Empty;
 
     private FrozenDictionary<Type, string> _configTypes
         = FrozenDictionary<Type, string>.Empty;
 
-    private FrozenDictionary<Type, ISheetlet> _sheetletTypes
+    private FrozenDictionary<Type, string> _sheetletTypes
+        = FrozenDictionary<Type, string>.Empty;
+
+    private FrozenDictionary<Type, ISheetlet> _sheetletInstances
         = FrozenDictionary<Type, ISheetlet>.Empty;
 
     private const string SheetletSuffix = "Sheetlet";
@@ -41,28 +44,39 @@ public sealed partial class SheetletFactory : ISheetletFactory
         return _configNames.TryGetValue(name, out type);
     }
 
+    public bool TryGetSheetletName(Type type, [NotNullWhen(true)] out string? name)
+    {
+        return _sheetletTypes.TryGetValue(type, out name);
+    }
+
+    public bool TryGetSheetletType(string name, [NotNullWhen(true)] out Type? type)
+    {
+        return _sheetletNames.TryGetValue(name, out type);
+    }
+
     public T GetSheetlet<T>() where T : ISheetlet
     {
         if (!_sheetletTypes.ContainsKey(typeof(T)))
             throw new ArgumentException($"Sheetlet type is not registered: {nameof(T)}");
 
-        return (T)_sheetletTypes[typeof(T)];
+        return (T)_sheetletInstances[typeof(T)];
     }
 
     public ISheetlet GetSheetlet(string name)
     {
-        if (!_sheetletNames.TryGetValue(name, out _))
+        if (!TryGetSheetletType(name, out var type))
             throw new ArgumentException($"Sheetlet name is not registered: {name}");
 
-        return _sheetletNames[name];
+        return _sheetletInstances[type];
     }
 
     private void RegisterSheetlet()
     {
         var sheetlets = _reflectionManager.FindTypesWithAttribute<SheetletAttribute>();
 
-        var names = new Dictionary<string, ISheetlet>();
-        var types = new Dictionary<Type, ISheetlet>();
+        var names = new Dictionary<string, Type>();
+        var types = new Dictionary<Type, string>();
+        var instances = new Dictionary<Type, ISheetlet>();
 
         foreach (var sheetlet in sheetlets)
         {
@@ -79,17 +93,22 @@ public sealed partial class SheetletFactory : ISheetletFactory
             // Sheetlets are stateless, so we can share one instance across all users.
             var instance = _typeFactory.CreateInstance<ISheetlet>(sheetlet);
 
-            if (!types.TryAdd(sheetlet, instance))
-                throw new InvalidOperationException($"Sheetlet type is already registered: {sheetlet}");
-
             var name = CalculateName(sheetlet, SheetletSuffix, attribute.Name);
 
-            if (!names.TryAdd(name, instance))
+            if (!types.TryAdd(sheetlet, name))
+                throw new InvalidOperationException($"Sheetlet type is already registered: {sheetlet}");
+
+            if (!names.TryAdd(name, sheetlet))
                 throw new InvalidOperationException($"Sheetlet name is already registered: {name}");
+
+            if (!instances.TryAdd(sheetlet, instance))
+                throw new InvalidOperationException($"Sheetlet instance is already registered: {name}");
+
         }
 
         _sheetletNames = names.ToFrozenDictionary();
         _sheetletTypes = types.ToFrozenDictionary();
+        _sheetletInstances = instances.ToFrozenDictionary();
     }
 
     private void RegisterConfigs()
