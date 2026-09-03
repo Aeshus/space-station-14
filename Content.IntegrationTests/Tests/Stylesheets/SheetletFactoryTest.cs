@@ -12,27 +12,27 @@ public sealed partial class SheetletFactoryTest : GameTest
     [SidedDependency(Side.Client)] private readonly ISheetletFactory _sheetletFactory = default!;
 
     [SheetletConfig]
-    public sealed partial class TestConfig : SheetletConfig
+    private sealed partial class TestConfig : SheetletConfig
     {
         [DataField]
         public int Test { get; set; }
     }
 
     [SheetletConfig("Named")]
-    public sealed partial class TestNamedConfig : SheetletConfig
+    private sealed partial class TestNamedConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
     }
 
-    public sealed partial class BadConfig : SheetletConfig
+    private sealed partial class BadConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
     }
 
     [Sheetlet]
-    public sealed class TestSheetlet : ISheetlet
+    private sealed class TestSheetlet : ISheetlet
     {
         public StyleRule[] Generate(SheetletConfigRegistry configs)
         {
@@ -41,7 +41,7 @@ public sealed partial class SheetletFactoryTest : GameTest
     }
 
     [Sheetlet("Named")]
-    public sealed class TestNamedSheetlet : ISheetlet
+    private sealed class TestNamedSheetlet : ISheetlet
     {
         public StyleRule[] Generate(SheetletConfigRegistry configs)
         {
@@ -49,7 +49,7 @@ public sealed partial class SheetletFactoryTest : GameTest
         }
     }
 
-    public sealed class BadSheetlet : ISheetlet
+    private sealed class BadSheetlet : ISheetlet
     {
         public StyleRule[] Generate(SheetletConfigRegistry configs)
         {
