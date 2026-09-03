@@ -128,7 +128,23 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         IDependencyCollection dependencies,
         ISerializationContext? context)
     {
-        throw new NotImplementedException();
+        var sequence = child.Copy();
+
+        var childDict = ToTypeIndexedDictionary(child);
+        var parentDict = ToTypeIndexedDictionary(parent);
+
+        foreach (var (type, parentNode) in parentDict)
+        {
+            if (childDict.TryGetValue(type, out var childNode))
+            {
+                sequence.Add(serializationManager.PushCompositionWithGenericNode(type, parentNode, childNode, context));
+                continue;
+            }
+
+            sequence.Add(parentNode);
+        }
+
+        return sequence;
     }
 
     public void CopyTo(ISerializationManager serializationManager,
@@ -138,6 +154,38 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         SerializationHookContext hookCtx,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        target.Clear();
+        target.EnsureCapacity(source.Count);
+
+        foreach (var (type, config) in source)
+        {
+            var copy = serializationManager.CreateCopy(
+                config,
+                hookCtx,
+                context,
+                notNullableOverride: true);
+
+            target.Add(type, copy);
+        }
+    }
+
+    private Dictionary<Type, MappingDataNode> ToTypeIndexedDictionary(SequenceDataNode node)
+    {
+        var dict = new Dictionary<Type, MappingDataNode>();
+        foreach (var entry in node)
+        {
+            if (entry is not MappingDataNode mapping)
+                throw new InvalidNodeTypeException($"{entry} is not a mapping data node");
+
+            if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
+                throw new KeyNotFoundException("The given key 'type' was not present in the dictionary.");
+
+            if (!_factory.TryGetConfigType(typeNode.Value, out var type))
+                throw new InvalidOperationException($"Unknown sheetlet config '{typeNode.Value}' in prototype!");
+
+            dict.Add(type, mapping);
+        }
+
+        return dict;
     }
 }
