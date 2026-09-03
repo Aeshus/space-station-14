@@ -9,6 +9,9 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
 namespace Content.Client.StyleProto;
 
+/// <summary>
+/// Serializes and deserializes Sheetlet Config Registries.
+/// </summary>
 [TypeSerializer]
 public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>,
@@ -16,50 +19,33 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
 {
     [Dependency] private ISheetletFactory _factory = default!;
 
+    /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
         SequenceDataNode node,
         IDependencyCollection dependencies,
         ISerializationContext? context = null)
     {
         var list = new List<ValidationNode>();
-        var seen = new HashSet<Type>();
 
-        foreach (var entry in node.Sequence)
+        try
         {
-            if (entry is not MappingDataNode mapping)
+            var dict = TypeMappingDictionary(node);
+            foreach (var (type, config) in dict)
             {
-                list.Add(new ErrorNode(entry, $"{entry} is not a mapping data node"));
-                continue;
+                var copy = config.Copy();
+                copy.Remove("type");
+                list.Add(serializationManager.ValidateNode(type, copy, context));
             }
-
-            if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
-            {
-                list.Add(new ErrorNode(mapping, "Missing sheetlet config type."));
-                continue;
-            }
-
-            if (!_factory.TryGetConfigType(typeNode.Value, out var type))
-            {
-                list.Add(new ErrorNode(
-                    typeNode,
-                    $"Unknown sheetlet config '{typeNode.Value}'."));
-                continue;
-            }
-
-            if (!seen.Add(type))
-            {
-                list.Add(new ErrorNode(mapping, "Duplicate Component."));
-                continue;
-            }
-
-            var copy = mapping.Copy();
-            copy.Remove("type");
-            list.Add(serializationManager.ValidateNode(type, copy, context));
+        }
+        catch (Exception e)
+        {
+            list.Add(new ErrorNode(node, e.Message));
         }
 
         return new ValidatedSequenceNode(list);
     }
 
+    /// <inheritdoc/>
     public SheetletConfigRegistry Read(ISerializationManager serializationManager,
         SequenceDataNode node,
         IDependencyCollection dependencies,
@@ -69,31 +55,26 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
 
-        foreach (var entry in node.Sequence)
+        var dict = TypeMappingDictionary(node);
+
+        foreach (var (type, config) in dict)
         {
-            if (entry is not MappingDataNode mapping)
-                throw new InvalidNodeTypeException($"{entry} is not a mapping data node");
+            var copy = config.Copy();
 
-            if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
-                throw new KeyNotFoundException("The given key 'type' was not present in the dictionary.");
-
-            if (!_factory.TryGetConfigType(typeNode.Value, out var type))
-                throw new InvalidOperationException($"Unknown sheetlet config '{typeNode.Value}' in prototype!");
-
-            var copy = mapping.Copy();
             copy.Remove("type");
-            var config = serializationManager.Read<SheetletConfig>(
+            var conf = serializationManager.Read<SheetletConfig>(
                 copy,
                 hookCtx,
                 context,
                 notNullableOverride: true);
 
-            configs[type] = config;
+            configs[type] = conf;
         }
 
         return configs;
     }
 
+    /// <inheritdoc/>
     public DataNode Write(ISerializationManager serializationManager,
         SheetletConfigRegistry value,
         IDependencyCollection dependencies,
@@ -101,6 +82,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null)
     {
         var sequence = new SequenceDataNode();
+
         foreach (var (type, config) in value)
         {
             if (!_factory.TryGetConfigName(type, out var name))
@@ -122,6 +104,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         return sequence;
     }
 
+    /// <inheritdoc/>
     public SequenceDataNode PushInheritance(ISerializationManager serializationManager,
         SequenceDataNode child,
         SequenceDataNode parent,
@@ -130,8 +113,8 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var sequence = child.Copy();
 
-        var childDict = ToTypeIndexedDictionary(child);
-        var parentDict = ToTypeIndexedDictionary(parent);
+        var childDict = TypeMappingDictionary(child);
+        var parentDict = TypeMappingDictionary(parent);
 
         foreach (var (type, parentNode) in parentDict)
         {
@@ -147,6 +130,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         return sequence;
     }
 
+    /// <inheritdoc/>
     public void CopyTo(ISerializationManager serializationManager,
         SheetletConfigRegistry source,
         ref SheetletConfigRegistry target,
@@ -169,7 +153,12 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         }
     }
 
-    private Dictionary<Type, MappingDataNode> ToTypeIndexedDictionary(SequenceDataNode node)
+    /// <summary>
+    /// Turns a SequenceNode into a mapping from type to a mapping node.
+    /// </summary>
+    /// <param name="node">The sequence node</param>
+    /// <returns>Mapping from type to mapping node</returns>
+    private Dictionary<Type, MappingDataNode> TypeMappingDictionary(SequenceDataNode node)
     {
         var dict = new Dictionary<Type, MappingDataNode>();
         foreach (var entry in node)
