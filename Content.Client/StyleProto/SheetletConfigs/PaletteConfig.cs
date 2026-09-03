@@ -1,15 +1,22 @@
+using Content.Client.Stylesheets.Palette;
+
 namespace Content.Client.StyleProto.SheetletConfigs;
 
 [SheetletConfig]
-[Virtual]
-public partial class PaletteConfig : SheetletConfig
+public sealed partial class PaletteConfig : SheetletConfig
 {
     [DataField]
-    public Color Primary { get; set; }
+    public ColorPalette PrimaryPalette { get; set; }
 
     [DataField]
-    public Color Secondary { get; set; }
+    public ColorPalette SecondaryPalette { get; set; }
 
     [DataField]
-    public Color Tertiary { get; set; }
+    public ColorPalette PositivePalette { get; set; }
+
+    [DataField]
+    public ColorPalette NegativePalette { get; set; }
+
+    [DataField]
+    public ColorPalette HighlightPalette { get; set; }
 }
