@@ -14,8 +14,6 @@ public sealed class PaletteSheetlet : ISheetlet
     {
         var palette = configs.GetConfig<PaletteConfig>();
 
-        throw new ArgumentException("IT WORKS");
-
         return
         [
             Element<Label>().Prop(Label.StylePropertyFontColor, palette.Primary),
