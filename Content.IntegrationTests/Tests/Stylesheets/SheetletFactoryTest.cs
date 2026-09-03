@@ -60,17 +60,15 @@ public sealed partial class SheetletFactoryTest : GameTest
     [Test]
     [Description("Checks the sheetlet config functionality of SheetletFactory")]
     [RunOnSide(Side.Client)]
-    public void TestConfigsGet()
+    public void TestConfigsTryGet()
     {
-        var config = _sheetletFactory.GetConfig<TestConfig>();
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>(), Is.TypeOf<TestConfig>());
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>().Test, Is.EqualTo(config.Test));
-        Assert.That(_sheetletFactory.GetConfig("Test"), Is.Not.SameAs(config));
-        Assert.That(_sheetletFactory.GetConfig("Test"), Is.TypeOf<TestConfig>());
-        Assert.That(((TestConfig)_sheetletFactory.GetConfig("Test")).Test, Is.EqualTo(config.Test));
-        config.Test = 10;
-        Assert.That(_sheetletFactory.GetConfig<TestConfig>().Test, Is.Not.EqualTo(config.Test));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_sheetletFactory.TryGetConfigName(typeof(TestConfig), out var name), Is.True);
+            Assert.That(name, Is.EqualTo("Test"));
+            Assert.That(_sheetletFactory.TryGetConfigType("Test", out var type), Is.True);
+            Assert.That(type, Is.EqualTo(typeof(TestConfig)));
+        }
     }
 
     [Test]
@@ -78,10 +76,15 @@ public sealed partial class SheetletFactoryTest : GameTest
     [RunOnSide(Side.Client)]
     public void TestConfigNamed()
     {
-        var config = _sheetletFactory.GetConfig<TestNamedConfig>();
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("TestNamed"));
-        Assert.That(_sheetletFactory.GetConfig("Named"), Is.Not.SameAs(config));
-        Assert.That(((TestNamedConfig)_sheetletFactory.GetConfig("Named")).Test2, Is.EqualTo(config.Test2));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_sheetletFactory.TryGetConfigName(typeof(TestNamedConfig), out var name), Is.True);
+            Assert.That(name, Is.EqualTo("Named"));
+            Assert.That(_sheetletFactory.TryGetConfigType("TestNamed", out var defaultNameType), Is.False);
+            Assert.That(defaultNameType, Is.Null);
+            Assert.That(_sheetletFactory.TryGetConfigType("Named", out var type), Is.True);
+            Assert.That(type, Is.EqualTo(typeof(TestNamedConfig)));
+        }
     }
 
     [Test]
@@ -89,9 +92,15 @@ public sealed partial class SheetletFactoryTest : GameTest
     [RunOnSide(Side.Client)]
     public void TestConfigUnknown()
     {
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig<BadConfig>());
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig<SheetletConfig>());
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetConfig("NotARealConfig"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_sheetletFactory.TryGetConfigName(typeof(BadConfig), out var badConfigName), Is.False);
+            Assert.That(badConfigName, Is.Null);
+            Assert.That(_sheetletFactory.TryGetConfigName(typeof(SheetletConfig), out var baseConfigName), Is.False);
+            Assert.That(baseConfigName, Is.Null);
+            Assert.That(_sheetletFactory.TryGetConfigType("NotARealConfig", out var type), Is.False);
+            Assert.That(type, Is.Null);
+        }
     }
 
     [Test]
@@ -100,9 +109,12 @@ public sealed partial class SheetletFactoryTest : GameTest
     public void TestSheetletGet()
     {
         var sheetlet = _sheetletFactory.GetSheetlet<TestSheetlet>();
-        Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.SameAs(sheetlet));
-        Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.EqualTo(sheetlet));
-        Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.SameAs(sheetlet));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.SameAs(sheetlet));
+            Assert.That(_sheetletFactory.GetSheetlet<TestSheetlet>(), Is.EqualTo(sheetlet));
+            Assert.That(_sheetletFactory.GetSheetlet("Test"), Is.SameAs(sheetlet));
+        }
     }
 
     [Test]
@@ -111,8 +123,11 @@ public sealed partial class SheetletFactoryTest : GameTest
     public void TestSheetletNamed()
     {
         var sheetlet = _sheetletFactory.GetSheetlet<TestNamedSheetlet>();
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("TestNamed"));
-        Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.SameAs(sheetlet));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("TestNamed"));
+            Assert.That(_sheetletFactory.GetSheetlet("Named"), Is.SameAs(sheetlet));
+        }
     }
 
     [Test]
@@ -120,8 +135,11 @@ public sealed partial class SheetletFactoryTest : GameTest
     [RunOnSide(Side.Client)]
     public void TestSheetletUnknown()
     {
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<BadSheetlet>());
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<ISheetlet>());
-        Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("NotARealSheetlet"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<BadSheetlet>());
+            Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet<ISheetlet>());
+            Assert.Throws<ArgumentException>(() => _sheetletFactory.GetSheetlet("NotARealSheetlet"));
+        }
     }
 }
