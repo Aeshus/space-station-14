@@ -62,13 +62,14 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
             var copy = config.Copy();
 
             copy.Remove("type");
-            var conf = serializationManager.Read<SheetletConfig>(
+            var conf = serializationManager.Read(
+                type,
                 copy,
                 hookCtx,
                 context,
                 notNullableOverride: true);
 
-            configs[type] = conf;
+            configs[type] = (SheetletConfig) conf!;
         }
 
         return configs;
