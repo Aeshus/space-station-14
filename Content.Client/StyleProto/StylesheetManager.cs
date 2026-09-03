@@ -54,7 +54,7 @@ public sealed partial class StylesheetManager : IPostInjectInit
         var rules = new List<StyleRule>();
         foreach (var sheetlet in proto.Sheetlets)
         {
-            //rules.AddRange(sheetlet.Generate(proto.Configs));
+            rules.AddRange(sheetlet.Generate(proto.Configs));
         }
 
         if (!_styleAccessors.ContainsKey(proto))

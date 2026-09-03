@@ -70,6 +70,7 @@ namespace Content.Client.IoC
             collection.Register<ISharedFeedbackManager, ClientFeedbackManager>();
             collection.Register<MidiFileCollectionManager>();
             collection.Register<ISheetletFactory, SheetletFactory>();
+            collection.Register<StyleProto.StylesheetManager>();
         }
     }
 }
