@@ -9,7 +9,7 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 namespace Content.Client.StyleProto;
 
 [TypeSerializer]
-public sealed class SheetletListSerializer : ITypeValidator<List<ISheetlet>, SequenceDataNode>,
+public sealed class SheetletListSerializer : BaseTypeSerializer, ITypeValidator<List<ISheetlet>, SequenceDataNode>,
     ITypeInheritanceHandler<List<ISheetlet>, SequenceDataNode>
 {
     public ValidationNode Validate(ISerializationManager serializationManager,
