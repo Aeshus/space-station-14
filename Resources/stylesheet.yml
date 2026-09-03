@@ -5,37 +5,5 @@
     primary: '#00ff00'
     secondary: '#00ff00'
     tertiary: '#0000ff'
-  - type: Font
-    fontSizes:
-      small: 12
-      base: 14
-      large: 16
-    families:
-    - BaseFont
   sheetlets:
-  - Label
-  - Panel
-
-- type: stylesheet
-  parent: StyleCommon
-  id: StyleNano
-  configs:
-  - type: Palette
-    primary: '#ff0000'
-    secondary: '#00ff00'
-    tertiary: '#0000ff'
-  sheetlets:
-  - Label
-
-- type: fontFamily
-  id: BaseFont
-  regular:
-  - "/Fonts/NotoSans/NotoSans-Regular.ttf"
-  bold:
-  - "/Fonts/NotoSans/NotoSans-Bold.ttf"
-  italic:
-  - "/Fonts/NotoSans/NotoSans-Italic.ttf"
-  boldItalic:
-  - "/Fonts/NotoSans/NotoSans-BoldItalic.ttf"
-  extra:
-  - "/Fonts/NotoSans/NotoSansSymbols2-Regular.ttf"
+  - Palette
