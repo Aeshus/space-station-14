@@ -10,9 +10,6 @@ namespace Content.Client.Stylesheets.Palette;
 public record ColorPalette(
     Color Base,
 
-    float LightnessShift,
-    float ChromaShift,
-
     Color Element,
     Color HoveredElement,
     Color PressedElement,
@@ -56,9 +53,6 @@ public record ColorPalette(
 
         return new ColorPalette(
             Base: @base,
-
-            LightnessShift: lightnessShift,
-            ChromaShift: chromaShift,
 
             Element: element.Value,
             HoveredElement: hoveredElement,
