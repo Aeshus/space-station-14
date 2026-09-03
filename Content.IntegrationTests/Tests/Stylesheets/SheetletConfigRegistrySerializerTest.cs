@@ -7,14 +7,14 @@ namespace Content.IntegrationTests.Tests.Stylesheets;
 public sealed partial class SheetletConfigRegistrySerializerTest
 {
     [SheetletConfig]
-    private sealed partial class TestConfig : SheetletConfig
+    private sealed partial class SerializerTestConfig : SheetletConfig
     {
         [DataField]
         public int Test { get; set; }
     }
 
-    [SheetletConfig("Named")]
-    private sealed partial class TestNamedConfig : SheetletConfig
+    [SheetletConfig("SerializerNamed")]
+    private sealed partial class SerializerTestNamedConfig : SheetletConfig
     {
         [DataField]
         public double Test2 { get; set; }
