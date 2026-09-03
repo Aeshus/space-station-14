@@ -26,13 +26,13 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     /// The sheetlet configs.
     /// </summary>
     [AlwaysPushInheritance]
-    [DataField(required: true)]
+    [DataField]
     public SheetletConfigRegistry Configs;
 
     /// <summary>
     /// The sheetlet names that will be used to generate a stylesheet using the sheetlet config registry.
     /// </summary>
     [AlwaysPushInheritance]
-    [DataField(required: true)]
+    [DataField]
     public List<ISheetlet> Sheetlets;
 }
