@@ -54,6 +54,7 @@ namespace Content.Client.Entry
         [Dependency] private IParallaxManager _parallaxManager = default!;
         [Dependency] private IConfigurationManager _configManager = default!;
         [Dependency] private IStylesheetManager _stylesheetManager = default!;
+        [Dependency] private StyleProto.StylesheetManager _newManager = default!;
         [Dependency] private ISheetletFactory _sheetletFactory = default!;
         [Dependency] private IScreenshotHook _screenshotHook = default!;
         [Dependency] private FullscreenHook _fullscreenHook = default!;
@@ -155,6 +156,7 @@ namespace Content.Client.Entry
             base.PostInit();
 
             _stylesheetManager.Initialize();
+            _newManager.Initialize();
 
             // Setup key contexts
             ContentContexts.SetupContexts(_inputManager.Contexts);
