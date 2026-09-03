@@ -17,8 +17,6 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>,
     ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>, ITypeCopier<SheetletConfigRegistry>
 {
-    [Dependency] private ISheetletFactory _factory = default!;
-
     /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
         SequenceDataNode node,
@@ -29,7 +27,8 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
 
         try
         {
-            var dict = TypeMappingDictionary(node);
+            var factory = dependencies.Resolve<ISheetletFactory>();
+            var dict = TypeMappingDictionary(node, factory);
             foreach (var (type, config) in dict)
             {
                 var copy = config.Copy();
@@ -55,7 +54,8 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     {
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
 
-        var dict = TypeMappingDictionary(node);
+        var factory = dependencies.Resolve<ISheetletFactory>();
+        var dict = TypeMappingDictionary(node, factory);
 
         foreach (var (type, config) in dict)
         {
@@ -82,10 +82,11 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context = null)
     {
         var sequence = new SequenceDataNode();
+        var factory = dependencies.Resolve<ISheetletFactory>();
 
         foreach (var (type, config) in value)
         {
-            if (!_factory.TryGetConfigName(type, out var name))
+            if (!factory.TryGetConfigName(type, out var name))
                 throw new InvalidOperationException($"{type} is not a registered sheetlet config");
 
             var node = serializationManager.WriteValue(
@@ -112,9 +113,10 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         ISerializationContext? context)
     {
         var sequence = child.Copy();
+        var factory = dependencies.Resolve<ISheetletFactory>();
 
-        var childDict = TypeMappingDictionary(child);
-        var parentDict = TypeMappingDictionary(parent);
+        var childDict = TypeMappingDictionary(child, factory);
+        var parentDict = TypeMappingDictionary(parent, factory);
 
         foreach (var (type, parentNode) in parentDict)
         {
@@ -157,8 +159,11 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     /// Turns a SequenceNode into a mapping from type to a mapping node.
     /// </summary>
     /// <param name="node">The sequence node</param>
+    /// <param name="factory">Factory used to resolve config names</param>
     /// <returns>Mapping from type to mapping node</returns>
-    private Dictionary<Type, MappingDataNode> TypeMappingDictionary(SequenceDataNode node)
+    private static Dictionary<Type, MappingDataNode> TypeMappingDictionary(
+        SequenceDataNode node,
+        ISheetletFactory factory)
     {
         var dict = new Dictionary<Type, MappingDataNode>();
         foreach (var entry in node)
@@ -169,7 +174,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
             if (!mapping.TryGet<ValueDataNode>("type", out var typeNode))
                 throw new KeyNotFoundException("The given key 'type' was not present in the dictionary.");
 
-            if (!_factory.TryGetConfigType(typeNode.Value, out var type))
+            if (!factory.TryGetConfigType(typeNode.Value, out var type))
                 throw new InvalidOperationException($"Unknown sheetlet config '{typeNode.Value}' in prototype!");
 
             dict.Add(type, mapping);
