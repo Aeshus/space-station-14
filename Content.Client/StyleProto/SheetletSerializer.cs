@@ -15,7 +15,14 @@ public sealed class SheetletSerializer : BaseTypeSerializer, ITypeSerializer<ISh
         IDependencyCollection dependencies,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        var factory = dependencies.Resolve<ISheetletFactory>();
+
+        if (!factory.TryGetSheetletType(node.Value, out var type))
+        {
+            return new ErrorNode(node, $"Unknown sheetlet type '{node.Value}' in prototype!");
+        }
+
+        return new ValidatedValueNode(node);
     }
 
     public ISheetlet Read(ISerializationManager serializationManager,
@@ -25,7 +32,8 @@ public sealed class SheetletSerializer : BaseTypeSerializer, ITypeSerializer<ISh
         ISerializationContext? context = null,
         ISerializationManager.InstantiationDelegate<ISheetlet>? instanceProvider = null)
     {
-        throw new NotImplementedException();
+        var factory = dependencies.Resolve<ISheetletFactory>();
+        return factory.GetSheetlet(node.Value);
     }
 
     public DataNode Write(ISerializationManager serializationManager,
@@ -34,6 +42,12 @@ public sealed class SheetletSerializer : BaseTypeSerializer, ITypeSerializer<ISh
         bool alwaysWrite = false,
         ISerializationContext? context = null)
     {
-        throw new NotImplementedException();
+        var factory = dependencies.Resolve<ISheetletFactory>();
+        if (!factory.TryGetSheetletName(value.GetType(), out var name))
+        {
+            throw new InvalidOperationException($"{value.GetType()} is not a registered sheetlet");
+        }
+
+        return new ValueDataNode(name);
     }
 }
