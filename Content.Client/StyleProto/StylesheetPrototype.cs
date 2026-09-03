@@ -34,5 +34,5 @@ public sealed partial class StylesheetPrototype : IPrototype, IInheritingPrototy
     /// </summary>
     [AlwaysPushInheritance]
     [DataField(required: true)]
-    public List<string> Sheetlets;
+    public List<ISheetlet> Sheetlets;
 }
