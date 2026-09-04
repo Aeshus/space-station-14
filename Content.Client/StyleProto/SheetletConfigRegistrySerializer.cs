@@ -13,7 +13,7 @@ namespace Content.Client.StyleProto;
 /// Serializes and deserializes Sheetlet Config Registries.
 /// </summary>
 [TypeSerializer]
-public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerializer,
+public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     ITypeSerializer<SheetletConfigRegistry, SequenceDataNode>,
     ITypeInheritanceHandler<SheetletConfigRegistry, SequenceDataNode>, ITypeCopier<SheetletConfigRegistry>
 {
@@ -28,10 +28,10 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         try
         {
             var factory = dependencies.Resolve<ISheetletFactory>();
-            var dict = TypeMappingDictionary(node, factory);
-            foreach (var (type, config) in dict)
+            var dict = TypeToIndexDict(node, factory);
+            foreach (var (type, index) in dict)
             {
-                var copy = config.Copy();
+                var copy = (MappingDataNode)node[index].Copy();
                 copy.Remove("type");
                 list.Add(serializationManager.ValidateNode(type, copy, context));
             }
@@ -55,11 +55,11 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
 
         var factory = dependencies.Resolve<ISheetletFactory>();
-        var dict = TypeMappingDictionary(node, factory);
+        var dict = TypeToIndexDict(node, factory);
 
-        foreach (var (type, config) in dict)
+        foreach (var (type, index) in dict)
         {
-            var copy = config.Copy();
+            var copy = (MappingDataNode)node[index].Copy();
 
             copy.Remove("type");
             var conf = serializationManager.Read(
@@ -69,7 +69,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
                 context,
                 notNullableOverride: true);
 
-            configs[type] = (SheetletConfig) conf!;
+            configs[type] = (SheetletConfig)conf!;
         }
 
         return configs;
@@ -116,18 +116,22 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
         var sequence = child.Copy();
         var factory = dependencies.Resolve<ISheetletFactory>();
 
-        var childDict = TypeMappingDictionary(child, factory);
-        var parentDict = TypeMappingDictionary(parent, factory);
+        var childDict = TypeToIndexDict(child, factory);
+        var parentDict = TypeToIndexDict(parent, factory);
 
-        foreach (var (type, parentNode) in parentDict)
+        foreach (var (type, parentIndex) in parentDict)
         {
-            if (childDict.TryGetValue(type, out var childNode))
+            if (childDict.TryGetValue(type, out var childIndex))
             {
-                sequence.Add(serializationManager.PushCompositionWithGenericNode(type, parentNode, childNode, context));
+                sequence[childIndex] = serializationManager.PushCompositionWithGenericNode(
+                    type,
+                    parent[parentIndex],
+                    child[childIndex],
+                    context);
                 continue;
             }
 
-            sequence.Add(parentNode);
+            sequence.Add(parent[parentIndex].Copy());
         }
 
         return sequence;
@@ -161,14 +165,16 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
     /// </summary>
     /// <param name="node">The sequence node</param>
     /// <param name="factory">Factory used to resolve config names</param>
-    /// <returns>Mapping from type to mapping node</returns>
-    private static Dictionary<Type, MappingDataNode> TypeMappingDictionary(
+    /// <returns>Mapping from type to its index in the sequence node</returns>
+    private static Dictionary<Type, int> TypeToIndexDict(
         SequenceDataNode node,
         ISheetletFactory factory)
     {
-        var dict = new Dictionary<Type, MappingDataNode>();
-        foreach (var entry in node)
+        var dict = new Dictionary<Type, int>();
+        for (var i = 0; i < node.Count; i++)
         {
+            var entry = node[i];
+
             if (entry is not MappingDataNode mapping)
                 throw new InvalidNodeTypeException($"{entry} is not a mapping data node");
 
@@ -178,7 +184,7 @@ public sealed partial class SheetletConfigRegistrySerializer : BaseTypeSerialize
             if (!factory.TryGetConfigType(typeNode.Value, out var type))
                 throw new InvalidOperationException($"Unknown sheetlet config '{typeNode.Value}' in prototype!");
 
-            dict.Add(type, mapping);
+            dict.Add(type, i);
         }
 
         return dict;
