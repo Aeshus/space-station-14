@@ -51,6 +51,9 @@ public sealed partial class StylesheetManager : IPostInjectInit
 
     private void UpdateStylesheet(StylesheetPrototype proto)
     {
+        if (proto.Abstract)
+            return;
+
         var rules = new List<StyleRule>();
         foreach (var sheetlet in proto.Sheetlets)
         {
