@@ -91,6 +91,7 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
                 throw new InvalidOperationException($"{type} is not a registered sheetlet config");
 
             var node = serializationManager.WriteValue(
+                type,
                 config,
                 alwaysWrite,
                 context,
