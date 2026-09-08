@@ -4,9 +4,9 @@ namespace Content.Client.StyleProto.Fonts;
 
 public interface IFontFamily
 {
-    public string Name { get; }
-    public FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width);
-    public Font GetFont(int size, FontOptions options);
+    string Name { get; }
+    FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width);
+    Font GetFont(int size, FontOptions options);
 }
 
 public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFamily
