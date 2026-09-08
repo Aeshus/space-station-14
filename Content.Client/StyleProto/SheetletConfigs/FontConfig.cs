@@ -9,14 +9,14 @@ public sealed partial class FontConfig : SheetletConfig
     public List<(string?, int)> CommonFontSizes { get; set; }
 
     [DataField]
-    public FontFamily BaseFont { get; set; }
+    public FontFamilyStack BaseFont { get; set; }
 
     [DataField]
-    public FontFamily MonoFont { get; set; }
+    public FontFamilyStack MonoFont { get; set; }
 
     [DataField]
-    public FontFamily DisplayFont { get; set; }
+    public FontFamilyStack DisplayFont { get; set; }
 
     [DataField]
-    public FontFamily DecorativeFont { get; set; }
+    public FontFamilyStack DecorativeFont { get; set; }
 }
