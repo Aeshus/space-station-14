@@ -39,21 +39,6 @@ public sealed partial class FontFamilyResolver : IPostInjectInit
             family = new FontFamilyBundled(proto);
         }
 
-        var options = family.GetClosest(weight, slant, width);
-
-        // Cache
-        if (_families.TryGetValue(family, out var instances))
-        {
-            if (instances.TryGetValue(options, out var instance))
-            {
-                return instance;
-            }
-        }
-        else
-        {
-            _families.Add(family, new Dictionary<FontOptions, Font>());
-        }
-
         var font = family.GetFont(ScaleFontSize(size, _fontScales[proto.FontType]), options);
 
         _families[family].Add(options, font);

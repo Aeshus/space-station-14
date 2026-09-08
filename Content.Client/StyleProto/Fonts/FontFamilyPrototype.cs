@@ -32,15 +32,15 @@ public sealed partial class FontFamilyPrototype : IPrototype
   id: NotoSans
   name: Noto Sans
   variants:
-    Normal:
-        Regular:
-            - "/Resources/Interface/Font/..."
-            - "/Resources/Interface/Font/..."
-            - "/Resources/Interface/Font/..."
-        Bold:
-            - "/Resources/Interface/Font/..."
-            - "/Resources/Interface/Font/..."
-    Italic:
-        Bold:
-            - "/Resources/Interface/Font/..."
+  - width: Normal
+    weight: Regular
+    slant: Italic
+    paths:
+    - "/Resources/Interface/Font/..."
+    - "/Resources/Interface/Font/..."
+  - width: Normal
+    weight: Bold
+    slant: Normal
+    paths:
+    - "/Resources/Interface/Font/..."
 */

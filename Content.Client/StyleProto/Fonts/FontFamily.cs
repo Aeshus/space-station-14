@@ -5,32 +5,40 @@ namespace Content.Client.StyleProto.Fonts;
 public interface IFontFamily
 {
     string Name { get; }
-    FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width);
     Font GetFont(int size, FontOptions options);
 }
 
 public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFamily
 {
+    Dictionary<FontOptions, FontOptions> _optionsCache = new();
+    Dictionary<FontOptions, Font> _instanceCache = new();
+
     public string Name => prototype.Name;
 
-    public FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width)
+    private FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width)
     {
-        // Following rules described here: https://www.w3.org/TR/css-fonts-3/#font-style-matching
+        var options = new FontOptions(weight, slant, width);
+
+        if (_optionsCache.TryGetValue(options, out var cached))
+            return cached;
 
         // Width is not implemented/supported (due to prototype shape)
         width = FontWidth.Normal;
         slant = ClosestSlant(slant);
         weight = ClosestWeight(slant, weight);
 
-        return new FontOptions(weight, slant, width);
+        var closest = new FontOptions(weight, slant, width);
+        _optionsCache.Add(options, closest);
+        return closest;
     }
 
     private FontWeight ClosestWeight(FontSlant slant, FontWeight weight)
     {
+        // Following rules described here: https://www.w3.org/TR/css-fonts-3/#font-style-matching
         if (prototype.Variants[slant].ContainsKey(weight))
             return weight;
 
-        if (weight == FontWeight.Normal)
+        if (weight == FontWeight.Regular)
         {
             if (prototype.Variants[slant].ContainsKey(FontWeight.Medium))
                 return FontWeight.Medium;
@@ -38,11 +46,11 @@ public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFami
 
         if (weight == FontWeight.Medium)
         {
-            if (prototype.Variants[slant].ContainsKey(FontWeight.Normal))
-                return FontWeight.Normal;
+            if (prototype.Variants[slant].ContainsKey(FontWeight.Regular))
+                return FontWeight.Regular;
         }
 
-        if (weight <= FontWeight.Normal)
+        if (weight <= FontWeight.Regular)
         {
             for (var i = weight; i >= FontWeight.Thin; i--)
             {
@@ -77,6 +85,8 @@ public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFami
 
     private FontSlant ClosestSlant(FontSlant slant)
     {
+        // Following rules described here: https://www.w3.org/TR/css-fonts-3/#font-style-matching
+
         // Oblique -> Italic -> Normal
         // Normal -> Oblique -> Italic
         // Italic -> Oblique -> Normal
@@ -138,6 +148,8 @@ public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFami
 
 public sealed class FontFamilySystem : IFontFamily
 {
+    // var faces = _systemFontManager.SystemFontFaces.GroupBy(s =>
+    //             s.GetLocalizedFamilyName(CultureInfo.InvariantCulture));
     private ISystemFontFace[] _fonts;
 
     public string Name
@@ -152,6 +164,6 @@ public sealed class FontFamilySystem : IFontFamily
 
     public Font GetFont(int size, FontOptions options)
     {
-        throw new NotImplementedException();
+        // For all closest fonts that make sense
     }
 }
