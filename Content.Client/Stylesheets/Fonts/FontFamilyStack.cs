@@ -11,14 +11,14 @@ namespace Content.Client.Stylesheets.Fonts;
 /// A set of font files for displaying a single font family.
 /// </summary>
 /// <seealso cref="FontFamilyBuilder"/>
-public sealed partial class FontFamily
+public sealed partial class FontFamilyStack
 {
     [Dependency] private IResourceCache _resourceCache = default!;
 
     private readonly FrozenDictionary<FontKind, ResPath[]> _fontPaths;
 
     [Access(typeof(FontFamilyBuilder))]
-    internal FontFamily(FrozenDictionary<FontKind, ResPath[]> fontPaths)
+    internal FontFamilyStack(FrozenDictionary<FontKind, ResPath[]> fontPaths)
     {
         IoCManager.InjectDependencies(this);
 
@@ -43,9 +43,9 @@ public sealed partial class FontFamily
     }
 
     /// <summary>
-    /// Start creating a new <see cref="FontFamily"/>.
+    /// Start creating a new <see cref="FontFamilyStack"/>.
     /// </summary>
-    /// <returns>A builder object that can be used to construct the <see cref="FontFamily"/>.</returns>
+    /// <returns>A builder object that can be used to construct the <see cref="FontFamilyStack"/>.</returns>
     public static FontFamilyBuilder New()
     {
         return new FontFamilyBuilder();
@@ -66,7 +66,7 @@ public sealed partial class FontFamily
 }
 
 /// <summary>
-/// A builder object used to construct a <see cref="FontFamily"/>.
+/// A builder object used to construct a <see cref="FontFamilyStack"/>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -125,13 +125,13 @@ public sealed class FontFamilyBuilder
     }
 
     /// <summary>
-    /// Finish constructing the <see cref="FontFamily"/>
+    /// Finish constructing the <see cref="FontFamilyStack"/>
     /// </summary>
-    /// <returns>The finished <see cref="FontFamily"/></returns>
+    /// <returns>The finished <see cref="FontFamilyStack"/></returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown if no <see cref="FontKind.Regular"/> was added via <see cref="AddKind"/>.
     /// </exception>
-    public FontFamily Build()
+    public FontFamilyStack Build()
     {
         var newDict = _kinds.ToDictionary(kv => kv.Key, kv => kv.Value.Concat(_extra).ToArray());
 
@@ -144,10 +144,10 @@ public sealed class FontFamilyBuilder
         newDict.TryAdd(FontKind.Bold, regularValue);
         newDict.TryAdd(FontKind.Italic, regularValue);
 
-        return new FontFamily(newDict.ToFrozenDictionary());
+        return new FontFamilyStack(newDict.ToFrozenDictionary());
     }
 
-    public static implicit operator FontFamily(FontFamilyBuilder builder)
+    public static implicit operator FontFamilyStack(FontFamilyBuilder builder)
     {
         return builder.Build();
     }

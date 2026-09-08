@@ -19,7 +19,12 @@ public sealed partial class StylesheetManager : IPostInjectInit
     public void Initialize()
     {
         DirtyAll();
+    }
 
+    /// <inheritdoc/>
+    public void PostInject()
+    {
+        _sawmill = _logManager.GetSawmill("stylesheet");
         _prototypeManager.PrototypesReloaded += OnPrototypesReloaded;
     }
 
@@ -156,11 +161,5 @@ public sealed partial class StylesheetManager : IPostInjectInit
 
             StyleChangedInternal?.Invoke(stylesheet, configs);
         }
-    }
-
-    /// <inheritdoc/>
-    public void PostInject()
-    {
-        _sawmill = _logManager.GetSawmill("stylesheet");
     }
 }
