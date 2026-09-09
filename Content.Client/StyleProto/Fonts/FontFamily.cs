@@ -1,19 +1,18 @@
+using System.Collections.Frozen;
 using Robust.Client.Graphics;
+using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
 
-public interface IFontFamily
+public abstract class IFontFamily
 {
-    string Name { get; }
-    Font GetFont(int size, FontOptions options);
-}
+    private FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FontWeight>> choices;
+    private Dictionary<FontOptions, ResPath[]> _fontsPaths;
+    private Dictionary<FontOptions, Font> _fontsCache = new();
+    private Dictionary<FontOptions, FontOptions> _optionsCache = new();
 
-public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFamily
-{
-    Dictionary<FontOptions, FontOptions> _optionsCache = new();
-    Dictionary<FontOptions, Font> _instanceCache = new();
-
-    public string Name => prototype.Name;
+    public abstract string Name { get; }
+    public abstract Font GetFont(int size, FontOptions options);
 
     private FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width)
     {
@@ -22,125 +21,73 @@ public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFami
         if (_optionsCache.TryGetValue(options, out var cached))
             return cached;
 
-        // Width is not implemented/supported (due to prototype shape)
-        width = FontWidth.Normal;
-        slant = ClosestSlant(slant);
-        weight = ClosestWeight(slant, weight);
+        width = ClosestWidth(choices, width);
+        slant = ClosestSlant(choices[width], slant);
+        weight = ClosestWeight(choices[width][slant], weight);
 
         var closest = new FontOptions(weight, slant, width);
         _optionsCache.Add(options, closest);
         return closest;
     }
 
-    private FontWeight ClosestWeight(FontSlant slant, FontWeight weight)
+    private FontWidth ClosestWidth(FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FontWeight>> choices,
+        FontWidth width)
     {
-        // Following rules described here: https://www.w3.org/TR/css-fonts-3/#font-style-matching
-        if (prototype.Variants[slant].ContainsKey(weight))
-            return weight;
+        // https://www.w3.org/TR/css-fonts-3/#font-style-matching
 
-        if (weight == FontWeight.Regular)
-        {
-            if (prototype.Variants[slant].ContainsKey(FontWeight.Medium))
-                return FontWeight.Medium;
-        }
+        if (width is < FontWidth.UltraCondensed or > FontWidth.UltraExpanded)
+            throw new ArgumentOutOfRangeException(nameof(width));
 
-        if (weight == FontWeight.Medium)
-        {
-            if (prototype.Variants[slant].ContainsKey(FontWeight.Regular))
-                return FontWeight.Regular;
-        }
+        if (choices.ContainsKey(width))
+            return width;
 
-        if (weight <= FontWeight.Regular)
+        // If the value of ‘font-stretch’ is ‘normal’ or one of the condensed values, narrower width values are
+        // checked first, then wider values.
+        if (width <= FontWidth.Normal)
         {
-            for (var i = weight; i >= FontWeight.Thin; i--)
+            for (var i = width - 1; i >= FontWidth.UltraCondensed; i--)
             {
-                if (prototype.Variants[slant].ContainsKey(i))
+                if (choices.ContainsKey(i))
                     return i;
             }
 
-            for (var i = weight; i <= FontWeight.ExtraBlack; i++)
+            for (var i = width + 1; i <= FontWidth.UltraExpanded; i++)
             {
-                if (prototype.Variants[slant].ContainsKey(i))
+                if (choices.ContainsKey(i))
                     return i;
             }
         }
-
-        if (weight <= FontWeight.Medium)
+        else
         {
-            for (var i = weight; i <= FontWeight.ExtraBlack; i++)
+            // If the value of ‘font-stretch’ is one of the expanded values, wider values are checked first, followed
+            // by narrower values.
+            for (var i = width + 1; i <= FontWidth.UltraExpanded; i++)
             {
-                if (prototype.Variants[slant].ContainsKey(i))
+                if (choices.ContainsKey(i))
                     return i;
             }
 
-            for (var i = weight; i >= FontWeight.Thin; i--)
+            for (var i = width - 1; i >= FontWidth.UltraCondensed; i--)
             {
-                if (prototype.Variants[slant].ContainsKey(i))
+                if (choices.ContainsKey(i))
                     return i;
             }
         }
 
-        throw new InvalidOperationException($"No font weights exist for the slant {slant} on font {prototype.ID}");
+        throw new InvalidOperationException($"No font widths are defined for font {Name}");
     }
+}
 
-    private FontSlant ClosestSlant(FontSlant slant)
-    {
-        // Following rules described here: https://www.w3.org/TR/css-fonts-3/#font-style-matching
+public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFamily
+{
+    private BundledFontFace[] _faces = [.. prototype.Variants];
 
-        // Oblique -> Italic -> Normal
-        // Normal -> Oblique -> Italic
-        // Italic -> Oblique -> Normal
+    Dictionary<FontOptions, FontOptions> _optionsCache = new();
+    Dictionary<FontOptions, Font> _instanceCache = new();
 
-        if (slant == FontSlant.Oblique && !prototype.Variants.ContainsKey(FontSlant.Oblique))
-        {
-            if (prototype.Variants.ContainsKey(FontSlant.Italic))
-            {
-                slant = FontSlant.Italic;
-            }
-            else if (prototype.Variants.ContainsKey(FontSlant.Normal))
-            {
-                slant = FontSlant.Normal;
-            }
-            else
-            {
-                throw new InvalidOperationException($"No font slants are defined for font {prototype.ID}");
-            }
-        }
-        else if (slant == FontSlant.Normal && !prototype.Variants.ContainsKey(FontSlant.Normal))
-        {
-            if (prototype.Variants.ContainsKey(FontSlant.Oblique))
-            {
-                slant = FontSlant.Oblique;
-            }
-            else if (prototype.Variants.ContainsKey(FontSlant.Italic))
-            {
-                slant = FontSlant.Italic;
-            }
-            else
-            {
-                throw new InvalidOperationException($"No font slants are defined for font {prototype.ID}");
-            }
-        }
-        else if (slant == FontSlant.Italic && !prototype.Variants.ContainsKey(FontSlant.Italic))
-        {
-            if (prototype.Variants.ContainsKey(FontSlant.Oblique))
-            {
-                slant = FontSlant.Oblique;
-            }
-            else if (prototype.Variants.ContainsKey(FontSlant.Normal))
-            {
-                slant = FontSlant.Normal;
-            }
-            else
-            {
-                throw new InvalidOperationException($"No font slants are defined for font {prototype.ID}");
-            }
-        }
+    public override string Name => prototype.Name;
 
-        return slant;
-    }
-
-    public Font GetFont(int size, FontOptions options)
+    public override Font GetFont(int size, FontOptions options)
     {
         throw new NotImplementedException();
     }
@@ -152,7 +99,7 @@ public sealed class FontFamilySystem : IFontFamily
     //             s.GetLocalizedFamilyName(CultureInfo.InvariantCulture));
     private ISystemFontFace[] _fonts;
 
-    public string Name
+    public override string Name
     {
         get => throw new NotImplementedException();
     }
@@ -162,7 +109,7 @@ public sealed class FontFamilySystem : IFontFamily
         throw new NotImplementedException();
     }
 
-    public Font GetFont(int size, FontOptions options)
+    public override Font GetFont(int size, FontOptions options)
     {
         // For all closest fonts that make sense
     }
