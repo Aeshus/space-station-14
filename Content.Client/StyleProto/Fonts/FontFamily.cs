@@ -4,96 +4,174 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
 
-public abstract class IFontFamily
+public abstract class FontFamily
 {
-    private FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FontWeight>> choices;
-    private Dictionary<FontOptions, ResPath[]> _fontsPaths;
-    private Dictionary<FontOptions, Font> _fontsCache = new();
-    private Dictionary<FontOptions, FontOptions> _optionsCache = new();
+    public required FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>>>
+        Options
+    {
+        get;
+        set;
+    }
+
+    private readonly Dictionary<FontOptions, FontOptions> _optionsCache = new();
 
     public abstract string Name { get; }
-    public abstract Font GetFont(int size, FontOptions options);
 
-    private FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width)
+    private FontOptions ClosestOptions(FontOptions options)
     {
-        var options = new FontOptions(weight, slant, width);
-
         if (_optionsCache.TryGetValue(options, out var cached))
             return cached;
 
-        width = ClosestWidth(choices, width);
-        slant = ClosestSlant(choices[width], slant);
-        weight = ClosestWeight(choices[width][slant], weight);
+        var width = options.Width;
+        var slant = options.Slant;
+        var weight = options.Weight;
+
+        width = ClosestWidth(Options, width);
+        slant = ClosestSlant(Options[width], slant);
+        weight = ClosestWeight(Options[width][slant], weight);
 
         var closest = new FontOptions(weight, slant, width);
         _optionsCache.Add(options, closest);
         return closest;
     }
 
-    private FontWidth ClosestWidth(FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FontWeight>> choices,
+    public abstract Font GetFont(int size, FontOptions options);
+
+    private FontWidth ClosestWidth(
+        FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>>> choices,
         FontWidth width)
     {
         // https://www.w3.org/TR/css-fonts-3/#font-style-matching
-
-        if (width is < FontWidth.UltraCondensed or > FontWidth.UltraExpanded)
-            throw new ArgumentOutOfRangeException(nameof(width));
-
         if (choices.ContainsKey(width))
             return width;
 
-        // If the value of ‘font-stretch’ is ‘normal’ or one of the condensed values, narrower width values are
-        // checked first, then wider values.
-        if (width <= FontWidth.Normal)
-        {
-            for (var i = width - 1; i >= FontWidth.UltraCondensed; i--)
-            {
-                if (choices.ContainsKey(i))
-                    return i;
-            }
+        FontWidth? smaller = null;
+        FontWidth? bigger = null;
 
-            for (var i = width + 1; i <= FontWidth.UltraExpanded; i++)
-            {
-                if (choices.ContainsKey(i))
-                    return i;
-            }
-        }
-        else
+        foreach (var choice in choices.Keys)
         {
-            // If the value of ‘font-stretch’ is one of the expanded values, wider values are checked first, followed
-            // by narrower values.
-            for (var i = width + 1; i <= FontWidth.UltraExpanded; i++)
+            if (choice < width)
             {
-                if (choices.ContainsKey(i))
-                    return i;
+                if (smaller is null || choice > smaller)
+                    smaller = choice;
             }
-
-            for (var i = width - 1; i >= FontWidth.UltraCondensed; i--)
+            else if (bigger is null || choice < bigger)
             {
-                if (choices.ContainsKey(i))
-                    return i;
+                bigger = choice;
             }
         }
 
-        throw new InvalidOperationException($"No font widths are defined for font {Name}");
+        var closest = width <= FontWidth.Normal
+            ? smaller ?? bigger
+            : bigger ?? smaller;
+
+        return closest ?? throw new InvalidOperationException($"No font width found for font {Name}");
+    }
+
+    private FontSlant ClosestSlant(FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>> choices,
+        FontSlant slant)
+    {
+        // https://www.w3.org/TR/css-fonts-3/#font-style-matching
+        if (choices.ContainsKey(slant))
+            return slant;
+
+        if (slant == FontSlant.Italic)
+        {
+            if (choices.ContainsKey(FontSlant.Oblique))
+                return FontSlant.Oblique;
+
+            if (choices.ContainsKey(FontSlant.Normal))
+                return FontSlant.Normal;
+        }
+
+        if (slant == FontSlant.Normal)
+        {
+            if (choices.ContainsKey(FontSlant.Oblique))
+                return FontSlant.Oblique;
+
+            if (choices.ContainsKey(FontSlant.Italic))
+                return FontSlant.Italic;
+        }
+
+        if (slant == FontSlant.Oblique)
+        {
+            if (choices.ContainsKey(FontSlant.Italic))
+                return FontSlant.Italic;
+
+            if (choices.ContainsKey(FontSlant.Normal))
+                return FontSlant.Normal;
+        }
+
+        throw new InvalidOperationException($"Not font slant found for font {Name}");
+    }
+
+    private FontWeight ClosestWeight(
+        FrozenDictionary<FontWeight, ResPath[]> choices,
+        FontWeight weight)
+    {
+        // https://www.w3.org/TR/css-fonts-3/#font-style-matching
+        if (choices.ContainsKey(weight))
+            return weight;
+
+        if (weight == FontWeight.Regular)
+        {
+            if (choices.ContainsKey(FontWeight.Medium))
+                return FontWeight.Medium;
+        }
+
+        if (weight == FontWeight.Medium)
+        {
+            if (choices.ContainsKey(FontWeight.Regular))
+                return FontWeight.Regular;
+        }
+
+        FontWeight? smaller = null;
+        FontWeight? bigger = null;
+
+        foreach (var choice in choices.Keys)
+        {
+            if (choice < weight)
+            {
+                if (smaller is null || choice > smaller)
+                    smaller = weight;
+            }
+            else if (bigger is null || choice < bigger)
+            {
+                bigger = choice;
+            }
+        }
+
+        var closest = weight <= FontWeight.Medium
+            ? smaller ?? bigger
+            : bigger ?? smaller;
+
+        return closest ?? throw new InvalidOperationException($"No font width found for font {Name}");
     }
 }
 
-public sealed class FontFamilyBundled(FontFamilyPrototype prototype) : IFontFamily
+public sealed class FontFamilyBundled : FontFamily
 {
-    private BundledFontFace[] _faces = [.. prototype.Variants];
-
-    Dictionary<FontOptions, FontOptions> _optionsCache = new();
+    private BundledFontFace[] _faces;
     Dictionary<FontOptions, Font> _instanceCache = new();
+    private readonly FontFamilyPrototype _prototype;
 
-    public override string Name => prototype.Name;
+    public FontFamilyBundled(FontFamilyPrototype prototype)
+    {
+        _prototype = prototype;
+        _faces = [.. prototype.Variants];
+
+        throw new NotImplementedException();
+    }
+
+    public override string Name => _prototype.Name;
 
     public override Font GetFont(int size, FontOptions options)
     {
-        throw new NotImplementedException();
+        return new DummyFont();
     }
 }
 
-public sealed class FontFamilySystem : IFontFamily
+public sealed class FontFamilySystem : FontFamily
 {
     // var faces = _systemFontManager.SystemFontFaces.GroupBy(s =>
     //             s.GetLocalizedFamilyName(CultureInfo.InvariantCulture));
@@ -101,12 +179,7 @@ public sealed class FontFamilySystem : IFontFamily
 
     public override string Name
     {
-        get => throw new NotImplementedException();
-    }
-
-    public FontOptions ClosestOptions(FontWeight weight, FontSlant slant, FontWidth width)
-    {
-        throw new NotImplementedException();
+        get => _fonts[0].FamilyName;
     }
 
     public override Font GetFont(int size, FontOptions options)
