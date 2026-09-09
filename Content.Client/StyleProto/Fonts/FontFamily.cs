@@ -109,21 +109,9 @@ public abstract class FontFamily
         FrozenDictionary<FontWeight, ResPath[]> choices,
         FontWeight weight)
     {
-        // https://www.w3.org/TR/css-fonts-3/#font-style-matching
+        // https://www.w3.org/TR/css-fonts-4/#font-style-matching
         if (choices.ContainsKey(weight))
             return weight;
-
-        if (weight == FontWeight.Regular)
-        {
-            if (choices.ContainsKey(FontWeight.Medium))
-                return FontWeight.Medium;
-        }
-
-        if (weight == FontWeight.Medium)
-        {
-            if (choices.ContainsKey(FontWeight.Regular))
-                return FontWeight.Regular;
-        }
 
         FontWeight? smaller = null;
         FontWeight? bigger = null;
@@ -133,7 +121,7 @@ public abstract class FontFamily
             if (choice < weight)
             {
                 if (smaller is null || choice > smaller)
-                    smaller = weight;
+                    smaller = choice;
             }
             else if (bigger is null || choice < bigger)
             {
@@ -141,11 +129,18 @@ public abstract class FontFamily
             }
         }
 
+        // CSS4 wraps weights between 400 and 500 first to the largest <500 before going back to normal.
+        if (weight is >= FontWeight.Regular and <= FontWeight.Medium &&
+            bigger is <= FontWeight.Medium)
+        {
+            return bigger.Value;
+        }
+
         var closest = weight <= FontWeight.Medium
             ? smaller ?? bigger
             : bigger ?? smaller;
 
-        return closest ?? throw new InvalidOperationException($"No font width found for font {Name}");
+        return closest ?? throw new InvalidOperationException($"No font weight found for font {Name}");
     }
 }
 
