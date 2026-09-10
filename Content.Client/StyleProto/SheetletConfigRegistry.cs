@@ -5,7 +5,6 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.
 /// </summary>
-/// <param name="configs">Configs</param>
 public sealed class SheetletConfigRegistry : Dictionary<Type, SheetletConfig>
 {
     /// <summary>
