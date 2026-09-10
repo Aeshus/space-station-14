@@ -1,12 +1,14 @@
 using System.Collections.Frozen;
+using Content.Client.Resources;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
 
-public abstract class FontFamily
+public abstract class FontFamily<T>
 {
-    public required FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>>>
+    public required FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, T>>>
         Options
     {
         get;
@@ -17,7 +19,7 @@ public abstract class FontFamily
 
     public abstract string Name { get; }
 
-    private FontOptions ClosestOptions(FontOptions options)
+    protected FontOptions ClosestOptions(FontOptions options)
     {
         if (_optionsCache.TryGetValue(options, out var cached))
             return cached;
@@ -38,7 +40,7 @@ public abstract class FontFamily
     public abstract Font GetFont(int size, FontOptions options);
 
     private FontWidth ClosestWidth(
-        FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>>> choices,
+        FrozenDictionary<FontWidth, FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, T>>> choices,
         FontWidth width)
     {
         // https://www.w3.org/TR/css-fonts-3/#font-style-matching
@@ -68,7 +70,7 @@ public abstract class FontFamily
         return closest ?? throw new InvalidOperationException($"No font width found for font {Name}");
     }
 
-    private FontSlant ClosestSlant(FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, ResPath[]>> choices,
+    private FontSlant ClosestSlant(FrozenDictionary<FontSlant, FrozenDictionary<FontWeight, T>> choices,
         FontSlant slant)
     {
         // https://www.w3.org/TR/css-fonts-3/#font-style-matching
@@ -105,9 +107,7 @@ public abstract class FontFamily
         throw new InvalidOperationException($"Not font slant found for font {Name}");
     }
 
-    private FontWeight ClosestWeight(
-        FrozenDictionary<FontWeight, ResPath[]> choices,
-        FontWeight weight)
+    private FontWeight ClosestWeight(FrozenDictionary<FontWeight, T> choices, FontWeight weight)
     {
         // https://www.w3.org/TR/css-fonts-4/#font-style-matching
         if (choices.ContainsKey(weight))
@@ -144,16 +144,19 @@ public abstract class FontFamily
     }
 }
 
-public sealed class FontFamilyBundled : FontFamily
+public sealed class FontFamilyBundled : FontFamily<ResPath[]>
 {
     private BundledFontFace[] _faces;
     Dictionary<FontOptions, Font> _instanceCache = new();
     private readonly FontFamilyPrototype _prototype;
 
-    public FontFamilyBundled(FontFamilyPrototype prototype)
+    private IResourceCache _resourceCache;
+
+    public FontFamilyBundled(FontFamilyPrototype prototype, IResourceCache cache)
     {
         _prototype = prototype;
         _faces = [.. prototype.Variants];
+        _resourceCache = cache;
 
         throw new NotImplementedException();
     }
@@ -162,15 +165,21 @@ public sealed class FontFamilyBundled : FontFamily
 
     public override Font GetFont(int size, FontOptions options)
     {
-        return new DummyFont();
+        options = ClosestOptions(options);
+        return _resourceCache.GetFont(Options[options.Width][options.Slant][options.Weight], size);
     }
 }
 
-public sealed class FontFamilySystem : FontFamily
+public sealed class FontFamilySystem : FontFamily<ISystemFontFace>
 {
     // var faces = _systemFontManager.SystemFontFaces.GroupBy(s =>
     //             s.GetLocalizedFamilyName(CultureInfo.InvariantCulture));
     private ISystemFontFace[] _fonts;
+
+    public FontFamilySystem(ISystemFontFace[] fonts)
+    {
+        Name = fonts[0];
+    }
 
     public override string Name
     {

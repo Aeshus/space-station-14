@@ -1,5 +1,3 @@
-using Content.Client.Stylesheets;
-using Content.Client.Stylesheets.Fonts;
 using Robust.Client.Graphics;
 using Robust.Shared.Prototypes;
 
@@ -11,8 +9,8 @@ public sealed partial class FontFamilyResolver : IPostInjectInit
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private StylesheetManager _stylesheetManager = default!;
 
-    private Dictionary<IFontFamily, Dictionary<FontOptions, Font>> _families = new();
-    private Dictionary<FontType, IFontFamily> _fontOverrides = new();
+    private Dictionary<FontFamily, Dictionary<FontOptions, Font>> _families = new();
+    private Dictionary<FontType, FontFamily> _fontOverrides = new();
     private Dictionary<FontType, float> _fontScales = new();
 
     private ISawmill _sawmill = default!;
@@ -21,7 +19,8 @@ public sealed partial class FontFamilyResolver : IPostInjectInit
     {
     }
 
-    Font Resolve(ProtoId<FontFamilyPrototype> id,
+    Font Resolve(
+        ProtoId<FontFamilyPrototype> id,
         int size,
         FontWeight weight = FontWeight.Regular,
         FontSlant slant = FontSlant.Normal,
@@ -29,7 +28,10 @@ public sealed partial class FontFamilyResolver : IPostInjectInit
     {
         var proto = _prototypeManager.Index(id);
 
-        IFontFamily family;
+        // The settings thing where it'd have a string override name for the override font family and then a
+        // bool toggle to use it or the bundled/default instead of mixing the two in one field.
+
+        FontFamily family;
         if (_fontOverrides.TryGetValue(proto.FontType, out var @override))
         {
             family = @override;
