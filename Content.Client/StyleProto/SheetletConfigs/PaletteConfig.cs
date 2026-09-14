@@ -1,15 +1,14 @@
 namespace Content.Client.StyleProto.SheetletConfigs;
 
 [SheetletConfig]
-[Virtual]
 public partial class PaletteConfig : SheetletConfig
 {
-    [DataField]
+    [DataField(required: true)]
     public Color Primary { get; set; }
 
-    [DataField]
+    [DataField(required: true)]
     public Color Secondary { get; set; }
 
-    [DataField]
+    [DataField(required: true)]
     public Color Tertiary { get; set; }
 }
