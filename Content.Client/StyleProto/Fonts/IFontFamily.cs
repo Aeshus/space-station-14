@@ -1,4 +1,5 @@
 using Robust.Client.Graphics;
+using Robust.Shared.Serialization.Manager.Definition;
 using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
@@ -9,6 +10,11 @@ namespace Content.Client.StyleProto.Fonts;
 /// </summary>
 public interface IFontFamily
 {
+    /// <summary>
+    /// The font name
+    /// </summary>
+    string Name { get; }
+
     /// <summary>
     /// The font scale that is multiplied against all font sizes used.
     /// </summary>
@@ -31,33 +37,23 @@ public interface IFontFamily
         FontWeight weight = FontWeight.Regular);
 }
 
-public abstract class FontFamily : IFontFamily
-{
-    public abstract float Scale { get; set; }
-
-    public abstract Font GetFont(int size,
-        FontWidth width = FontWidth.Normal,
-        FontSlant slant = FontSlant.Normal,
-        FontWeight weight = FontWeight.Normal);
-
-    protected record struct FontFace
-    {
-        public FontWidth Width;
-        public FontSlant Slant;
-        public FontWeight Weight;
-    }
-}
-
 /// <summary>
 /// A font family that is based on bundled font files distributed in Resources.
 /// </summary>
-public sealed partial class FontFamilyBundled : FontFamily
+[DataDefinition]
+public sealed partial class FontFamilyBundled : IFontFamily
 {
-    /// <inheritdoc/>
-    public override float Scale { get; set; } = 1;
+    [DataField]
+    private FontFace[] Faces { get; set; }
+
+    [DataField]
+    public string Name { get; private set; }
 
     /// <inheritdoc/>
-    public override Font GetFont(int size,
+    public float Scale { get; set; } = 1;
+
+    /// <inheritdoc/>
+    public Font GetFont(int size,
         FontWidth width = FontWidth.Normal,
         FontSlant slant = FontSlant.Normal,
         FontWeight weight = FontWeight.Normal)
@@ -66,16 +62,34 @@ public sealed partial class FontFamilyBundled : FontFamily
     }
 }
 
+[DataDefinition]
+public sealed partial class FontFace
+{
+    [DataField]
+    public FontWidth Width { get; set; } = FontWidth.Normal;
+
+    [DataField(required: true)]
+    public FontSlant Slant { get; set; } = FontSlant.Normal;
+
+    [DataField(required: true)]
+    public FontWeight Weight { get; set; } = FontWeight.Regular;
+
+    [DataField(required: true)]
+    public ResPath Path { get; set; }
+}
+
 /// <summary>
 /// A font family that is built on font faces provided by the operating system.
 /// </summary>
-public sealed partial class FontFamilySystem : FontFamily
+public sealed partial class FontFamilySystem : IFontFamily
 {
     private readonly IFontFamily _fallback;
     private readonly ISystemFontFace[] _faces;
 
+    public string Name => _faces[0].FamilyName;
+
     /// <inheritdoc/>
-    public override float Scale { get; set; } = 1;
+    public float Scale { get; set; } = 1;
 
     /// <summary>
     /// Creates a FontFamilySystem font with a fallback font.
@@ -98,8 +112,13 @@ public sealed partial class FontFamilySystem : FontFamily
         _fallback.Scale = 1;
     }
 
+    private Font Closest(FontWidth width, FontSlant slant, FontWeight weight)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <inheritdoc/>
-    public override Font GetFont(int size,
+    public Font GetFont(int size,
         FontWidth width = FontWidth.Normal,
         FontSlant slant = FontSlant.Normal,
         FontWeight weight = FontWeight.Normal)
@@ -109,3 +128,21 @@ public sealed partial class FontFamilySystem : FontFamily
         return new StackedFont(_faces[0].Load(0), _fallback.GetFont(scale));
     }
 }
+
+
+/*
+
+- type: Stylesheet
+  name: test
+  configs:
+    - type: FontConfig
+      primary:
+        name: "Noto Sans"
+        faces:
+        - width: 5
+          slant: italic
+          weight: 500
+          path: "/Resources/Textures/Interface/Fonts/asdf.ttf"
+        - weight: 800
+          path: "/Resources/Textures/Interface/Fonts/qwerty.ttf"
+ */
