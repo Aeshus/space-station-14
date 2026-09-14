@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 
 namespace Content.Client.StyleProto;
@@ -6,6 +7,7 @@ namespace Content.Client.StyleProto;
 /// A sheetlet that generates specific style rules after being provided the appropriate sheetlet configs.
 /// </summary>
 /// <seealso cref="SheetletConfig"/>
+[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 public interface ISheetlet
 {
     /// <summary>
