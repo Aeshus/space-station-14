@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Content.Client.StyleProto.Fonts;
 
 namespace Content.Client.StyleProto.SheetletConfigs;
@@ -5,15 +6,39 @@ namespace Content.Client.StyleProto.SheetletConfigs;
 [SheetletConfig]
 public sealed partial class FontConfig : SheetletConfig
 {
-    [DataField(required: true)]
-    public IFontFamily Base { get; private set; }
+    [DataField("base", required: true)]
+    private FontFamilyBundled _base = default!;
 
-    [DataField(required: true)]
-    public IFontFamily Monospace { get; private set; }
+    public IFontFamily Base
+    {
+        get => field ?? _base;
+        set;
+    }
 
-    [DataField(required: true)]
-    public IFontFamily Display { get; private set; }
+    [DataField("monospace", required: true)]
+    private FontFamilyBundled _monospace = default!;
 
-    [DataField(required: true)]
-    public IFontFamily Decorative { get; private set; }
+    public IFontFamily Monospace
+    {
+        get => field ?? _monospace;
+        set;
+    }
+
+    [DataField("display", required: true)]
+    private FontFamilyBundled _display = default!;
+
+    public IFontFamily Display
+    {
+        get => field ?? _display;
+        set;
+    }
+
+    [DataField("decorative", required: true)]
+    private FontFamilyBundled _decorative = default!;
+
+    public IFontFamily Decorative
+    {
+        get => field ?? _decorative;
+        set;
+    }
 }
