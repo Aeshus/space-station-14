@@ -1,22 +1,19 @@
-using Content.Client.Stylesheets.Fonts;
+using Content.Client.StyleProto.Fonts;
 
 namespace Content.Client.StyleProto.SheetletConfigs;
 
 [SheetletConfig]
 public sealed partial class FontConfig : SheetletConfig
 {
-    [DataField]
-    public List<(string?, int)> CommonFontSizes { get; set; }
+    [DataField(required: true)]
+    public IFontFamily Base { get; private set; }
 
-    [DataField]
-    public FontFamilyStack BaseFont { get; set; }
+    [DataField(required: true)]
+    public IFontFamily Monospace { get; private set; }
 
-    [DataField]
-    public FontFamilyStack MonoFont { get; set; }
+    [DataField(required: true)]
+    public IFontFamily Display { get; private set; }
 
-    [DataField]
-    public FontFamilyStack DisplayFont { get; set; }
-
-    [DataField]
-    public FontFamilyStack DecorativeFont { get; set; }
+    [DataField(required: true)]
+    public IFontFamily Decorative { get; private set; }
 }
