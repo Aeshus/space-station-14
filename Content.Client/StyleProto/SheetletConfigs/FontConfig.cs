@@ -1,7 +1,14 @@
-using System.Diagnostics.CodeAnalysis;
 using Content.Client.StyleProto.Fonts;
 
 namespace Content.Client.StyleProto.SheetletConfigs;
+
+// Why?
+//
+// Essentially, there's no way to serialize interfaces to my understanding, due to its ambitious nature.
+//
+// The problem is that here, we only actually want to (de)serialize between a singular subtype of the interface,
+// FontFamilyBundled, and we don't want to (de)serialize from a FontFamilySystem as that's brittle.
+// Thus, we can do this hack (which is "kinda" seen in ConstructionGraphNode) so that we can write it in YAML.
 
 [SheetletConfig]
 public sealed partial class FontConfig : SheetletConfig
