@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Robust.Client.Graphics;
 using Robust.Shared.Serialization.Manager.Definition;
 using Robust.Shared.Utility;
@@ -43,11 +44,12 @@ public interface IFontFamily
 [DataDefinition]
 public sealed partial class FontFamilyBundled : IFontFamily
 {
-    [DataField]
-    private FontFace[] Faces { get; set; }
+    [DataField(required: true)]
+    private FontFace[] Faces { get; set; } = [];
 
-    [DataField]
-    public string Name { get; private set; }
+    /// <inheritdoc/>
+    [DataField(required: true)]
+    public string Name { get; private set; } = string.Empty;
 
     /// <inheritdoc/>
     public float Scale { get; set; } = 1;
@@ -86,7 +88,8 @@ public sealed partial class FontFamilySystem : IFontFamily
     private readonly IFontFamily _fallback;
     private readonly ISystemFontFace[] _faces;
 
-    public string Name => _faces[0].FamilyName;
+    /// <inheritdoc/>
+    public string Name { get; }
 
     /// <inheritdoc/>
     public float Scale { get; set; } = 1;
@@ -103,6 +106,8 @@ public sealed partial class FontFamilySystem : IFontFamily
     {
         _fallback = fallback;
         _faces = faces;
+
+        Name = _faces[0].FamilyName;
 
         // This makes it safe for an ordering s.t. the font scale is mutated _before_ the font is overridden with
         // its system variant.
