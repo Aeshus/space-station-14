@@ -1,4 +1,6 @@
+using Content.Client.Resources;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
@@ -42,6 +44,11 @@ public interface IFontFamily
 [DataDefinition]
 public sealed partial class FontFamilyBundled : IFontFamily
 {
+    [Dependency] private IResourceCache _resCache = default!;
+
+    private Dictionary<(FontWidth, FontSlant, FontWeight), ResPath> _faceCache = new();
+    private Dictionary<(ResPath, int), Font> _fontCache = new();
+
     [DataField(required: true)]
     private FontFace[] Faces { get; set; } = [];
 
@@ -57,6 +64,25 @@ public sealed partial class FontFamilyBundled : IFontFamily
         FontWidth width = FontWidth.Normal,
         FontSlant slant = FontSlant.Normal,
         FontWeight weight = FontWeight.Normal)
+    {
+        size = (int)(Scale * size);
+
+        if (!_faceCache.TryGetValue((width, slant, weight), out var path))
+        {
+            path = GetClosest(width, slant, weight).Path;
+            _faceCache.Add((width, slant, weight), path);
+        }
+
+        if (!_fontCache.TryGetValue((path, size), out var font))
+        {
+            font = _resCache.GetFont(path, size);
+            _fontCache.Add((path, size), font);
+        }
+
+        return font;
+    }
+
+    private FontFace GetClosest(FontWidth width, FontSlant slant, FontWeight weight)
     {
         throw new NotImplementedException();
     }
@@ -102,6 +128,9 @@ public sealed partial class FontFamilySystem : IFontFamily
     private readonly IFontFamily _fallback;
     private readonly ISystemFontFace[] _faces;
 
+    private Dictionary<(FontWidth, FontSlant, FontWeight), ISystemFontFace> _faceCache = new();
+    private Dictionary<(ISystemFontFace, int), Font> _fontCache = new();
+
     /// <inheritdoc/>
     public string Name { get; }
 
@@ -131,20 +160,32 @@ public sealed partial class FontFamilySystem : IFontFamily
         _fallback.Scale = 1;
     }
 
-    private Font Closest(FontWidth width, FontSlant slant, FontWeight weight)
-    {
-        throw new NotImplementedException();
-    }
-
     /// <inheritdoc/>
     public Font GetFont(int size,
         FontWidth width = FontWidth.Normal,
         FontSlant slant = FontSlant.Normal,
         FontWeight weight = FontWeight.Normal)
     {
-        var scale = (int)(Scale * size);
+        size = (int)(Scale * size);
 
-        return new StackedFont(_faces[0].Load(0), _fallback.GetFont(scale));
+        if (!_faceCache.TryGetValue((width, slant, weight), out var face))
+        {
+            face = GetClosest(width, slant, weight);
+            _faceCache.Add((width, slant, weight), face);
+        }
+
+        if (!_fontCache.TryGetValue((face, size), out var font))
+        {
+            font = new StackedFont(face.Load(size), _fallback.GetFont(size));
+            _fontCache.Add((face, size), font);
+        }
+
+        return font;
+    }
+
+    private ISystemFontFace GetClosest(FontWidth width, FontSlant slant, FontWeight weight)
+    {
+        throw new NotImplementedException();
     }
 }
 
