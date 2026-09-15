@@ -64,18 +64,34 @@ public sealed partial class FontFamilyBundled : IFontFamily
     }
 }
 
+/// <summary>
+/// A font face with its associated metadata.
+/// </summary>
+/// <seealso cref="ISystemFontFace"/>
 [DataDefinition]
 public sealed partial class FontFace
 {
+    /// <summary>
+    /// The font face's width.
+    /// </summary>
     [DataField]
     public FontWidth Width { get; set; } = FontWidth.Normal;
 
+    /// <summary>
+    /// The font face's slant.
+    /// </summary>
     [DataField(required: true)]
     public FontSlant Slant { get; set; } = FontSlant.Normal;
 
+    /// <summary>
+    /// The font face's weight.
+    /// </summary>
     [DataField(required: true)]
     public FontWeight Weight { get; set; } = FontWeight.Regular;
 
+    /// <summary>
+    /// The font face's path.
+    /// </summary>
     [DataField(required: true)]
     public ResPath Path { get; set; }
 }
