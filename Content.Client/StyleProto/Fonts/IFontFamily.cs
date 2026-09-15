@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using Robust.Client.Graphics;
-using Robust.Shared.Serialization.Manager.Definition;
 using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto.Fonts;
