@@ -1,4 +1,5 @@
 using Content.Client.StyleProto;
+using Content.Client.StyleProto.Serializers;
 using Robust.Shared.Serialization.Manager.Attributes;
 
 namespace Content.IntegrationTests.Tests.Stylesheets;
