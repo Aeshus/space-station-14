@@ -49,6 +49,12 @@ public sealed partial class FontFamilyBundled : IFontFamily
     private Dictionary<(FontWidth, FontSlant, FontWeight), ResPath> _faceCache = new();
     private Dictionary<(ResPath, int), Font> _fontCache = new();
 
+    /// <summary>
+    /// Constructor for serializer.
+    /// </summary>
+    /// <remarks>This is private s.t. users cannot incorrectly create an invalid FontFamilyBundled.</remarks>
+    private FontFamilyBundled() { }
+
     [DataField(required: true)]
     private FontFace[] Faces { get; set; } = [];
 
