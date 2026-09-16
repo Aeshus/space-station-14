@@ -7,7 +7,7 @@ using Robust.Shared.Serialization.Markdown.Validation;
 using Robust.Shared.Serialization.Markdown.Value;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.StyleProto.Serializers;
 
 /// <summary>
 /// Serializes and deserializes Sheetlet Config Registries.
