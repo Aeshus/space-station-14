@@ -16,7 +16,7 @@ namespace Content.Client.StyleProto.Serializers;
 /// It mostly just 1) ensures there's no duplicates, and 2) handle inheritance.
 /// </remarks>
 [TypeSerializer]
-public sealed class ISheetletListSerializer : BaseTypeSerializer, ITypeSerializer<List<ISheetlet>, SequenceDataNode>,
+public sealed class ISheetletListSerializer : BaseTypeSerializer, ITypeValidator<List<ISheetlet>, SequenceDataNode>,
     ITypeInheritanceHandler<List<ISheetlet>, SequenceDataNode>
 {
     /// <inheritdoc/>
@@ -65,43 +65,5 @@ public sealed class ISheetletListSerializer : BaseTypeSerializer, ITypeSerialize
         }
 
         return new ValidatedSequenceNode(lst);
-    }
-
-    /// <inheritdoc/>
-    public List<ISheetlet> Read(ISerializationManager serializationManager,
-        SequenceDataNode node,
-        IDependencyCollection dependencies,
-        SerializationHookContext hookCtx,
-        ISerializationContext? context = null,
-        ISerializationManager.InstantiationDelegate<List<ISheetlet>>? instanceProvider = null)
-    {
-        var lst = new List<ISheetlet>();
-
-        foreach (var entry in node)
-        {
-            if (entry is not ValueDataNode)
-                throw new InvalidOperationException($"{entry} is not a ValueDataNode");
-
-            lst.Add(serializationManager.Read<ISheetlet>(entry, context, notNullableOverride: true));
-        }
-
-        return lst;
-    }
-
-    /// <inheritdoc/>
-    public DataNode Write(ISerializationManager serializationManager,
-        List<ISheetlet> value,
-        IDependencyCollection dependencies,
-        bool alwaysWrite = false,
-        ISerializationContext? context = null)
-    {
-        var lst = new List<DataNode>();
-
-        foreach (var sheetlet in value)
-        {
-            serializationManager.WriteValue(sheetlet, alwaysWrite, context, true);
-        }
-
-        return new SequenceDataNode(lst);
     }
 }

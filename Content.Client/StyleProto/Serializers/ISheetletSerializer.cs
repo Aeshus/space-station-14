@@ -8,7 +8,7 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 namespace Content.Client.StyleProto.Serializers;
 
 /// <summary>
-/// (De)Serializes ISheetlets.
+/// (De)Serializes ISheetlets interfaces into instances of their actual types.
 /// </summary>
 [TypeSerializer]
 public sealed class ISheetletSerializer : BaseTypeSerializer, ITypeSerializer<ISheetlet, ValueDataNode>
@@ -21,7 +21,7 @@ public sealed class ISheetletSerializer : BaseTypeSerializer, ITypeSerializer<IS
     {
         var factory = dependencies.Resolve<ISheetletFactory>();
 
-        return !factory.TryGetSheetletType(node.Value, out var type)
+        return !factory.TryGetSheetletType(node.Value, out _)
             ? throw new InvalidOperationException($"{node.Value} is not a registered sheetlet")
             : new ValidatedValueNode(node);
     }
