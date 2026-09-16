@@ -5,7 +5,7 @@ using Robust.Shared.Serialization.Markdown.Mapping;
 using Robust.Shared.Serialization.Markdown.Validation;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.StyleProto.Serializers;
 
 /// <summary>
 /// (de)Serializes IFontFamily by pretending it's only ever FontFamilyBundled.
