@@ -25,20 +25,9 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     {
         var list = new List<ValidationNode>();
 
-        try
+        foreach (var entry in node)
         {
-            var factory = dependencies.Resolve<ISheetletFactory>();
-            var dict = TypeToIndexDict(node, factory);
-            foreach (var (type, index) in dict)
-            {
-                var copy = (MappingDataNode)node[index].Copy();
-                copy.Remove("type");
-                list.Add(serializationManager.ValidateNode(type, copy, context));
-            }
-        }
-        catch (Exception e)
-        {
-            list.Add(new ErrorNode(node, e.Message));
+            list.Add(serializationManager.ValidateNode<SheetletConfig>(entry, context));
         }
 
         return new ValidatedSequenceNode(list);
@@ -54,22 +43,10 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     {
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
 
-        var factory = dependencies.Resolve<ISheetletFactory>();
-        var dict = TypeToIndexDict(node, factory);
-
-        foreach (var (type, index) in dict)
+        foreach (var entry in node)
         {
-            var copy = (MappingDataNode)node[index].Copy();
-
-            copy.Remove("type");
-            var conf = serializationManager.Read(
-                type,
-                copy,
-                hookCtx,
-                context,
-                notNullableOverride: true);
-
-            configs[type] = (SheetletConfig)conf!;
+            var data = serializationManager.Read<SheetletConfig>(entry, context, notNullableOverride: true);
+            configs.Add(data.GetType(), data);
         }
 
         return configs;
@@ -83,25 +60,10 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         ISerializationContext? context = null)
     {
         var sequence = new SequenceDataNode();
-        var factory = dependencies.Resolve<ISheetletFactory>();
 
-        foreach (var (type, config) in value)
+        foreach (var config in value.Values)
         {
-            if (!factory.TryGetConfigName(type, out var name))
-                throw new InvalidOperationException($"{type} is not a registered sheetlet config");
-
-            var node = serializationManager.WriteValue(
-                type,
-                config,
-                alwaysWrite,
-                context,
-                true);
-
-            if (node is not MappingDataNode mapping)
-                throw new InvalidNodeTypeException($"{node} is not a mapping data node");
-
-            mapping.Add("type", new ValueDataNode(name));
-            sequence.Add(mapping);
+            sequence.Add(serializationManager.WriteValue(config, notNullableOverride: true));
         }
 
         return sequence;
