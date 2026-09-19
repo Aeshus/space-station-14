@@ -19,11 +19,26 @@ public sealed partial class FontFamilyBundled : IFontFamily
     private Dictionary<(ResPath, int), Font> _fontCache = new();
 
     /// <summary>
-    /// Constructor for serializer.
+    /// Creates a FontFamilyBundled and injects its dependencies.
     /// </summary>
-    /// <remarks>This is private s.t. users cannot incorrectly create an invalid FontFamilyBundled.</remarks>
+    /// <param name="dependencies">Dependency collection</param>
+    /// <param name="name">Name of the font family</param>
+    /// <param name="faces">The faces to use</param>
+    public FontFamilyBundled(IDependencyCollection dependencies, string name, FontFace[] faces)
+    {
+        dependencies.InjectDependencies(this);
+        Name = name;
+        Faces = faces;
+    }
+
+    /// <remarks>
+    /// Hidden so that the resource cache is always initialized properly.
+    /// </remarks>
     private FontFamilyBundled() { }
 
+    /// <summary>
+    /// The font faces.
+    /// </summary>
     [DataField(required: true)]
     private FontFace[] Faces { get; set; } = [];
 
@@ -57,6 +72,13 @@ public sealed partial class FontFamilyBundled : IFontFamily
         return font;
     }
 
+    /// <summary>
+    /// Gets the closest matching FontFace to the provided parameters.
+    /// </summary>
+    /// <param name="width">Desired width</param>
+    /// <param name="slant">Desired slant</param>
+    /// <param name="weight">Desired weight</param>
+    /// <returns>Closest FontFace</returns>
     private FontFace GetClosest(FontWidth width, FontSlant slant, FontWeight weight)
     {
         return Faces.OrderBy(f => ClosestWidth(f.Width, width))
