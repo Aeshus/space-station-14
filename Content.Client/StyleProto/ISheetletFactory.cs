@@ -5,6 +5,7 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// Factory that manages the resolution and creation of sheetlets and sheetlet configs.
 /// </summary>
+/// <seealso cref="SheetletFactory"/>
 /// <seealso cref="ISheetlet"/>
 /// <seealso cref="SheetletConfig"/>
 public interface ISheetletFactory
