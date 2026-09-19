@@ -73,7 +73,7 @@ public sealed class FontFamilySystem : IFontFamily
     /// <param name="width">Desired width</param>
     /// <param name="slant">Desired slant</param>
     /// <param name="weight">Desired weight</param>
-    /// <returns>Closest ISystemFontFace to</returns>
+    /// <returns>Closest ISystemFontFace</returns>
     private ISystemFontFace GetClosest(FontWidth width, FontSlant slant, FontWeight weight)
     {
         return _faces.OrderBy(f => ClosestWidth(f.Width, width))
