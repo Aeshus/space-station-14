@@ -39,6 +39,14 @@ public sealed partial class SheetletFactory : ISheetletFactory
         return _configTypes.TryGetValue(type, out name);
     }
 
+    public ISheetlet GetSheetlet(Type type)
+    {
+        if (!_sheetletTypes.ContainsKey(type))
+            throw new ArgumentException($"Sheetlet type is not registered: {type}");
+
+        return _sheetletInstances[type];
+    }
+
     public bool TryGetConfigType(string name, [NotNullWhen(true)] out Type? type)
     {
         return _configNames.TryGetValue(name, out type);
@@ -60,14 +68,6 @@ public sealed partial class SheetletFactory : ISheetletFactory
             throw new ArgumentException($"Sheetlet type is not registered: {nameof(T)}");
 
         return (T)_sheetletInstances[typeof(T)];
-    }
-
-    public ISheetlet GetSheetlet(string name)
-    {
-        if (!TryGetSheetletType(name, out var type))
-            throw new ArgumentException($"Sheetlet name is not registered: {name}");
-
-        return _sheetletInstances[type];
     }
 
     private void RegisterSheetlet()
@@ -103,7 +103,6 @@ public sealed partial class SheetletFactory : ISheetletFactory
 
             if (!instances.TryAdd(sheetlet, instance))
                 throw new InvalidOperationException($"Sheetlet instance is already registered: {name}");
-
         }
 
         _sheetletNames = names.ToFrozenDictionary();
