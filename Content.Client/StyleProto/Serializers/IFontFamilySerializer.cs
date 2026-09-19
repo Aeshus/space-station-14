@@ -8,8 +8,11 @@ using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 namespace Content.Client.StyleProto.Serializers;
 
 /// <summary>
-/// (de)Serializes IFontFamily by pretending it's only ever FontFamilyBundled.
+/// (de)Serializes IFontFamily.
 /// </summary>
+/// <remarks>
+/// It acts like it's always reading a FontFamilyBundled, as it wouldn't make sense otherwise.
+/// </remarks>
 [TypeSerializer]
 public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFontFamily, MappingDataNode>
 {
