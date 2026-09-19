@@ -5,6 +5,11 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
+/// <summary>
+/// An implementation of the sheetlet factory, which handles registration and creation of <see cref="ISheetlet"/> and
+/// <see cref="SheetletConfig"/>.
+/// </summary>
+/// <seealso cref="ISheetletFactory"/>
 public sealed partial class SheetletFactory : ISheetletFactory
 {
     [Dependency] private IReflectionManager _reflectionManager = default!;
@@ -28,17 +33,20 @@ public sealed partial class SheetletFactory : ISheetletFactory
     private const string SheetletSuffix = "Sheetlet";
     private const string ConfigSuffix = "Config";
 
+    /// <inheritdoc/>
     public void Initialize()
     {
         RegisterSheetlet();
         RegisterConfigs();
     }
 
+    /// <inheritdoc/>
     public bool TryGetConfigName(Type type, [NotNullWhen(true)] out string? name)
     {
         return _configTypes.TryGetValue(type, out name);
     }
 
+    /// <inheritdoc/>
     public ISheetlet GetSheetlet(Type type)
     {
         if (!_sheetletTypes.ContainsKey(type))
@@ -47,21 +55,25 @@ public sealed partial class SheetletFactory : ISheetletFactory
         return _sheetletInstances[type];
     }
 
+    /// <inheritdoc/>
     public bool TryGetConfigType(string name, [NotNullWhen(true)] out Type? type)
     {
         return _configNames.TryGetValue(name, out type);
     }
 
+    /// <inheritdoc/>
     public bool TryGetSheetletName(Type type, [NotNullWhen(true)] out string? name)
     {
         return _sheetletTypes.TryGetValue(type, out name);
     }
 
+    /// <inheritdoc/>
     public bool TryGetSheetletType(string name, [NotNullWhen(true)] out Type? type)
     {
         return _sheetletNames.TryGetValue(name, out type);
     }
 
+    /// <inheritdoc/>
     public T GetSheetlet<T>() where T : ISheetlet
     {
         if (!_sheetletTypes.ContainsKey(typeof(T)))
@@ -70,6 +82,10 @@ public sealed partial class SheetletFactory : ISheetletFactory
         return (T)_sheetletInstances[typeof(T)];
     }
 
+    /// <summary>
+    /// Registers all the sheetlet types via reflection.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">If a sheetlet can't be registered</exception>
     private void RegisterSheetlet()
     {
         var sheetlets = _reflectionManager.FindTypesWithAttribute<SheetletAttribute>();
@@ -88,12 +104,10 @@ public sealed partial class SheetletFactory : ISheetletFactory
                     $"Type {sheetlet} has {nameof(ISheetlet)}'s Attribute but does not implement {nameof(ISheetlet)}.");
             }
 
-            // TODO: add more checking
+            var name = CalculateName(sheetlet, SheetletSuffix, attribute.Name);
 
             // Sheetlets are stateless, so we can share one instance across all users.
             var instance = _typeFactory.CreateInstance<ISheetlet>(sheetlet);
-
-            var name = CalculateName(sheetlet, SheetletSuffix, attribute.Name);
 
             if (!types.TryAdd(sheetlet, name))
                 throw new InvalidOperationException($"Sheetlet type is already registered: {sheetlet}");
@@ -110,6 +124,10 @@ public sealed partial class SheetletFactory : ISheetletFactory
         _sheetletInstances = instances.ToFrozenDictionary();
     }
 
+    /// <summary>
+    /// Registers all the sheetlet config types via reflection.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">If a sheetlet config can't be registered</exception>
     private void RegisterConfigs()
     {
         var configs = _reflectionManager.FindTypesWithAttribute<SheetletConfigAttribute>();
@@ -128,7 +146,6 @@ public sealed partial class SheetletFactory : ISheetletFactory
                     $"Type {config} has {nameof(SheetletConfig)}'s Attribute but does not extend {nameof(SheetletConfig)}.");
             }
 
-            // TODO: add more checking
             var name = CalculateName(config, ConfigSuffix, attribute.Name);
 
             if (!types.TryAdd(config, name))
@@ -142,13 +159,21 @@ public sealed partial class SheetletFactory : ISheetletFactory
         _configTypes = types.ToFrozenDictionary();
     }
 
+    /// <summary>
+    /// Calculates the name of the type (used in serialization) from the type name.
+    /// </summary>
+    /// <param name="type">The type</param>
+    /// <param name="suffix">The suffix for the type (e.g. "Config")</param>
+    /// <param name="nameOverride">An overriding name</param>
+    /// <returns>The name for this type</returns>
+    /// <exception cref="InvalidOperationException">If the type doesn't end with the suffix</exception>
     private static string CalculateName(
         Type type,
         string suffix,
         string? nameOverride)
     {
         if (!type.Name.EndsWith(suffix))
-            throw new InvalidComponentNameException($"{type} must end with the word {suffix}");
+            throw new InvalidOperationException($"{type} must end with the word {suffix}");
 
         var typeName = type.Name[..^suffix.Length];
         DebugTools.Assert(typeName != string.Empty, $"{type} has invalid name {type.Name}");
