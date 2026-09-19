@@ -1,7 +1,7 @@
 namespace Content.Client.StyleProto.SheetletConfigs;
 
 [SheetletConfig]
-public partial class PaletteConfig : SheetletConfig
+public sealed partial class PaletteConfig : SheetletConfig
 {
     [DataField(required: true)]
     public Color Primary { get; set; }
