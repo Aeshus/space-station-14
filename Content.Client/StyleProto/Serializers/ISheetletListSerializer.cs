@@ -12,9 +12,6 @@ namespace Content.Client.StyleProto.Serializers;
 /// <summary>
 /// (De)serializes sheetlet lists.
 /// </summary>
-/// <remarks>
-/// It mostly just 1) ensures there's no duplicates, and 2) handle inheritance.
-/// </remarks>
 [TypeSerializer]
 public sealed class ISheetletListSerializer : BaseTypeSerializer, ITypeValidator<List<ISheetlet>, SequenceDataNode>,
     ITypeInheritanceHandler<List<ISheetlet>, SequenceDataNode>

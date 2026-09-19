@@ -24,6 +24,7 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         ISerializationContext? context = null)
     {
         var list = new List<ValidationNode>();
+        list.EnsureCapacity(node.Count);
 
         foreach (var entry in node)
         {
@@ -42,6 +43,7 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         ISerializationManager.InstantiationDelegate<SheetletConfigRegistry>? instanceProvider = null)
     {
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
+        configs.EnsureCapacity(node.Count);
 
         foreach (var entry in node)
         {

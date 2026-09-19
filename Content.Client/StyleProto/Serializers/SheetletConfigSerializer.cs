@@ -29,7 +29,6 @@ public sealed class SheetletConfigSerializer : BaseTypeSerializer, ITypeSerializ
         if (!factory.TryGetConfigType(typeNode.Value, out var type))
             return new ErrorNode(typeNode, $"Unknown sheetlet config '{typeNode.Value}'");
 
-        // We could also make a private field on the prototype that resolves to type, but that'd waste memory.
         var copy = node.Copy();
         copy.Remove("type");
 
