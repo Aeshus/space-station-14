@@ -172,13 +172,15 @@ public sealed partial class SheetletFactory : ISheetletFactory
         string suffix,
         string? nameOverride)
     {
+        if (nameOverride != null)
+            return nameOverride;
+
         if (!type.Name.EndsWith(suffix))
             throw new InvalidOperationException($"{type} must end with the word {suffix}");
 
         var typeName = type.Name[..^suffix.Length];
         DebugTools.Assert(typeName != string.Empty, $"{type} has invalid name {type.Name}");
-        var name = nameOverride ?? typeName;
 
-        return name;
+        return typeName;
     }
 }
