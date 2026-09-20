@@ -2,16 +2,20 @@ using System.Diagnostics.CodeAnalysis;
 using Robust.Client.UserInterface;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.Manager;
+using Robust.Shared.Utility;
 
 namespace Content.Client.StyleProto;
 
+/// <summary>
+/// Manages stylesheets, creating them from prototypes and allowing code to subscribe to updates.
+/// </summary>
 public sealed partial class StylesheetManager : IPostInjectInit
 {
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private ISerializationManager _serializationManager = default!;
     [Dependency] private ILogManager _logManager = default!;
 
-    private Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
+    private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
     /// <summary>
@@ -52,6 +56,9 @@ public sealed partial class StylesheetManager : IPostInjectInit
     /// <summary>
     /// Dirties all the Stylesheets so that they are reloaded/rebuilt.
     /// </summary>
+    /// <remarks>
+    /// Deleted prototypes and failed rebuilds retain their last successfully built stylesheet and subscriptions.
+    /// </remarks>
     public void DirtyAll()
     {
         foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
@@ -63,10 +70,14 @@ public sealed partial class StylesheetManager : IPostInjectInit
     /// <summary>
     /// Dirty a specific Stylesheet so it is reloaded/rebuilt.
     /// </summary>
+    /// <remarks>
+    /// If the prototype no longer exists, its cached stylesheet is left unchanged.
+    /// </remarks>
     /// <param name="proto">The stylesheet prototype</param>
     public void Dirty(ProtoId<StylesheetPrototype> proto)
     {
-        UpdateStylesheet(_prototypeManager.Index(proto));
+        if (_prototypeManager.TryIndex(proto, out var prototype))
+            UpdateStylesheet(prototype);
     }
 
     /// <summary>
@@ -78,35 +89,46 @@ public sealed partial class StylesheetManager : IPostInjectInit
         if (proto.Abstract)
             return;
 
-        // Deep copy the configs (as to not mutate the Prototype's version) and then unordered notify subscribers
-        // to mutate it. (TODO: move to event bus subscriptions for ordering?)
-        var configs = _serializationManager.CreateCopy(
-            proto.Configs,
-            notNullableOverride: true);
-        OnStyleReload?.Invoke(configs);
-
-        var rules = new List<StyleRule>();
-        foreach (var sheetlet in proto.Sheetlets)
+        SheetletConfigRegistry configs;
+        Stylesheet stylesheet;
+        try
         {
-            rules.AddRange(sheetlet.Generate(configs));
+            // Copy before subscribers mutate the configs, then notify them in subscription order.
+            configs = _serializationManager.CreateCopy(
+                proto.Configs,
+                notNullableOverride: true);
+            OnStyleReload?.Invoke(configs);
+
+            var rules = new List<StyleRule>();
+            foreach (var sheetlet in proto.Sheetlets)
+            {
+                rules.AddRange(sheetlet.Generate(configs));
+            }
+
+            stylesheet = new Stylesheet(rules);
+        }
+        catch (Exception e)
+        {
+            _sawmill.Error($"Failed to rebuild stylesheet '{proto.ID}': {e}");
+            return;
         }
 
-        if (!_styleAccessors.ContainsKey(proto))
+        if (!_styleAccessors.TryGetValue(proto, out var accessor))
         {
-            _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), configs));
+            _styleAccessors.Add(proto, new StyleAccessor(_sawmill, stylesheet, configs));
         }
         else
         {
             // Implicitly calls StyleChanged for subscribers
-            _styleAccessors[proto].Update(new Stylesheet(rules), configs);
+            accessor.Update(stylesheet, configs);
         }
     }
 
     /// <summary>
-    /// Tries and get a stylesheet subscription from a prototype.
+    /// Tries to get a stylesheet subscription from a prototype.
     /// </summary>
     /// <param name="proto">Stylesheet prototype</param>
-    /// <param name="accessor">An acessor which contains an event to subscribe to</param>
+    /// <param name="accessor">An accessor which contains an event to subscribe to</param>
     /// <returns>True if the accessor is found, False if null</returns>
     public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
         [NotNullWhen(true)] out IStyleAccessor? accessor)
@@ -145,7 +167,8 @@ public sealed partial class StylesheetManager : IPostInjectInit
     }
 
     /// <inheritdoc/>
-    public sealed class StyleAccessor(Stylesheet stylesheet, SheetletConfigRegistry configs) : IStyleAccessor
+    public sealed class StyleAccessor(ISawmill sawmill, Stylesheet stylesheet, SheetletConfigRegistry configs)
+        : IStyleAccessor
     {
         /// <summary>
         /// The current stylesheet.
@@ -161,27 +184,34 @@ public sealed partial class StylesheetManager : IPostInjectInit
         private SheetletConfigRegistry Configs { get; set; } = configs;
 
         /// <summary>
-        /// The actual internal event that users subscribe to.
+        /// The stylesheet subscriptions for updates.
         /// </summary>
-        private event Action<Stylesheet, SheetletConfigRegistry>? StyleChangedInternal;
+        private readonly List<Action<Stylesheet, SheetletConfigRegistry>> _subscriptions = [];
 
         /// <inheritdoc/>
         public event Action<Stylesheet, SheetletConfigRegistry> StyleChanged
         {
             add
             {
+                DebugTools.Assert(!_subscriptions.Contains(value),
+                    "Attempted to subscribe the same stylesheet twice.");
+                _subscriptions.Add(value);
+
                 try
                 {
                     value(Stylesheet, Configs);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // ignored
+                    sawmill.Error($"Exception caught during style update: {e}");
                 }
-
-                StyleChangedInternal += value;
             }
-            remove => StyleChangedInternal -= value;
+            remove
+            {
+                DebugTools.Assert(_subscriptions.Contains(value),
+                    "Attempted to unsubscribe a stylesheet that was not subscribed to.");
+                _subscriptions.Remove(value);
+            }
         }
 
         /// <summary>
@@ -194,7 +224,17 @@ public sealed partial class StylesheetManager : IPostInjectInit
             Stylesheet = stylesheet;
             Configs = configs;
 
-            StyleChangedInternal?.Invoke(stylesheet, configs);
+            foreach (var subscriber in _subscriptions.ToArray())
+            {
+                try
+                {
+                    subscriber(stylesheet, configs);
+                }
+                catch (Exception e)
+                {
+                    sawmill.Error($"Exception caught during style update: {e}");
+                }
+            }
         }
     }
 }
