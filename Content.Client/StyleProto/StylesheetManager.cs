@@ -9,7 +9,7 @@ namespace Content.Client.StyleProto;
 /// <summary>
 /// Manages stylesheets, creating them from prototypes and allowing code to subscribe to updates.
 /// </summary>
-public sealed partial class StylesheetManager : IPostInjectInit
+public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetManager
 {
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private ISerializationManager _serializationManager = default!;
@@ -18,17 +18,10 @@ public sealed partial class StylesheetManager : IPostInjectInit
     private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
-    /// <summary>
-    /// An event that gets invoked whenever the Stylesheets are reloaded.
-    /// </summary>
-    /// <remarks>
-    /// This is used for mutating Sheetlet Configs. Note, it is in subscription order.
-    /// </remarks>
+    /// <inheritdoc/>
     public event Action<SheetletConfigRegistry>? OnStyleReload;
 
-    /// <summary>
-    /// Initialize the StylesheetManager.
-    /// </summary>
+    /// <inheritdoc/>
     public void Initialize()
     {
         DirtyAll();
@@ -53,12 +46,7 @@ public sealed partial class StylesheetManager : IPostInjectInit
         DirtyAll();
     }
 
-    /// <summary>
-    /// Dirties all the Stylesheets so that they are reloaded/rebuilt.
-    /// </summary>
-    /// <remarks>
-    /// Deleted prototypes and failed rebuilds retain their last successfully built stylesheet and subscriptions.
-    /// </remarks>
+    /// <inheritdoc/>
     public void DirtyAll()
     {
         foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
@@ -67,17 +55,30 @@ public sealed partial class StylesheetManager : IPostInjectInit
         }
     }
 
-    /// <summary>
-    /// Dirty a specific Stylesheet so it is reloaded/rebuilt.
-    /// </summary>
-    /// <remarks>
-    /// If the prototype no longer exists, its cached stylesheet is left unchanged.
-    /// </remarks>
-    /// <param name="proto">The stylesheet prototype</param>
+    /// <inheritdoc/>
     public void Dirty(ProtoId<StylesheetPrototype> proto)
     {
         if (_prototypeManager.TryIndex(proto, out var prototype))
             UpdateStylesheet(prototype);
+    }
+
+    /// <inheritdoc/>
+    public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
+        [NotNullWhen(true)] out IStyleAccessor? accessor)
+    {
+        accessor = null;
+
+        if (!_styleAccessors.TryGetValue(proto, out var acc))
+            return false;
+
+        accessor = acc;
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
+    {
+        return _styleAccessors[proto];
     }
 
     /// <summary>
@@ -122,34 +123,6 @@ public sealed partial class StylesheetManager : IPostInjectInit
             // Implicitly calls StyleChanged for subscribers
             accessor.Update(stylesheet, configs);
         }
-    }
-
-    /// <summary>
-    /// Tries to get a stylesheet subscription from a prototype.
-    /// </summary>
-    /// <param name="proto">Stylesheet prototype</param>
-    /// <param name="accessor">An accessor which contains an event to subscribe to</param>
-    /// <returns>True if the accessor is found, False if null</returns>
-    public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
-        [NotNullWhen(true)] out IStyleAccessor? accessor)
-    {
-        accessor = null;
-
-        if (!_styleAccessors.TryGetValue(proto, out var acc))
-            return false;
-
-        accessor = acc;
-        return true;
-    }
-
-    /// <summary>
-    /// Gets the style subscription with the prototype.
-    /// </summary>
-    /// <param name="proto">Stylesheet prototype</param>
-    /// <returns>The accessor</returns>
-    public IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
-    {
-        return _styleAccessors[proto];
     }
 
     /// <summary>
