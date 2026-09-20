@@ -1,5 +1,5 @@
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Controls;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
@@ -9,13 +9,14 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 namespace Content.Client.Stylesheets.NTSheetlets;
 
 /// Not NTHeading because NanoHeading is the name of the element
-[Sheetlet(typeof(NanotrasenStylesheetDefinition))]
-public sealed class NanoHeadingSheetlet<T> : ISheetlet<T>
-    where T : INanoHeadingConfig
+[CommonSheetlet]
+public sealed class NanoHeadingSheetlet : Sheetlet<NanotrasenStylesheet>
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(NanotrasenStylesheet sheet, object config)
     {
-        var nanoHeadingTex = sheet.GetTexture(config.NanoHeadingPath);
+        INanoHeadingConfig nanoHeadingCfg = sheet;
+
+        var nanoHeadingTex = sheet.GetTexture(nanoHeadingCfg.NanoHeadingPath);
         var nanoHeadingBox = new StyleBoxTexture
         {
             Texture = nanoHeadingTex,

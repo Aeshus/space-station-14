@@ -1,6 +1,4 @@
-﻿using Content.Client.Stylesheets;
-using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -8,21 +6,20 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.FeedbackPopup;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class FeedbackPopupSheetlet<T> : ISheetlet<T>
-    where T : IPaletteConfig
+[CommonSheetlet]
+public sealed class FeedbackPopupSheetlet : Sheetlet<PalettedStylesheet>
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
     {
         var borderTop = new StyleBoxFlat()
         {
-            BorderColor = config.SecondaryPalette.Base,
+            BorderColor = sheet.SecondaryPalette.Base,
             BorderThickness = new Thickness(0, 1, 0, 0),
         };
 
         var borderBottom = new StyleBoxFlat()
         {
-            BorderColor = config.SecondaryPalette.Base,
+            BorderColor = sheet.SecondaryPalette.Base,
             BorderThickness = new Thickness(0, 0, 0, 1),
         };
 

@@ -1,6 +1,6 @@
 using System.Numerics;
+using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
 using Content.Client.UserInterface.Controls;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
@@ -9,16 +9,15 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class MonotoneButtonSheetlet<T> : ISheetlet<T>
-    where T : IButtonConfig
+[CommonSheetlet]
+public sealed class MonotoneButtonSheetlet<T> : Sheetlet<T> where T : IButtonConfig
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(T sheet, object config)
     {
         // Monotone (unfilled)
         var monotoneButton = new StyleBoxTexture
         {
-            Texture = sheet.GetTexture(config.MonotoneBaseButtonPath)
+            Texture = sheet.GetTextureOr(sheet.MonotoneBaseButtonPath, NanotrasenStylesheet.TextureRoot)
         };
         monotoneButton.SetPatchMargin(StyleBox.Margin.All, 11);
         monotoneButton.SetPadding(StyleBox.Margin.All, 1);
@@ -27,21 +26,21 @@ public sealed class MonotoneButtonSheetlet<T> : ISheetlet<T>
 
         var monotoneButtonOpenLeft = new StyleBoxTexture(monotoneButton)
         {
-            Texture = sheet.GetTexture(config.MonotoneOpenLeftButtonPath)
+            Texture = sheet.GetTextureOr(sheet.MonotoneOpenLeftButtonPath, NanotrasenStylesheet.TextureRoot)
         };
 
         var monotoneButtonOpenRight = new StyleBoxTexture(monotoneButton)
         {
-            Texture = sheet.GetTexture(config.MonotoneOpenRightButtonPath)
+            Texture = sheet.GetTextureOr(sheet.MonotoneOpenRightButtonPath, NanotrasenStylesheet.TextureRoot)
         };
 
         var monotoneButtonOpenBoth = new StyleBoxTexture(monotoneButton)
         {
-            Texture = sheet.GetTexture(config.MonotoneOpenBothButtonPath)
+            Texture = sheet.GetTextureOr(sheet.MonotoneOpenBothButtonPath, NanotrasenStylesheet.TextureRoot)
         };
 
         // Monotone (filled)
-        var buttonTex = sheet.GetTexture(config.OpenLeftButtonPath);
+        var buttonTex = sheet.GetTextureOr(sheet.OpenLeftButtonPath, NanotrasenStylesheet.TextureRoot);
         var monotoneFilledButton = new StyleBoxTexture(monotoneButton)
         {
             Texture = buttonTex

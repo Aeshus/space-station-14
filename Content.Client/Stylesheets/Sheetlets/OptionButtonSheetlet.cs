@@ -1,5 +1,5 @@
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets.Stylesheets;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -7,15 +7,15 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class OptionButtonSheetlet<T> : ISheetlet<T>
-    where T : IIconConfig, IPaletteConfig
+[CommonSheetlet]
+public sealed class OptionButtonSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, IIconConfig
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(T sheet, object config)
     {
-        IIconConfig iconCfg = config;
+        IIconConfig iconCfg = sheet;
 
-        var invertedTriangleTex = sheet.GetTexture(iconCfg.InvertedTriangleIconPath);
+        var invertedTriangleTex =
+            sheet.GetTextureOr(iconCfg.InvertedTriangleIconPath, NanotrasenStylesheet.TextureRoot);
 
         return
         [
@@ -25,7 +25,7 @@ public sealed class OptionButtonSheetlet<T> : ISheetlet<T>
             E<Label>().Class(OptionButton.StyleClassOptionButton).AlignMode(Label.AlignMode.Center),
             E<PanelContainer>()
                 .Class(OptionButton.StyleClassOptionsBackground)
-                .Panel(new StyleBoxFlat(config.PrimaryPalette.Background)),
+                .Panel(new StyleBoxFlat(sheet.PrimaryPalette.Background)),
         ];
     }
 }

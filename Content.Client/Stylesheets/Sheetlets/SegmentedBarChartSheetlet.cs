@@ -1,22 +1,21 @@
-using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
-using Content.Client.UserInterface.Controls;
+using Content.Client.Stylesheets;
+using Content.Client.Stylesheets.Colorspace;
+using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
-namespace Content.Client.Stylesheets.Sheetlets;
+namespace Content.Client.UserInterface.Controls;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class SegmentedBarChartSheetlet<T> : ISheetlet<T>
-    where T : IPaletteConfig
+[CommonSheetlet]
+public sealed class SegmentedBarChartSheetlet : Sheetlet<PalettedStylesheet>
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
     {
         return
         [
             E<SegmentedBarChart>()
                 .Prop(SegmentedBarChart.StylePropertyNotchColor, Color.White.WithAlpha(0.25f))
-                .Prop(SegmentedBarChart.StylePropertyBackgroundColor, config.SecondaryPalette.BackgroundDark)
+                .Prop(SegmentedBarChart.StylePropertyBackgroundColor, sheet.SecondaryPalette.BackgroundDark)
                 .Prop(SegmentedBarChart.StylePropertyGap, 0f)
                 .Prop(SegmentedBarChart.StylePropertyMediumNotchInterval, 5)
                 .Prop(SegmentedBarChart.StylePropertyBigNotchInterval, 10)

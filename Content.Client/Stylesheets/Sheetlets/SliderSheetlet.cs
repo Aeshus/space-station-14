@@ -1,5 +1,5 @@
-﻿using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets.SheetletConfigs;
+using Content.Client.Stylesheets.Stylesheets;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -7,35 +7,36 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class SliderSheetlet<T> : ISheetlet<T>
-    where T : ISliderConfig, IPaletteConfig
+[CommonSheetlet]
+public sealed class SliderSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, ISliderConfig
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(T sheet, object config)
     {
-        var sliderFillTex = sheet.GetTexture(config.SliderFillPath);
+        ISliderConfig sliderCfg = sheet;
+
+        var sliderFillTex = sheet.GetTextureOr(sliderCfg.SliderFillPath, NanotrasenStylesheet.TextureRoot);
 
         var sliderFillBox = new StyleBoxTexture
         {
             Texture = sliderFillTex,
-            Modulate = config.PositivePalette.TextDark,
+            Modulate = sheet.PositivePalette.TextDark,
         };
 
         var sliderBackBox = new StyleBoxTexture
         {
             Texture = sliderFillTex,
-            Modulate = config.SecondaryPalette.BackgroundDark,
+            Modulate = sheet.SecondaryPalette.BackgroundDark,
         };
 
         var sliderForeBox = new StyleBoxTexture
         {
-            Texture = sheet.GetTexture(config.SliderOutlinePath),
+            Texture = sheet.GetTextureOr(sliderCfg.SliderOutlinePath, NanotrasenStylesheet.TextureRoot),
             Modulate = Color.FromHex("#494949") // TODO: Unhardcode.
         };
 
         var sliderGrabBox = new StyleBoxTexture
         {
-            Texture = sheet.GetTexture(config.SliderGrabber),
+            Texture = sheet.GetTextureOr(sliderCfg.SliderGrabber, NanotrasenStylesheet.TextureRoot),
         };
 
         sliderFillBox.SetPatchMargin(StyleBox.Margin.All, 12);
@@ -48,8 +49,8 @@ public sealed class SliderSheetlet<T> : ISheetlet<T>
         // var sliderFillBlue = new StyleBoxTexture(sliderFillBox) { Modulate = Color.Blue };
         // var sliderFillWhite = new StyleBoxTexture(sliderFillBox) { Modulate = Color.White };
 
-        return
-        [
+        return new StyleRule[]
+        {
             E<Slider>()
                 .Prop(Slider.StylePropertyBackground, sliderBackBox)
                 .Prop(Slider.StylePropertyForeground, sliderForeBox)
@@ -68,6 +69,6 @@ public sealed class SliderSheetlet<T> : ISheetlet<T>
             //     .Prop(Slider.StylePropertyFill, sliderFillGreen),
             // E<Slider>().Class(StyleClass.StyleClassSliderWhite)
             //     .Prop(Slider.StylePropertyFill, sliderFillWhite),
-        ];
+        };
     }
 }

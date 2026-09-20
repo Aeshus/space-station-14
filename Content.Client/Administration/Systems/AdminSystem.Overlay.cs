@@ -1,5 +1,4 @@
 using Content.Client.Administration.Managers;
-using Content.Client.Stylesheets;
 using Content.Shared.Roles;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
@@ -11,7 +10,7 @@ namespace Content.Client.Administration.Systems
     public sealed partial class AdminSystem
     {
         [Dependency] private IOverlayManager _overlayManager = default!;
-        [Dependency] private IStylesheetManager _stylesheets = default!;
+        [Dependency] private IResourceCache _resourceCache = default!;
         [Dependency] private IClientAdminManager _adminManager = default!;
         [Dependency] private IEyeManager _eyeManager = default!;
         [Dependency] private EntityLookupSystem _entityLookup = default!;
@@ -30,7 +29,7 @@ namespace Content.Client.Administration.Systems
                 this,
                 EntityManager,
                 _eyeManager,
-                _stylesheets,
+                _resourceCache,
                 _entityLookup,
                 _userInterfaceManager,
                 _configurationManager,

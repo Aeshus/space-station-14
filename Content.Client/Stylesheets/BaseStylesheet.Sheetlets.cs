@@ -2,20 +2,20 @@ using Robust.Client.UserInterface;
 
 namespace Content.Client.Stylesheets;
 
-public abstract partial class StylesheetFactory
+public abstract partial class BaseStylesheet
 {
     public StyleRule[] GetSheetletRules<TSheetTy>(Type sheetletTy, StylesheetManager man)
     {
-        ISheetlet<TSheetTy>? sheetlet = null;
+        Sheetlet<TSheetTy>? sheetlet = null;
         try
         {
             if (sheetletTy.ContainsGenericParameters)
             {
-                if (SandboxHelper.CreateInstance(sheetletTy.MakeGenericType(typeof(TSheetTy))) is ISheetlet<TSheetTy>
+                if (SandboxHelper.CreateInstance(sheetletTy.MakeGenericType(typeof(TSheetTy))) is Sheetlet<TSheetTy>
                     sheetlet1)
                     sheetlet = sheetlet1;
             }
-            else if (SandboxHelper.CreateInstance(sheetletTy) is ISheetlet<TSheetTy> sheetlet2)
+            else if (SandboxHelper.CreateInstance(sheetletTy) is Sheetlet<TSheetTy> sheetlet2)
             {
                 sheetlet = sheetlet2;
             }
@@ -27,7 +27,7 @@ public abstract partial class StylesheetFactory
         if (sheetlet is not null)
         {
             man.UnusedSheetlets.Remove(sheetletTy);
-            return sheetlet.GetRules(TODO, (TSheetTy)(object)this);
+            return sheetlet.GetRules((TSheetTy)(object)this, _config);
         }
         else
             return [];

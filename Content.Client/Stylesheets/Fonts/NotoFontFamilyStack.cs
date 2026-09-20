@@ -13,7 +13,6 @@ namespace Content.Client.Stylesheets.Fonts;
 /// <param name="resCache"></param>
 /// <param name="variant"></param>
 [PublicAPI]
-[Obsolete("Use FontFamilyStack instead")]
 public sealed class NotoFontFamilyStack(IResourceCache resCache, string variant = "")
 {
     /// <summary>

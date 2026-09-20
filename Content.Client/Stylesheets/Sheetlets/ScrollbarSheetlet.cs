@@ -1,4 +1,3 @@
-using Content.Client.Stylesheets.StylesheetDefinitions;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -6,13 +5,12 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class ScrollbarSheetlet<T> : ISheetlet<T>
-    where T : ISheetletConfig
+[CommonSheetlet]
+public sealed class ScrollbarSheetlet : Sheetlet<PalettedStylesheet>
 {
     public const int DefaultGrabberSize = 10;
 
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
     {
         // TODO: hardcoded colors!!!
         var vScrollBarGrabberNormal = new StyleBoxFlat

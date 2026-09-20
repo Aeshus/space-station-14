@@ -108,7 +108,6 @@ namespace Content.Server.Entry
             _factory.GenerateNetIds();
 
             _proto.RegisterIgnore("parallax");
-            _proto.RegisterIgnore("stylesheet");
 
             _loc.Initialize();
 

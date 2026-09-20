@@ -3,20 +3,19 @@ using Content.Client.Resources;
 using Content.Client.Stylesheets.Fonts;
 using Content.Client.Stylesheets.Palette;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.Verbs.UI;
 using Content.Shared.Verbs;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
-using Robust.Shared.Utility;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class ContextMenuSheetlet<T> : ISheetlet<T>
-    where T : IWindowConfig, IButtonConfig, IIconConfig, IFontConfig, IPaletteConfig
+[CommonSheetlet]
+public sealed class ContextMenuSheetlet<T> : Sheetlet<T>
+    where T : PalettedStylesheet, IWindowConfig, IButtonConfig, IIconConfig
 {
     // TODO: make this not hardcoded (I am too scared to change the context menu colors)
     private static readonly ColorPalette ContextButtonPalette = ColorPalette.FromHexBase("#000000") with
@@ -26,18 +25,18 @@ public sealed class ContextMenuSheetlet<T> : ISheetlet<T>
         PressedElement = Color.LightSlateGray,
     };
 
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(T sheet, object config)
     {
+        IWindowConfig windowCfg = sheet;
+
         var borderedWindowBackground = new StyleBoxTexture
         {
-            Texture = sheet.GetTexture(config.WindowBackgroundBorderedPath),
+            Texture = sheet.GetTextureOr(windowCfg.WindowBackgroundBorderedPath, NanotrasenStylesheet.TextureRoot),
         };
         borderedWindowBackground.SetPatchMargin(StyleBox.Margin.All, ContextMenuElement.ElementMargin);
         var buttonContext = new StyleBoxTexture { Texture = Texture.White };
-        var contextMenuExpansionTexture =
-            sheet.GetTexture(new ResPath("VerbIcons/group.svg.192dpi.png"));
-        var verbMenuConfirmationTexture =
-            sheet.GetTexture(new ResPath("VerbIcons/group.svg.192dpi.png"));
+        var contextMenuExpansionTexture = ResCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
+        var verbMenuConfirmationTexture = ResCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
 
         var rules = new List<StyleRule>
         {
@@ -54,16 +53,16 @@ public sealed class ContextMenuSheetlet<T> : ISheetlet<T>
             // Context Menu Labels
             E<RichTextLabel>()
                 .Class(InteractionVerb.DefaultTextStyleClass)
-                .Font(config.BaseFont.GetFont(12, FontKind.BoldItalic)),
+                .Font(sheet.BaseFont.GetFont(12, FontKind.BoldItalic)),
             E<RichTextLabel>()
                 .Class(ActivationVerb.DefaultTextStyleClass)
-                .Font(config.BaseFont.GetFont(12, FontKind.Bold)),
+                .Font(sheet.BaseFont.GetFont(12, FontKind.Bold)),
             E<RichTextLabel>()
                 .Class(AlternativeVerb.DefaultTextStyleClass)
-                .Font(config.BaseFont.GetFont(12, FontKind.Italic)),
+                .Font(sheet.BaseFont.GetFont(12, FontKind.Italic)),
             E<RichTextLabel>()
                 .Class(Verb.DefaultTextStyleClass)
-                .Font(config.BaseFont.GetFont(12)),
+                .Font(sheet.BaseFont.GetFont(12)),
             E<TextureRect>()
                 .Class(ContextMenuElement.StyleClassContextMenuExpansionTexture)
                 .Prop(TextureRect.StylePropertyTexture, contextMenuExpansionTexture),
@@ -81,7 +80,7 @@ public sealed class ContextMenuSheetlet<T> : ISheetlet<T>
             ContextButtonPalette,
             ContextMenuElement.StyleClassContextMenuButton);
         ButtonSheetlet<T>.MakeButtonRules<ContextMenuElement>(rules,
-            config.NegativePalette,
+            sheet.NegativePalette,
             ConfirmationMenuElement.StyleClassConfirmationContextMenuButton);
 
         return rules.ToArray();

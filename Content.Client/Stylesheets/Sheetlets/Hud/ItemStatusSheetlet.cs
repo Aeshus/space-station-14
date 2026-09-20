@@ -1,27 +1,24 @@
-﻿using Content.Client.Stylesheets.Fonts;
-using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.StylesheetDefinitions;
+using Content.Client.Stylesheets.Fonts;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[Sheetlet(typeof(CommonStylesheetDefinition))]
-public sealed class ItemStatusSheetlet<T> : ISheetlet<T>
-    where T : IFontConfig
+[CommonSheetlet]
+public sealed class ItemStatusSheetlet : Sheetlet<PalettedStylesheet>
 {
-    public StyleRule[] GetRules(StylesheetDefinition sheet, T config)
+    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
     {
         return
         [
             E()
                 .Class(StyleClass.ItemStatus)
-                .Prop("font", config.BaseFont.GetFont(10)),
+                .Prop("font", sheet.BaseFont.GetFont(10)),
 
             E()
                 .Class(StyleClass.ItemStatusNotHeld)
-                .Prop("font", config.BaseFont.GetFont(10, FontKind.Italic))
+                .Prop("font", sheet.BaseFont.GetFont(10, FontKind.Italic))
                 .Prop("font-color", Color.Gray),
 
             E<RichTextLabel>()

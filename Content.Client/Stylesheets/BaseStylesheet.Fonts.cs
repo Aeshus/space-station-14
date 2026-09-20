@@ -8,7 +8,7 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets;
 
-public abstract partial class StylesheetFactory
+public abstract partial class BaseStylesheet : IStyleResources
 {
     [Dependency] protected ISandboxHelper SandboxHelper = default!;
     [Dependency] protected IReflectionManager ReflectionManager = default!;
@@ -30,10 +30,7 @@ public abstract partial class StylesheetFactory
     /// <remarks>Use <see cref="M:Content.Client.Stylesheets.BaseStylesheet.GetFontClass(Content.Client.Stylesheets.Redux.Fonts.FontStack.FontKind,System.String)"/> to get the appropriate styleclass for a font choice.</remarks>
     // god xmldoc refs are long ^^^
     // lmao
-    protected StyleRule[]
-        GetRulesForFont(string? prefix,
-            NotoFontFamilyStack stack,
-            List<(string?, int)> sizes) // TODO: NotoFontFamilyStack is temporary
+    protected StyleRule[] GetRulesForFont(string? prefix, NotoFontFamilyStack stack, List<(string?, int)> sizes) // TODO: NotoFontFamilyStack is temporary
     {
         var rules = new List<StyleRule>();
 
