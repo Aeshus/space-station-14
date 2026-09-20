@@ -14,7 +14,8 @@ namespace Content.Client.StyleProto.Serializers;
 /// It acts like it's always reading a FontFamilyBundled, as it wouldn't make sense otherwise.
 /// </remarks>
 [TypeSerializer]
-public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFontFamily, MappingDataNode>
+public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFontFamily, MappingDataNode>,
+    ITypeCopyCreator<IFontFamily>
 {
     /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
@@ -39,5 +40,21 @@ public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFon
         dependencies.InjectDependencies(data);
 
         return data;
+    }
+
+    /// <inheritdoc/>
+    public IFontFamily CreateCopy(ISerializationManager serializationManager,
+        IFontFamily source,
+        IDependencyCollection dependencies,
+        SerializationHookContext hookCtx,
+        ISerializationContext? context = null)
+    {
+        var copy = serializationManager.CreateCopy((FontFamilyBundled)source,
+            hookCtx,
+            context,
+            notNullableOverride: true);
+        copy.Scale = source.Scale;
+        dependencies.InjectDependencies(copy);
+        return copy;
     }
 }
