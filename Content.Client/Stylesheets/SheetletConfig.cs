@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Content.Client.Stylesheets;
 
 /// <summary>
@@ -9,5 +7,4 @@ namespace Content.Client.Stylesheets;
 /// <seealso cref="SheetletConfigAttribute"/>
 /// <seealso cref="ISheetlet"/>
 [ImplicitDataDefinitionForInheritors]
-[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 public abstract partial class SheetletConfig;

@@ -6,6 +6,7 @@ namespace Content.Client.Stylesheets;
 /// Marks a sheetlet for registration for prototype-based stylesheet generation.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
+[MeansImplicitUse]
 [BaseTypeRequired(typeof(ISheetlet))]
 public sealed class SheetletAttribute : Attribute
 {
