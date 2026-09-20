@@ -53,7 +53,6 @@ public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFon
             hookCtx,
             context,
             notNullableOverride: true);
-        copy.Scale = source.Scale;
         dependencies.InjectDependencies(copy);
         return copy;
     }
