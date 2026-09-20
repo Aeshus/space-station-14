@@ -47,6 +47,7 @@ public sealed partial class FontFamilyBundled : IFontFamily
     public string Name { get; private set; } = string.Empty;
 
     /// <inheritdoc/>
+    [DataField]
     public float Scale { get; set; } = 1;
 
     /// <inheritdoc/>
