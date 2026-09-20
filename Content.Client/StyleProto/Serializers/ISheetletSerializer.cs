@@ -36,7 +36,9 @@ public sealed class ISheetletSerializer : BaseTypeSerializer, ITypeSerializer<IS
     {
         var factory = dependencies.Resolve<ISheetletFactory>();
 
-        return factory.GetSheetlet(node.Value);
+        return !factory.TryGetSheetletType(node.Value, out var type)
+            ? throw new InvalidOperationException($"{node.Value} is not a registered sheetlet")
+            : factory.GetSheetlet(type);
     }
 
     /// <inheritdoc/>
