@@ -1,21 +1,30 @@
 using System.Diagnostics.CodeAnalysis;
 using Robust.Client.UserInterface;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.Manager;
 
 namespace Content.Client.StyleProto;
 
 public sealed partial class StylesheetManager : IPostInjectInit
 {
     [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private ISerializationManager _serializationManager = default!;
     [Dependency] private ILogManager _logManager = default!;
 
     private Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// An event that gets invoked whenever the Stylesheets are reloaded.
+    /// </summary>
+    /// <remarks>
+    /// This is used for mutating Sheetlet Configs. Note, it is in subscription order.
+    /// </remarks>
     public event Action<SheetletConfigRegistry>? OnStyleReload;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initialize the StylesheetManager.
+    /// </summary>
     public void Initialize()
     {
         DirtyAll();
@@ -40,7 +49,9 @@ public sealed partial class StylesheetManager : IPostInjectInit
         DirtyAll();
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Dirties all the Stylesheets so that they are reloaded/rebuilt.
+    /// </summary>
     public void DirtyAll()
     {
         foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
@@ -49,34 +60,54 @@ public sealed partial class StylesheetManager : IPostInjectInit
         }
     }
 
+    /// <summary>
+    /// Dirty a specific Stylesheet so it is reloaded/rebuilt.
+    /// </summary>
+    /// <param name="proto">The stylesheet prototype</param>
     public void Dirty(ProtoId<StylesheetPrototype> proto)
     {
         UpdateStylesheet(_prototypeManager.Index(proto));
     }
 
+    /// <summary>
+    /// Updates a stylesheet by rebuilding it
+    /// </summary>
+    /// <param name="proto"></param>
     private void UpdateStylesheet(StylesheetPrototype proto)
     {
         if (proto.Abstract)
             return;
 
+        // Deep copy the configs (as to not mutate the Prototype's version) and then unordered notify subscribers
+        // to mutate it. (TODO: move to event bus subscriptions for ordering?)
+        var configs = _serializationManager.CreateCopy(
+            proto.Configs,
+            notNullableOverride: true);
+        OnStyleReload?.Invoke(configs);
+
         var rules = new List<StyleRule>();
         foreach (var sheetlet in proto.Sheetlets)
         {
-            rules.AddRange(sheetlet.Generate(proto.Configs));
+            rules.AddRange(sheetlet.Generate(configs));
         }
 
         if (!_styleAccessors.ContainsKey(proto))
         {
-            _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), proto.Configs));
+            _styleAccessors.Add(proto, new StyleAccessor(new Stylesheet(rules), configs));
         }
         else
         {
             // Implicitly calls StyleChanged for subscribers
-            _styleAccessors[proto].Update(new Stylesheet(rules), proto.Configs);
+            _styleAccessors[proto].Update(new Stylesheet(rules), configs);
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Tries and get a stylesheet subscription from a prototype.
+    /// </summary>
+    /// <param name="proto">Stylesheet prototype</param>
+    /// <param name="accessor">An acessor which contains an event to subscribe to</param>
+    /// <returns>True if the accessor is found, False if null</returns>
     public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
         [NotNullWhen(true)] out IStyleAccessor? accessor)
     {
@@ -89,7 +120,11 @@ public sealed partial class StylesheetManager : IPostInjectInit
         return true;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the style subscription with the prototype.
+    /// </summary>
+    /// <param name="proto">Stylesheet prototype</param>
+    /// <returns>The accessor</returns>
     public IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
     {
         return _styleAccessors[proto];
