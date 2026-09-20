@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// Factory that manages the resolution and creation of sheetlets and sheetlet configs.

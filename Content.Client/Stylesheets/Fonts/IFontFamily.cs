@@ -1,6 +1,6 @@
 using Robust.Client.Graphics;
 
-namespace Content.Client.StyleProto.Fonts;
+namespace Content.Client.Stylesheets.Fonts;
 
 /// <summary>
 /// A font family, where multiple faces with different variations (e.g. weights/slants/etc) can be passed and queried

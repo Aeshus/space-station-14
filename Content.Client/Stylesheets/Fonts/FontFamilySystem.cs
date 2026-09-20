@@ -1,8 +1,8 @@
 using System.Linq;
 using Robust.Client.Graphics;
-using static Content.Client.StyleProto.Fonts.FontMatchingHelpers;
+using static Content.Client.Stylesheets.Fonts.FontMatchingHelpers;
 
-namespace Content.Client.StyleProto.Fonts;
+namespace Content.Client.Stylesheets.Fonts;
 
 /// <summary>
 /// A font family that is built on font faces provided by the operating system.

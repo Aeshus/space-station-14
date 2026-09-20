@@ -5,7 +5,7 @@ using Robust.Shared.Serialization.Markdown.Validation;
 using Robust.Shared.Serialization.Markdown.Value;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
-namespace Content.Client.StyleProto.Serializers;
+namespace Content.Client.Stylesheets.Serializers;
 
 /// <summary>
 /// (De)Serializes ISheetlets interfaces into instances of their actual types.

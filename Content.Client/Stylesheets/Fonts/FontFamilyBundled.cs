@@ -3,9 +3,9 @@ using Content.Client.Resources;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Shared.Utility;
-using static Content.Client.StyleProto.Fonts.FontMatchingHelpers;
+using static Content.Client.Stylesheets.Fonts.FontMatchingHelpers;
 
-namespace Content.Client.StyleProto.Fonts;
+namespace Content.Client.Stylesheets.Fonts;
 
 /// <summary>
 /// A font family that is based on bundled font files distributed in Resources.

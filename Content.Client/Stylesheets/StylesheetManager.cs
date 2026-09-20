@@ -1,79 +1,213 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Content.Client.Stylesheets.Stylesheets;
-using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
-using Robust.Shared.Reflection;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.Manager;
+using Robust.Shared.Utility;
 
-namespace Content.Client.Stylesheets
+namespace Content.Client.Stylesheets;
+
+/// <summary>
+/// Manages stylesheets, creating them from prototypes and allowing code to subscribe to updates.
+/// </summary>
+public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetManager
 {
-    public sealed partial class StylesheetManager : IStylesheetManager
+    [Dependency] private IPrototypeManager _prototypeManager = default!;
+    [Dependency] private ISerializationManager _serializationManager = default!;
+    [Dependency] private ILogManager _logManager = default!;
+
+    private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
+    private ISawmill _sawmill = default!;
+
+    /// <inheritdoc/>
+    public event Action<SheetletConfigRegistry>? OnStyleReload;
+
+    /// <inheritdoc/>
+    public void Initialize()
     {
-        [Dependency] private ILogManager _logManager = default!;
-        [Dependency] private IUserInterfaceManager _userInterfaceManager = default!;
-        [Dependency] private IReflectionManager _reflection = default!;
+        DirtyAll();
+    }
 
-        [Dependency]
-        private IResourceCache
-            _resCache = default!; // TODO: REMOVE (obsolete; used to construct StyleNano/StyleSpace)
+    /// <inheritdoc/>
+    public void PostInject()
+    {
+        _sawmill = _logManager.GetSawmill("stylesheet");
+        _prototypeManager.PrototypesReloaded += OnPrototypesReloaded;
+    }
 
-        public Stylesheet SheetNanotrasen { get; private set; } = default!;
-        public Stylesheet SheetSystem { get; private set; } = default!;
+    /// <summary>
+    /// Reloads the stylesheets when stylesheet prototypes are modified.
+    /// </summary>
+    /// <param name="eventArgs">Event's arguments</param>
+    private void OnPrototypesReloaded(PrototypesReloadedEventArgs eventArgs)
+    {
+        if (!eventArgs.WasModified<StylesheetPrototype>())
+            return;
 
-        [Obsolete("Update to use SheetNanotrasen instead")]
-        public Stylesheet SheetNano { get; private set; } = default!;
+        DirtyAll();
+    }
 
-        [Obsolete("Update to use SheetSystem instead")]
-        public Stylesheet SheetSpace { get; private set; } = default!;
-
-        private Dictionary<string, Stylesheet> Stylesheets { get; set; } = default!;
-
-        public bool TryGetStylesheet(string name, [MaybeNullWhen(false)] out Stylesheet stylesheet)
+    /// <inheritdoc/>
+    public void DirtyAll()
+    {
+        foreach (var proto in _prototypeManager.EnumeratePrototypes<StylesheetPrototype>())
         {
-            return Stylesheets.TryGetValue(name, out stylesheet);
+            UpdateStylesheet(proto);
         }
+    }
 
-        public HashSet<Type> UnusedSheetlets { get; private set; } = [];
+    /// <inheritdoc/>
+    public void Dirty(ProtoId<StylesheetPrototype> proto)
+    {
+        if (_prototypeManager.TryIndex(proto, out var prototype))
+            UpdateStylesheet(prototype);
+    }
 
-        public void Initialize()
+    /// <inheritdoc/>
+    public bool TryGetStyleSubscription(ProtoId<StylesheetPrototype> proto,
+        [NotNullWhen(true)] out IStyleAccessor? accessor)
+    {
+        accessor = null;
+
+        if (!_styleAccessors.TryGetValue(proto, out var acc))
+            return false;
+
+        accessor = acc;
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public IStyleAccessor GetStyleSubscription(ProtoId<StylesheetPrototype> proto)
+    {
+        return _styleAccessors[proto];
+    }
+
+    /// <summary>
+    /// Updates a stylesheet by rebuilding it
+    /// </summary>
+    /// <param name="proto"></param>
+    private void UpdateStylesheet(StylesheetPrototype proto)
+    {
+        if (proto.Abstract)
+            return;
+
+        SheetletConfigRegistry configs;
+        Stylesheet stylesheet;
+        try
         {
-            var sawmill = _logManager.GetSawmill("style");
-            sawmill.Debug("Initializing Stylesheets...");
-            var sw = Stopwatch.StartNew();
+            // Copy before subscribers mutate the configs, then notify them in subscription order.
+            configs = _serializationManager.CreateCopy(
+                proto.Configs,
+                notNullableOverride: true);
+            OnStyleReload?.Invoke(configs);
 
-            // add all sheetlets to the hashset
-            var tys = _reflection.FindTypesWithAttribute<CommonSheetletAttribute>();
-            UnusedSheetlets = [..tys];
-
-            Stylesheets = new Dictionary<string, Stylesheet>();
-            SheetNanotrasen = Init(new NanotrasenStylesheet(new BaseStylesheet.NoConfig(), this));
-            SheetSystem = Init(new SystemStylesheet(new BaseStylesheet.NoConfig(), this));
-            SheetNano = new StyleNano(_resCache).Stylesheet; // TODO: REMOVE (obsolete)
-            SheetSpace = new StyleSpace(_resCache).Stylesheet; // TODO: REMOVE (obsolete)
-
-            _userInterfaceManager.Stylesheet = SheetNanotrasen;
-
-            // warn about unused sheetlets
-            if (UnusedSheetlets.Count > 0)
+            var rules = new List<StyleRule>();
+            foreach (var sheetlet in proto.Sheetlets)
             {
-                var sheetlets = UnusedSheetlets.AsEnumerable()
-                    .Take(5)
-                    .Select(t => t.FullName ?? "<could not get FullName>")
-                    .ToArray();
-                sawmill.Error($"There are unloaded sheetlets: {string.Join(", ", sheetlets)}");
+                rules.AddRange(sheetlet.Generate(configs));
             }
 
-            sawmill.Debug($"Initialized {_styleRuleCount} style rules in {sw.Elapsed}");
+            stylesheet = new Stylesheet(rules);
+        }
+        catch (Exception e)
+        {
+            _sawmill.Error($"Failed to rebuild stylesheet '{proto.ID}': {e}");
+            return;
         }
 
-        private int _styleRuleCount;
-
-        private Stylesheet Init(BaseStylesheet baseSheet)
+        if (!_styleAccessors.TryGetValue(proto, out var accessor))
         {
-            Stylesheets.Add(baseSheet.StylesheetName, baseSheet.Stylesheet);
-            _styleRuleCount += baseSheet.Stylesheet.Rules.Count;
-            return baseSheet.Stylesheet;
+            _styleAccessors.Add(proto, new StyleAccessor(_sawmill, stylesheet, configs));
+        }
+        else
+        {
+            // Implicitly calls StyleChanged for subscribers
+            accessor.Update(stylesheet, configs);
+        }
+    }
+
+    /// <summary>
+    /// Allows for accessing/subscribing to the current stylesheet and registry for a protoid.
+    /// </summary>
+    public interface IStyleAccessor
+    {
+        /// <summary>
+        /// Event called when styles change.
+        /// </summary>
+        /// <remarks>
+        /// This will also immediately call the specified delegate.
+        /// </remarks>
+        event Action<Stylesheet, SheetletConfigRegistry> StyleChanged;
+    }
+
+    /// <inheritdoc/>
+    public sealed class StyleAccessor(ISawmill sawmill, Stylesheet stylesheet, SheetletConfigRegistry configs)
+        : IStyleAccessor
+    {
+        /// <summary>
+        /// The current stylesheet.
+        /// </summary>
+        private Stylesheet Stylesheet { get; set; } = stylesheet;
+
+        /// <summary>
+        /// The current sheetlet configs.
+        /// </summary>
+        /// <remarks>
+        /// We assume these will be immutable after they are placed in here.
+        /// </remarks>
+        private SheetletConfigRegistry Configs { get; set; } = configs;
+
+        /// <summary>
+        /// The stylesheet subscriptions for updates.
+        /// </summary>
+        private readonly List<Action<Stylesheet, SheetletConfigRegistry>> _subscriptions = [];
+
+        /// <inheritdoc/>
+        public event Action<Stylesheet, SheetletConfigRegistry> StyleChanged
+        {
+            add
+            {
+                DebugTools.Assert(!_subscriptions.Contains(value),
+                    "Attempted to subscribe the same stylesheet twice.");
+                _subscriptions.Add(value);
+
+                try
+                {
+                    value(Stylesheet, Configs);
+                }
+                catch (Exception e)
+                {
+                    sawmill.Error($"Exception caught during style update: {e}");
+                }
+            }
+            remove
+            {
+                DebugTools.Assert(_subscriptions.Contains(value),
+                    "Attempted to unsubscribe a stylesheet that was not subscribed to.");
+                _subscriptions.Remove(value);
+            }
+        }
+
+        /// <summary>
+        /// Updates the internal stylesheet and configs.
+        /// </summary>
+        /// <param name="stylesheet">The stylesheet</param>
+        /// <param name="configs">The sheetlet configs</param>
+        public void Update(Stylesheet stylesheet, SheetletConfigRegistry configs)
+        {
+            Stylesheet = stylesheet;
+            Configs = configs;
+
+            foreach (var subscriber in _subscriptions.ToArray())
+            {
+                try
+                {
+                    subscriber(stylesheet, configs);
+                }
+                catch (Exception e)
+                {
+                    sawmill.Error($"Exception caught during style update: {e}");
+                }
+            }
         }
     }
 }

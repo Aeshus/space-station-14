@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// A sheetlet config registry, which provides sheetlets access to concrete instances of configs they request.

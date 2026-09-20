@@ -7,13 +7,13 @@ using Robust.Shared.Serialization.Markdown.Validation;
 using Robust.Shared.Serialization.Markdown.Value;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
-namespace Content.Client.StyleProto.Serializers;
+namespace Content.Client.Stylesheets.Serializers;
 
 /// <summary>
 /// (De)Serializes SheetletConfigs.
 /// </summary>
 [TypeSerializer]
-public sealed class SheetletConfigSerializer : BaseTypeSerializer, ITypeSerializer<ISheetletConfig, MappingDataNode>
+public sealed class SheetletConfigSerializer : BaseTypeSerializer, ITypeSerializer<SheetletConfig, MappingDataNode>
 {
     /// <inheritdoc/>
     public ValidationNode Validate(ISerializationManager serializationManager,
@@ -36,12 +36,12 @@ public sealed class SheetletConfigSerializer : BaseTypeSerializer, ITypeSerializ
     }
 
     /// <inheritdoc/>
-    public ISheetletConfig Read(ISerializationManager serializationManager,
+    public SheetletConfig Read(ISerializationManager serializationManager,
         MappingDataNode node,
         IDependencyCollection dependencies,
         SerializationHookContext hookCtx,
         ISerializationContext? context = null,
-        ISerializationManager.InstantiationDelegate<ISheetletConfig>? instanceProvider = null)
+        ISerializationManager.InstantiationDelegate<SheetletConfig>? instanceProvider = null)
     {
         var factory = dependencies.Resolve<ISheetletFactory>();
 
@@ -54,12 +54,12 @@ public sealed class SheetletConfigSerializer : BaseTypeSerializer, ITypeSerializ
         var copy = node.Copy();
         copy.Remove("type");
 
-        return (ISheetletConfig)serializationManager.Read(type, copy, context)!;
+        return (SheetletConfig)serializationManager.Read(type, copy, context)!;
     }
 
     /// <inheritdoc/>
     public DataNode Write(ISerializationManager serializationManager,
-        ISheetletConfig value,
+        SheetletConfig value,
         IDependencyCollection dependencies,
         bool alwaysWrite = false,
         ISerializationContext? context = null)

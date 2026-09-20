@@ -1,7 +1,7 @@
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// Prototype representing a sheetlet-powered stylesheet.

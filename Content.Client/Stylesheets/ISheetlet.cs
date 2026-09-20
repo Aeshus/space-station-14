@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// A sheetlet that generates specific style rules after being provided the appropriate sheetlet configs.

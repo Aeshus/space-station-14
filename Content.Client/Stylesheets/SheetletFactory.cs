@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Robust.Shared.Reflection;
 using Robust.Shared.Utility;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// An implementation of the sheetlet factory, which handles registration and creation of <see cref="ISheetlet"/> and

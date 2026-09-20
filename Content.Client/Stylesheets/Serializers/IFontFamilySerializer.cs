@@ -1,11 +1,11 @@
-using Content.Client.StyleProto.Fonts;
+using Content.Client.Stylesheets.Fonts;
 using Robust.Shared.Serialization;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown.Mapping;
 using Robust.Shared.Serialization.Markdown.Validation;
 using Robust.Shared.Serialization.TypeSerializers.Interfaces;
 
-namespace Content.Client.StyleProto.Serializers;
+namespace Content.Client.Stylesheets.Serializers;
 
 /// <summary>
 /// (de)Serializes IFontFamily.
@@ -23,7 +23,7 @@ public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFon
         IDependencyCollection dependencies,
         ISerializationContext? context = null)
     {
-        return serializationManager.ValidateNode<FontFamilyBundled>(node, context);
+        return serializationManager.ValidateNode<Stylesheets.Fonts.FontFamilyBundled>(node, context);
     }
 
     /// <inheritdoc/>
@@ -34,7 +34,7 @@ public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFon
         ISerializationContext? context = null,
         ISerializationManager.InstantiationDelegate<IFontFamily>? instanceProvider = null)
     {
-        var data = serializationManager.Read<FontFamilyBundled>(node, context, notNullableOverride: true);
+        var data = serializationManager.Read<Stylesheets.Fonts.FontFamilyBundled>(node, context, notNullableOverride: true);
 
         // It has an internal ResCache that is uses, so we populate that here.
         dependencies.InjectDependencies(data);
@@ -49,7 +49,7 @@ public sealed class IFontFamilySerializer : BaseTypeSerializer, ITypeReader<IFon
         SerializationHookContext hookCtx,
         ISerializationContext? context = null)
     {
-        var copy = serializationManager.CreateCopy((FontFamilyBundled)source,
+        var copy = serializationManager.CreateCopy((Stylesheets.Fonts.FontFamilyBundled)source,
             hookCtx,
             context,
             notNullableOverride: true);

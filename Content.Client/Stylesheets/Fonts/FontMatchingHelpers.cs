@@ -1,6 +1,6 @@
 using Robust.Client.Graphics;
 
-namespace Content.Client.StyleProto.Fonts;
+namespace Content.Client.Stylesheets.Fonts;
 
 // The underlying representation of FontWidth and FontWeight are ushorts, so to force an ordering of certain values,
 // I'm able to add ushort.MaxValue so that it'll go in the order I want.

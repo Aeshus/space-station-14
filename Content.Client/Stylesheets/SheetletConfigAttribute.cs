@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace Content.Client.StyleProto;
+namespace Content.Client.Stylesheets;
 
 /// <summary>
 /// Marks a sheetlet config for registration for prototype-based stylesheet generation.
