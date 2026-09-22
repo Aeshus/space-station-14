@@ -1,22 +1,22 @@
 using Content.Client.ContextMenu.UI;
 using Content.Client.Resources;
-using Content.Client.Stylesheets.Fonts;
 using Content.Client.Stylesheets.Palette;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.Verbs.UI;
 using Content.Shared.Verbs;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[CommonSheetlet]
-public sealed class ContextMenuSheetlet<T> : Sheetlet<T>
-    where T : PalettedStylesheet, IWindowConfig, IButtonConfig, IIconConfig
+[Sheetlet]
+public sealed partial class ContextMenuSheetlet<T> : ISheetlet
 {
+    [Dependency] private IResourceCache _resCache = default!;
+
     // TODO: make this not hardcoded (I am too scared to change the context menu colors)
     private static readonly ColorPalette ContextButtonPalette = ColorPalette.FromHexBase("#000000") with
     {
@@ -25,18 +25,20 @@ public sealed class ContextMenuSheetlet<T> : Sheetlet<T>
         PressedElement = Color.LightSlateGray,
     };
 
-    public override StyleRule[] GetRules(T sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        IWindowConfig windowCfg = sheet;
+        var windows = configs.GetConfig<WindowConfig>();
+        var fonts = configs.GetConfig<FontConfig>();
+        var palettes = configs.GetConfig<PaletteConfig>();
 
         var borderedWindowBackground = new StyleBoxTexture
         {
-            Texture = sheet.GetTextureOr(windowCfg.WindowBackgroundBorderedPath, NanotrasenStylesheet.TextureRoot),
+            Texture = _resCache.GetTexture(windows.WindowBackgroundBorderedPath),
         };
         borderedWindowBackground.SetPatchMargin(StyleBox.Margin.All, ContextMenuElement.ElementMargin);
         var buttonContext = new StyleBoxTexture { Texture = Texture.White };
-        var contextMenuExpansionTexture = ResCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
-        var verbMenuConfirmationTexture = ResCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
+        var contextMenuExpansionTexture = _resCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
+        var verbMenuConfirmationTexture = _resCache.GetTexture("/Textures/Interface/VerbIcons/group.svg.192dpi.png");
 
         var rules = new List<StyleRule>
         {
@@ -53,16 +55,16 @@ public sealed class ContextMenuSheetlet<T> : Sheetlet<T>
             // Context Menu Labels
             E<RichTextLabel>()
                 .Class(InteractionVerb.DefaultTextStyleClass)
-                .Font(sheet.BaseFont.GetFont(12, FontKind.BoldItalic)),
+                .Font(fonts.Main.GetFont(12, FontWeight.Bold, FontSlant.Italic)),
             E<RichTextLabel>()
                 .Class(ActivationVerb.DefaultTextStyleClass)
-                .Font(sheet.BaseFont.GetFont(12, FontKind.Bold)),
+                .Font(fonts.Main.GetFont(12, FontWeight.Bold)),
             E<RichTextLabel>()
                 .Class(AlternativeVerb.DefaultTextStyleClass)
-                .Font(sheet.BaseFont.GetFont(12, FontKind.Italic)),
+                .Font(fonts.Main.GetFont(12, slant: FontSlant.Italic)),
             E<RichTextLabel>()
                 .Class(Verb.DefaultTextStyleClass)
-                .Font(sheet.BaseFont.GetFont(12)),
+                .Font(fonts.Main.GetFont(12)),
             E<TextureRect>()
                 .Class(ContextMenuElement.StyleClassContextMenuExpansionTexture)
                 .Prop(TextureRect.StylePropertyTexture, contextMenuExpansionTexture),
@@ -76,11 +78,11 @@ public sealed class ContextMenuSheetlet<T> : Sheetlet<T>
                 .Prop(ContainerButton.StylePropertyStyleBox, buttonContext),
         };
 
-        ButtonSheetlet<T>.MakeButtonRules<ContextMenuElement>(rules,
+        ButtonSheetlet.MakeButtonRules<ContextMenuElement>(rules,
             ContextButtonPalette,
             ContextMenuElement.StyleClassContextMenuButton);
-        ButtonSheetlet<T>.MakeButtonRules<ContextMenuElement>(rules,
-            sheet.NegativePalette,
+        ButtonSheetlet.MakeButtonRules<ContextMenuElement>(rules,
+            palettes.NegativePalette,
             ConfirmationMenuElement.StyleClassConfirmationContextMenuButton);
 
         return rules.ToArray();

@@ -1,32 +1,33 @@
 using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Systems.Actions.Controls;
 using Content.Client.UserInterface.Systems.Actions.Windows;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[CommonSheetlet]
-public sealed class ActionSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, IPanelConfig
+[Sheetlet]
+public sealed partial class ActionSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
+    [Dependency] private IResourceCache _resCache = default!;
+
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        IPanelConfig panelCfg = sheet;
+        var panels = configs.GetConfig<PanelConfig>();
 
         // TODO: absolute texture access
-        var handSlotHighlightTex = ResCache.GetTexture("/Textures/Interface/Inventory/hand_slot_highlight.png");
+        var handSlotHighlightTex = _resCache.GetTexture("/Textures/Interface/Inventory/hand_slot_highlight.png");
         var handSlotHighlight = new StyleBoxTexture
         {
             Texture = handSlotHighlightTex,
         };
         handSlotHighlight.SetPatchMargin(StyleBox.Margin.All, 2);
 
-        var actionSearchBoxTex =
-            sheet.GetTextureOr(panelCfg.BlackPanelDarkThinBorderPath, NanotrasenStylesheet.TextureRoot);
+        var actionSearchBoxTex = _resCache.GetTexture(panels.BlackPanelDarkThinBorderPath);
         var actionSearchBox = new StyleBoxTexture
         {
             Texture = actionSearchBoxTex,

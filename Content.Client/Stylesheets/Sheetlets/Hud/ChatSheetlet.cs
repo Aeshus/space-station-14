@@ -1,25 +1,29 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Systems.Chat.Controls;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[CommonSheetlet]
-public sealed class ChatSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, IButtonConfig
+[Sheetlet]
+public sealed partial class ChatSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
-    {
-        IButtonConfig btnCfg = sheet;
+    [Dependency] private IResourceCache _resCache = default!;
 
-        var chatColor = sheet.SecondaryPalette.Background.WithAlpha(221.0f / 255.0f);
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
+    {
+        var buttons = configs.GetConfig<ButtonConfig>();
+        var palettes = configs.GetConfig<PaletteConfig>();
+
+        var chatColor = palettes.SecondaryPalette.Background.WithAlpha(221.0f / 255.0f);
         var chatBg = new StyleBoxFlat(chatColor);
 
         var chatChannelButtonTex =
-            sheet.GetTextureOr(btnCfg.RoundedButtonBorderedPath, NanotrasenStylesheet.TextureRoot);
+            _resCache.GetTexture(buttons.RoundedButtonBorderedPath);
         var chatChannelButton = new StyleBoxTexture
         {
             Texture = chatChannelButtonTex,
@@ -28,7 +32,7 @@ public sealed class ChatSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, I
         chatChannelButton.SetPadding(StyleBox.Margin.All, 2);
 
         var chatFilterButtonTex =
-            sheet.GetTextureOr(btnCfg.RoundedButtonBorderedPath, NanotrasenStylesheet.TextureRoot);
+            _resCache.GetTexture(buttons.RoundedButtonBorderedPath);
         var chatFilterButton = new StyleBoxTexture
         {
             Texture = chatFilterButtonTex,

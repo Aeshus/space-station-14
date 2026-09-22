@@ -1,8 +1,8 @@
 using Content.Client.Examine;
-using Content.Client.Stylesheets.Fonts;
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
@@ -10,18 +10,20 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets.Hud;
 
-[CommonSheetlet]
-public sealed class TooltipSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, ITooltipConfig
+[Sheetlet]
+public sealed partial class TooltipSheetlet<T> : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
+    [Dependency] private IResourceCache _resCache = default!;
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        ITooltipConfig tooltipCfg = sheet;
+        var tooltips = configs.GetConfig<TooltipConfig>();
+        var fonts = configs.GetConfig<FontConfig>();
 
-        var tooltipBox = sheet.GetTextureOr(tooltipCfg.TooltipBoxPath, NanotrasenStylesheet.TextureRoot)
+        var tooltipBox = _resCache.GetTexture(tooltips.TooltipBoxPath)
             .IntoPatch(StyleBox.Margin.All, 2);
         tooltipBox.SetContentMarginOverride(StyleBox.Margin.Horizontal, 7);
 
-        var whisperBox = sheet.GetTextureOr(tooltipCfg.WhisperBoxPath, NanotrasenStylesheet.TextureRoot)
+        var whisperBox = _resCache.GetTexture(tooltips.WhisperBoxPath)
             .IntoPatch(StyleBox.Margin.All, 2);
         whisperBox.SetContentMarginOverride(StyleBox.Margin.Horizontal, 7);
 
@@ -33,10 +35,10 @@ public sealed class TooltipSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet
                 .Panel(tooltipBox),
             E<RichTextLabel>()
                 .Class(StyleClass.TooltipTitle)
-                .Font(sheet.BaseFont.GetFont(14, FontKind.Bold)),
+                .Font(fonts.Main.GetFont(14, FontWeight.Bold)),
             E<RichTextLabel>()
                 .Class(StyleClass.TooltipDesc)
-                .Font(sheet.BaseFont.GetFont(12)),
+                .Font(fonts.Main.GetFont(12)),
 
             E<Tooltip>()
                 // ReSharper disable once AccessToStaticMemberViaDerivedType
@@ -54,11 +56,11 @@ public sealed class TooltipSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet
             E<PanelContainer>()
                 .Class("speechBox", "whisperBox")
                 .ParentOf(E<RichTextLabel>().Class("bubbleContent"))
-                .Prop(Label.StylePropertyFont, sheet.BaseFont.GetFont(12, FontKind.Italic)),
+                .Prop(Label.StylePropertyFont, fonts.Main.GetFont(12, slant: FontSlant.Italic)),
             E<PanelContainer>()
                 .Class("speechBox", "emoteBox")
                 .ParentOf(E<RichTextLabel>().Class("bubbleContent"))
-                .Prop(Label.StylePropertyFont, sheet.BaseFont.GetFont(12, FontKind.Italic)),
+                .Prop(Label.StylePropertyFont, fonts.Main.GetFont(12, slant: FontSlant.Italic)),
         ];
     }
 }
