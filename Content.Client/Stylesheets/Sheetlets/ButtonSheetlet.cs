@@ -49,8 +49,8 @@ public sealed partial class ButtonSheetlet : ISheetlet
             CButton()
                 .Class(StyleClass.ButtonSmall)
                 .ParentOf(E<Label>())
-                .Font(fonts.BaseFont.GetFont(8)),
-            CButton().Class(StyleClass.ButtonBig).ParentOf(E<Label>()).Font(fonts.BaseFont.GetFont(16)),
+                .Font(fonts.Main.GetFont(8)),
+            CButton().Class(StyleClass.ButtonBig).ParentOf(E<Label>()).Font(fonts.Main.GetFont(16)),
 
             // Cross Button (Red)
             E<TextureButton>()

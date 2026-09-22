@@ -31,7 +31,7 @@ public sealed partial class PlaceholderSheetlet : ISheetlet
                 .Prop(Placeholder.StylePropertyPanel, placeholderBox),
             E<Label>()
                 .Class(Placeholder.StyleClassPlaceholderText)
-                .Font(fonts.BaseFont.GetFont(16))
+                .Font(fonts.Main.GetFont(16))
                 .FontColor(new Color(103, 103, 103, 128)), // TODO: fix hardcoded color
         ];
     }

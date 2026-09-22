@@ -1,8 +1,6 @@
 using System.Numerics;
 using Content.Client.Resources;
-using Content.Client.Stylesheets.Fonts;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Controls;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
@@ -69,7 +67,7 @@ public sealed partial class MenuButtonSheetlet : ISheetlet
                 .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.SquareStyleBox(_resCache, buttons)),
             E<Label>()
                 .Class(MenuButton.StyleClassLabelTopButton)
-                .Prop(Label.StylePropertyFont, fonts.BaseFont.GetFont(14, FontWeight.Bold)),
+                .Prop(Label.StylePropertyFont, fonts.Main.GetFont(14, FontWeight.Bold)),
             // new StyleProperty(Label.StylePropertyFont, notoSansDisplayBold14),
         };
 
