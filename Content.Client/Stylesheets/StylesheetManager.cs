@@ -92,27 +92,27 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
 
         SheetletConfigRegistry configs;
         Stylesheet stylesheet;
-        try
-        {
-            // Copy before subscribers mutate the configs, then notify them in subscription order.
-            configs = _serializationManager.CreateCopy(
-                proto.Configs,
-                notNullableOverride: true);
-            OnStyleReload?.Invoke(configs);
+        // Copy before subscribers mutate the configs, then notify them in subscription order.
+        configs = _serializationManager.CreateCopy(
+            proto.Configs,
+            notNullableOverride: true);
+        OnStyleReload?.Invoke(configs);
 
-            var rules = new List<StyleRule>();
-            foreach (var sheetlet in proto.Sheetlets)
+        var rules = new List<StyleRule>();
+        foreach (var sheetlet in proto.Sheetlets)
+        {
+            try
             {
                 rules.AddRange(sheetlet.Generate(configs));
             }
+            catch (Exception e)
+            {
+                _sawmill.Error($"Error during building sheetlet '{proto.ID}' on sheetlet '{nameof(sheetlet)}: {e}");
+                return;
+            }
+        }
 
-            stylesheet = new Stylesheet(rules);
-        }
-        catch (Exception e)
-        {
-            _sawmill.Error($"Failed to rebuild stylesheet '{proto.ID}': {e}");
-            return;
-        }
+        stylesheet = new Stylesheet(rules);
 
         if (!_styleAccessors.TryGetValue(proto, out var accessor))
         {
