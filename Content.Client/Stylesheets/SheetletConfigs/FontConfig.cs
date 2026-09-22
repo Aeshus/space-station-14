@@ -6,8 +6,11 @@ namespace Content.Client.Stylesheets.SheetletConfigs;
 public sealed partial class FontConfig : SheetletConfig
 {
     [DataField]
-    public IFontFamily BaseFont { get; set; }
+    public IFontFamily Main { get; set; }
 
     [DataField]
-    public IFontFamily MonoFont { get; set; }
+    public IFontFamily Monospace { get; set; }
+
+    [DataField]
+    public IFontFamily Decorative { get; set; }
 }
