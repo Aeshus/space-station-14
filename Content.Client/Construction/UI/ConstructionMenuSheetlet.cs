@@ -1,25 +1,29 @@
 using Content.Client.Stylesheets;
+using Content.Client.Stylesheets.SheetletConfigs;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Construction.UI;
-[CommonSheetlet]
-public sealed class ConstructionMenuSheetlet : Sheetlet<PalettedStylesheet>
+
+[Sheetlet]
+public sealed class ConstructionMenuSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
+        var fonts = configs.GetConfig<FontConfig>();
+
         return
         [
             E<Label>()
                 .Identifier("RecipeHistoryNavButtonLabel")
-                .Font(sheet.BaseFont.GetFont(8))
+                .Font(fonts.Main.GetFont(8))
                 .FontColor(Color.White),
 
             E<Label>()
                 .Identifier("RecipeHistoryNavButtonLabel")
                 .PseudoDisabled()
-                .Font(sheet.BaseFont.GetFont(8))
+                .Font(fonts.Main.GetFont(8))
                 .FontColor(Color.Gray),
         ];
     }

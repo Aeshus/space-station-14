@@ -1,5 +1,6 @@
 using Content.Client.Resources;
 using Content.Client.Stylesheets;
+using Content.Client.Stylesheets.SheetletConfigs;
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -10,8 +11,8 @@ namespace Content.Client.Communications.UI;
 /// <summary>
 /// A sheetlet for the communications console, for the character limit labels.
 /// </summary>
-[CommonSheetlet]
-public sealed class CommunicationsConsoleSheetlet : Sheetlet<PalettedStylesheet>
+[Sheetlet]
+public sealed class CommunicationsConsoleSheetlet : ISheetlet
 {
     /// <summary>
     /// The name of a style class for char limit labels.
@@ -23,18 +24,19 @@ public sealed class CommunicationsConsoleSheetlet : Sheetlet<PalettedStylesheet>
     /// </summary>
     public const string CharLimitExceeded = "CommsConsoleCharLimitExceeded";
 
-    /// <inheritdoc/>
-    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
+        var fonts = configs.GetConfig<FontConfig>();
+
         return
         [
             E<Label>()
                 .Class(CharLimit)
-                .Font(sheet.BaseFont.GetFont(8)),
+                .Font(fonts.Main.GetFont(8)),
 
             E<Label>()
                 .Class(CharLimitExceeded)
-                .Font(sheet.BaseFont.GetFont(8))
+                .Font(fonts.Main.GetFont(8))
                 .FontColor(Color.Red)
         ];
     }
