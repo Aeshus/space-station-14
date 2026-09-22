@@ -7,7 +7,8 @@ namespace Content.Client.Stylesheets.Palette;
 /// <remarks>
 ///     Don't be afraid to add a lot of fields here! This class is made for readability.
 /// </remarks>
-public record ColorPalette(
+[DataRecord]
+public partial record ColorPalette(
     Color Base,
 
     float LightnessShift,
