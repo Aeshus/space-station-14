@@ -1,56 +1,61 @@
 using Content.Client.Resources;
 using Content.Client.Stylesheets.Fonts;
 using Content.Client.Stylesheets.Palette;
+using Content.Client.Stylesheets.SheetletConfigs;
+using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class LabelSheetlet : Sheetlet<PalettedStylesheet>
+[Sheetlet]
+public sealed class LabelSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        var robotoMonoBold11 = ResCache.GetFont("/Fonts/RobotoMono/RobotoMono-Bold.ttf", size: 11);
-        var robotoMonoBold12 = ResCache.GetFont("/Fonts/RobotoMono/RobotoMono-Bold.ttf", size: 12);
-        var robotoMonoBold14 = ResCache.GetFont("/Fonts/RobotoMono/RobotoMono-Bold.ttf", size: 14);
+        var font = configs.GetConfig<FontConfig>();
+        var palette = configs.GetConfig<PaletteConfig>();
+
+        var robotoMonoBold11 = font.MonoFont.GetFont(11, FontWeight.Bold);
+        var robotoMonoBold12 = font.MonoFont.GetFont(12, FontWeight.Bold);
+        var robotoMonoBold14 = font.MonoFont.GetFont(14, FontWeight.Bold);
 
         return
         [
             E<Label>()
                 .Class(StyleClass.LabelHeading)
-                .Font(sheet.BaseFont.GetFont(16, FontKind.Bold))
-                .FontColor(sheet.HighlightPalette.Text),
+                .Font(font.BaseFont.GetFont(16, FontWeight.Bold))
+                .FontColor(palette.HighlightPalette.Text),
             E<Label>()
                 .Class(StyleClass.LabelHeadingBigger)
-                .Font(sheet.BaseFont.GetFont(20, FontKind.Bold))
-                .FontColor(sheet.HighlightPalette.Text),
+                .Font(font.BaseFont.GetFont(20, FontWeight.Bold))
+                .FontColor(palette.HighlightPalette.Text),
             E<Label>()
                 .Class(StyleClass.LabelSubHeading)
-                .Font(sheet.BaseFont.GetFont(14, FontKind.Italic))
-                .FontColor(sheet.HighlightPalette.TextDark),
+                .Font(font.BaseFont.GetFont(14, slant: FontSlant.Italic))
+                .FontColor(palette.HighlightPalette.TextDark),
             E<Label>()
                 .Class(StyleClass.LabelSubText)
-                .Font(sheet.BaseFont.GetFont(10))
+                .Font(font.BaseFont.GetFont(10))
                 .FontColor(Color.DarkGray),
             E<Label>()
                 .Class(StyleClass.LabelKeyText)
-                .Font(sheet.BaseFont.GetFont(12, FontKind.Bold))
-                .FontColor(sheet.HighlightPalette.Text),
+                .Font(font.BaseFont.GetFont(12, FontWeight.Bold))
+                .FontColor(palette.HighlightPalette.Text),
             E<Label>()
                 .Class(StyleClass.LabelWeak)
                 .FontColor(Color.DarkGray), // TODO: you know the drill by now
 
             E<Label>()
                 .Class(StyleClass.Positive)
-                .FontColor(sheet.PositivePalette.Text),
+                .FontColor(palette.PositivePalette.Text),
             E<Label>()
                 .Class(StyleClass.Negative)
-                .FontColor(sheet.NegativePalette.Text),
+                .FontColor(palette.NegativePalette.Text),
             E<Label>()
                 .Class(StyleClass.Highlight)
-                .FontColor(sheet.HighlightPalette.Text),
+                .FontColor(palette.HighlightPalette.Text),
 
             E<Label>()
                 .Class(StyleClass.StatusGood)

@@ -1,22 +1,25 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Controls;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class StripebackSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, IStripebackConfig
+[Sheetlet]
+public sealed partial class StripebackSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
+    [Dependency] private IResourceCache _resCache = default!;
+
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        IStripebackConfig stripebackCfg = sheet;
+        var stripeback = configs.GetConfig<StripebackConfig>();
 
         var stripeBack = new StyleBoxTexture
         {
-            Texture = sheet.GetTextureOr(stripebackCfg.StripebackPath, NanotrasenStylesheet.TextureRoot),
+            Texture = _resCache.GetTexture(stripeback.StripebackPath),
             Mode = StyleBoxTexture.StretchMode.Tile,
         };
 

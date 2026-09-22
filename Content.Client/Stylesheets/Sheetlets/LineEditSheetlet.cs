@@ -1,20 +1,24 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
 using Content.Client.Stylesheets.Stylesheets;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class LineEditSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, ILineEditConfig
+[Sheetlet]
+public sealed partial class LineEditSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
-    {
-        ILineEditConfig lineEditCfg = sheet;
+    [Dependency] private IResourceCache _resCache = default!;
 
-        var lineEditStylebox = sheet.GetTextureOr(lineEditCfg.LineEditPath, NanotrasenStylesheet.TextureRoot)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
+    {
+        var lineEdit = configs.GetConfig<LineEditConfig>();
+
+        var lineEditStylebox = _resCache.GetTexture(lineEdit.LineEditPath)
             .IntoPatch(StyleBox.Margin.All, 3);
         lineEditStylebox.SetContentMarginOverride(StyleBox.Margin.Horizontal, 5);
 

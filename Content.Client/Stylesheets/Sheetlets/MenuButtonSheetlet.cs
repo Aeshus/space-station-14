@@ -1,28 +1,28 @@
 using System.Numerics;
+using Content.Client.Resources;
 using Content.Client.Stylesheets.Fonts;
 using Content.Client.Stylesheets.SheetletConfigs;
 using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Controls;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class MenuButtonSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, IButtonConfig, IIconConfig
+[Sheetlet]
+public sealed partial class MenuButtonSheetlet : ISheetlet
 {
-    private static MutableSelectorElement CButton()
-    {
-        return E<MenuButton>();
-    }
+    [Dependency] private IResourceCache _resCache = default!;
 
-    public override StyleRule[] GetRules(T sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        IButtonConfig cfg = sheet;
+        var buttons = configs.GetConfig<ButtonConfig>();
+        var fonts = configs.GetConfig<FontConfig>();
 
-        var buttonTex = sheet.GetTextureOr(cfg.BaseButtonPath, NanotrasenStylesheet.TextureRoot);
+        var buttonTex = _resCache.GetTexture(buttons.BaseButtonPath);
         var topButtonBase = new StyleBoxTexture
         {
             Texture = buttonTex,
@@ -54,29 +54,34 @@ public sealed class MenuButtonSheetlet<T> : Sheetlet<T> where T : PalettedStyles
             CButton().Class(StyleClass.ButtonSquare).Box(topButtonSquare),
             CButton().Class(StyleClass.ButtonOpenLeft).Box(topButtonOpenLeft),
             CButton().Class(StyleClass.ButtonOpenRight).Box(topButtonOpenRight),
-            CButton().Box(StyleBoxHelpers.BaseStyleBox(sheet)),
+            CButton().Box(StyleBoxHelpers.BaseStyleBox(_resCache, buttons)),
             CButton()
                 .Class(StyleClass.ButtonOpenLeft)
-                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.OpenLeftStyleBox(sheet)),
+                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.OpenLeftStyleBox(_resCache, buttons)),
             CButton()
                 .Class(StyleClass.ButtonOpenRight)
-                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.OpenRightStyleBox(sheet)),
+                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.OpenRightStyleBox(_resCache, buttons)),
             CButton()
                 .Class(StyleClass.ButtonOpenBoth)
-                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.SquareStyleBox(sheet)),
+                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.SquareStyleBox(_resCache, buttons)),
             CButton()
                 .Class(StyleClass.ButtonSquare)
-                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.SquareStyleBox(sheet)),
+                .Prop(ContainerButton.StylePropertyStyleBox, StyleBoxHelpers.SquareStyleBox(_resCache, buttons)),
             E<Label>()
                 .Class(MenuButton.StyleClassLabelTopButton)
-                .Prop(Label.StylePropertyFont, sheet.BaseFont.GetFont(14, FontKind.Bold)),
+                .Prop(Label.StylePropertyFont, fonts.BaseFont.GetFont(14, FontWeight.Bold)),
             // new StyleProperty(Label.StylePropertyFont, notoSansDisplayBold14),
         };
 
-        ButtonSheetlet<T>.MakeButtonRules<MenuButton>(rules, cfg.ButtonPalette, null);
-        ButtonSheetlet<T>.MakeButtonRules<MenuButton>(rules, cfg.PositiveButtonPalette, StyleClass.Positive);
-        ButtonSheetlet<T>.MakeButtonRules<MenuButton>(rules, cfg.NegativeButtonPalette, StyleClass.Negative);
+        ButtonSheetlet.MakeButtonRules<MenuButton>(rules, buttons.ButtonPalette, null);
+        ButtonSheetlet.MakeButtonRules<MenuButton>(rules, buttons.PositiveButtonPalette, StyleClass.Positive);
+        ButtonSheetlet.MakeButtonRules<MenuButton>(rules, buttons.NegativeButtonPalette, StyleClass.Negative);
 
         return rules.ToArray();
+    }
+
+    private static MutableSelectorElement CButton()
+    {
+        return E<MenuButton>();
     }
 }

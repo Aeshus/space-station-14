@@ -5,12 +5,12 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class ScrollbarSheetlet : Sheetlet<PalettedStylesheet>
+[Sheetlet]
+public sealed class ScrollbarSheetlet : ISheetlet
 {
     public const int DefaultGrabberSize = 10;
 
-    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
         // TODO: hardcoded colors!!!
         var vScrollBarGrabberNormal = new StyleBoxFlat

@@ -7,14 +7,17 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class ListContainerSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, IButtonConfig, IIconConfig
+[Sheetlet]
+public sealed class ListContainerSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        IButtonConfig buttonCfg = sheet;
+        var button = configs.GetConfig<ButtonConfig>();
 
-        var box = new StyleBoxFlat() { BackgroundColor = Color.White };
+        var box = new StyleBoxFlat
+        {
+            BackgroundColor = Color.White
+        };
 
         var rules = new List<StyleRule>(
         [
@@ -22,8 +25,9 @@ public sealed class ListContainerSheetlet<T> : Sheetlet<T> where T : PalettedSty
                 .Class(ListContainer.StyleClassListContainerButton)
                 .Box(box),
         ]);
-        ButtonSheetlet<T>.MakeButtonRules<ContainerButton>(rules,
-            buttonCfg.ButtonPalette,
+
+        ButtonSheetlet.MakeButtonRules<ContainerButton>(rules,
+            button.ButtonPalette,
             ListContainer.StyleClassListContainerButton);
 
         return rules.ToArray();

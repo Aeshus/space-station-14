@@ -1,25 +1,29 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class TabContainerSheetlet<T> : Sheetlet<T> where T: PalettedStylesheet, ITabContainerConfig
+[Sheetlet]
+public sealed partial class TabContainerSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
-    {
-        ITabContainerConfig tabCfg = sheet;
+    [Dependency] private IResourceCache _resCache = default!;
 
-        var tabContainerPanel = sheet.GetTextureOr(tabCfg.TabContainerPanelPath, NanotrasenStylesheet.TextureRoot)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
+    {
+        var tabs = configs.GetConfig<TabContainerConfig>();
+        var palettes = configs.GetConfig<PaletteConfig>();
+
+        var tabContainerPanel = _resCache.GetTexture(tabs.TabContainerPanelPath)
             .IntoPatch(StyleBox.Margin.All, 2);
 
-        var tabContainerBoxActive = new StyleBoxFlat(sheet.SecondaryPalette.Element);
+        var tabContainerBoxActive = new StyleBoxFlat(palettes.SecondaryPalette.Element);
         tabContainerBoxActive.SetContentMarginOverride(StyleBox.Margin.Horizontal, 5);
-        var tabContainerBoxInactive = new StyleBoxFlat(sheet.SecondaryPalette.Background);
+        var tabContainerBoxInactive = new StyleBoxFlat(palettes.SecondaryPalette.Background);
         tabContainerBoxInactive.SetContentMarginOverride(StyleBox.Margin.Horizontal, 5);
 
         return

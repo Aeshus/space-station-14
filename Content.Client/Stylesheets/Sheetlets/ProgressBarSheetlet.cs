@@ -5,12 +5,11 @@ using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class ProgressBarSheetlet : Sheetlet<PalettedStylesheet>
+[Sheetlet]
+public sealed class ProgressBarSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(PalettedStylesheet sheet, object config)
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
     {
-        // TODO: 1) hardcoded colors, 2) yuck
         var progressBarBackground = new StyleBoxFlat
         {
             BackgroundColor = new Color(0.25f, 0.25f, 0.25f),

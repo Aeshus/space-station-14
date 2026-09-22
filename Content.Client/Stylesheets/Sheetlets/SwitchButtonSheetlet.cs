@@ -1,25 +1,29 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
 using Content.Client.UserInterface.Controls;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class SwitchButtonSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, ISwitchButtonConfig
+[Sheetlet]
+public sealed partial class SwitchButtonSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
-    {
-        ISwitchButtonConfig switchButtonCfg = sheet;
+    [Dependency] private IResourceCache _resCache = default!;
 
-        var trackFillTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonTrackFillPath, NanotrasenStylesheet.TextureRoot);
-        var trackOutlineTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonTrackOutlinePath, NanotrasenStylesheet.TextureRoot);
-        var thumbFillTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonThumbFillPath, NanotrasenStylesheet.TextureRoot);
-        var thumbOutlineTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonThumbOutlinePath, NanotrasenStylesheet.TextureRoot);
-        var symbolOffTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonSymbolOffPath, NanotrasenStylesheet.TextureRoot);
-        var symbolOnTex = sheet.GetTextureOr(switchButtonCfg.SwitchButtonSymbolOnPath, NanotrasenStylesheet.TextureRoot);
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
+    {
+        var switchButtons = configs.GetConfig<SwitchButtonConfig>();
+        var palettes = configs.GetConfig<PaletteConfig>();
+
+        var trackFillTex = _resCache.GetTexture(switchButtons.SwitchButtonTrackFillPath);
+        var trackOutlineTex = _resCache.GetTexture(switchButtons.SwitchButtonTrackOutlinePath);
+        var thumbFillTex = _resCache.GetTexture(switchButtons.SwitchButtonThumbFillPath);
+        var thumbOutlineTex = _resCache.GetTexture(switchButtons.SwitchButtonThumbOutlinePath);
+        var symbolOffTex = _resCache.GetTexture(switchButtons.SwitchButtonSymbolOffPath);
+        var symbolOnTex = _resCache.GetTexture(switchButtons.SwitchButtonSymbolOnPath);
 
         return
         [
@@ -29,35 +33,35 @@ public sealed class SwitchButtonSheetlet<T> : Sheetlet<T> where T : PalettedStyl
             E<SwitchButton>()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackFill))
                 .Prop(TextureRect.StylePropertyTexture, trackFillTex)
-                .Modulate(sheet.SecondaryPalette.BackgroundDark),
+                .Modulate(palettes.SecondaryPalette.BackgroundDark),
 
             E<SwitchButton>()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackOutline))
                 .Prop(TextureRect.StylePropertyTexture, trackOutlineTex)
-                .Modulate(sheet.SecondaryPalette.Text),
+                .Modulate(palettes.SecondaryPalette.Text),
 
             E<SwitchButton>()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassThumbFill))
                 .Prop(TextureRect.StylePropertyTexture, thumbFillTex)
-                .Modulate(sheet.PrimaryPalette.Element)
+                .Modulate(palettes.PrimaryPalette.Element)
                 .HorizontalAlignment(Control.HAlignment.Left),
 
             E<SwitchButton>()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassThumbOutline))
                 .Prop(TextureRect.StylePropertyTexture, thumbOutlineTex)
-                .Modulate(sheet.PrimaryPalette.Text)
+                .Modulate(palettes.PrimaryPalette.Text)
                 .HorizontalAlignment(Control.HAlignment.Left),
 
             E<SwitchButton>()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassSymbol))
                 .Prop(TextureRect.StylePropertyTexture, symbolOffTex)
-                .Modulate(sheet.SecondaryPalette.Text),
+                .Modulate(palettes.SecondaryPalette.Text),
 
             // Pressed styles
             E<SwitchButton>()
                 .PseudoPressed()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackFill))
-                .Modulate(sheet.PositivePalette.Text),
+                .Modulate(palettes.PositivePalette.Text),
 
             E<SwitchButton>()
                 .PseudoPressed()
@@ -79,32 +83,32 @@ public sealed class SwitchButtonSheetlet<T> : Sheetlet<T> where T : PalettedStyl
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackFill))
-                .Modulate(sheet.SecondaryPalette.DisabledElement),
+                .Modulate(palettes.SecondaryPalette.DisabledElement),
 
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackOutline))
-                .Modulate(sheet.SecondaryPalette.DisabledElement),
+                .Modulate(palettes.SecondaryPalette.DisabledElement),
 
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassThumbFill))
-                .Modulate(sheet.PrimaryPalette.DisabledElement),
+                .Modulate(palettes.PrimaryPalette.DisabledElement),
 
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassThumbOutline))
-                .Modulate(sheet.PrimaryPalette.TextDark),
+                .Modulate(palettes.PrimaryPalette.TextDark),
 
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassSymbol))
-                .Modulate(sheet.SecondaryPalette.TextDark),
+                .Modulate(palettes.SecondaryPalette.TextDark),
 
             E<SwitchButton>()
                 .PseudoDisabled()
                 .ParentOf(E<Label>())
-                .Modulate(sheet.PrimaryPalette.TextDark),
+                .Modulate(palettes.PrimaryPalette.TextDark),
 
             // Both pressed & disabled styles
             // Note that some of the pressed-only and disabled-only styles do not conflict
@@ -113,13 +117,13 @@ public sealed class SwitchButtonSheetlet<T> : Sheetlet<T> where T : PalettedStyl
                 .PseudoPressed()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassTrackFill))
-                .Modulate(sheet.PositivePalette.DisabledElement),
+                .Modulate(palettes.PositivePalette.DisabledElement),
 
             E<SwitchButton>()
                 .PseudoPressed()
                 .PseudoDisabled()
                 .ParentOf(E<TextureRect>().Class(SwitchButton.StyleClassSymbol))
-                .Modulate(sheet.PositivePalette.Text),
+                .Modulate(palettes.PositivePalette.Text),
         ];
     }
 }

@@ -1,20 +1,23 @@
+using Content.Client.Resources;
 using Content.Client.Stylesheets.SheetletConfigs;
-using Content.Client.Stylesheets.Stylesheets;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using static Content.Client.Stylesheets.StylesheetHelpers;
 
 namespace Content.Client.Stylesheets.Sheetlets;
 
-[CommonSheetlet]
-public sealed class CheckboxSheetlet<T> : Sheetlet<T> where T : PalettedStylesheet, ICheckboxConfig
+[Sheetlet]
+public sealed partial class CheckboxSheetlet : ISheetlet
 {
-    public override StyleRule[] GetRules(T sheet, object config)
-    {
-        ICheckboxConfig checkboxCfg = sheet;
+    [Dependency] private IResourceCache _resCache = default!;
 
-        var uncheckedTex = sheet.GetTextureOr(checkboxCfg.CheckboxUncheckedPath, NanotrasenStylesheet.TextureRoot);
-        var checkedTex = sheet.GetTextureOr(checkboxCfg.CheckboxCheckedPath, NanotrasenStylesheet.TextureRoot);
+    public StyleRule[] Generate(SheetletConfigRegistry configs)
+    {
+        var checkbox = configs.GetConfig<CheckboxConfig>();
+
+        var uncheckedTex = _resCache.GetTexture(checkbox.CheckboxUncheckedPath);
+        var checkedTex = _resCache.GetTexture(checkbox.CheckboxCheckedPath);
 
         return
         [
