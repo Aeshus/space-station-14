@@ -7,4 +7,7 @@ public sealed partial class FontConfig : SheetletConfig
 {
     [DataField]
     public IFontFamily BaseFont { get; set; }
+
+    [DataField]
+    public IFontFamily MonoFont { get; set; }
 }
