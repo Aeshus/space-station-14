@@ -12,6 +12,6 @@ public interface ISheetlet
     /// Generates the style rules for this sheetlet.
     /// </summary>
     /// <param name="configs">Configuration registry</param>
-    /// <returns>Generates rules, or an empty array if config requirements not met.</returns>
+    /// <returns>Generates rules</returns>
     StyleRule[] Generate(SheetletConfigRegistry configs);
 }
