@@ -52,9 +52,9 @@ public sealed partial class FontFamilyBundled : IFontFamily
 
     /// <inheritdoc/>
     public Font GetFont(int size,
-        FontWidth width = FontWidth.Normal,
+        FontWeight weight = FontWeight.Regular,
         FontSlant slant = FontSlant.Normal,
-        FontWeight weight = FontWeight.Normal)
+        FontWidth width = FontWidth.Normal)
     {
         size = (int)(Scale * size);
 

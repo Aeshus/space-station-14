@@ -25,12 +25,12 @@ public interface IFontFamily
     /// Gets the font that is the closest to the specified font face variation requested at a given size.
     /// </summary>
     /// <param name="size">The size of the font in points (and scaled by <see cref="Scale"/> + UIScale)</param>
-    /// <param name="width">The width of the font (css 'font-stretch')</param>
-    /// <param name="slant">The slant of the font (css 'font-style')</param>
     /// <param name="weight">The weight of the font (css 'font-weight')</param>
+    /// <param name="slant">The slant of the font (css 'font-style')</param>
+    /// <param name="width">The width of the font (css 'font-stretch')</param>
     /// <returns>The font (face) associated with this family</returns>
     Font GetFont(int size,
-        FontWidth width = FontWidth.Normal,
+        FontWeight weight = FontWeight.Regular,
         FontSlant slant = FontSlant.Normal,
-        FontWeight weight = FontWeight.Regular);
+        FontWidth width = FontWidth.Normal);
 }
