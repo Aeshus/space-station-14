@@ -43,12 +43,12 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         ISerializationManager.InstantiationDelegate<SheetletConfigRegistry>? instanceProvider = null)
     {
         var configs = instanceProvider != null ? instanceProvider() : new SheetletConfigRegistry();
-        configs.EnsureCapacity(node.Count);
+        configs.Configs.EnsureCapacity(node.Count);
 
         foreach (var entry in node)
         {
             var data = serializationManager.Read<SheetletConfig>(entry, context, notNullableOverride: true);
-            configs.Add(data.GetType(), data);
+            configs.Configs.Add(data.GetType(), data);
         }
 
         return configs;
@@ -63,7 +63,7 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
     {
         var sequence = new SequenceDataNode();
 
-        foreach (var config in value.Values)
+        foreach (var config in value.Configs.Values)
         {
             sequence.Add(serializationManager.WriteValue(config, notNullableOverride: true));
         }
@@ -110,10 +110,10 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
         SerializationHookContext hookCtx,
         ISerializationContext? context = null)
     {
-        target.Clear();
-        target.EnsureCapacity(source.Count);
+        target.Configs.Clear();
+        target.Configs.EnsureCapacity(source.Configs.Count);
 
-        foreach (var (type, config) in source)
+        foreach (var (type, config) in source.Configs)
         {
             var copy = serializationManager.CreateCopy(
                 config,
@@ -121,7 +121,7 @@ public sealed class SheetletConfigRegistrySerializer : BaseTypeSerializer,
                 context,
                 notNullableOverride: true);
 
-            target.Add(type, copy);
+            target.Configs.Add(type, copy);
         }
     }
 
