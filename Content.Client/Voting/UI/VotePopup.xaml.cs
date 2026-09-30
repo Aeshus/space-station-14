@@ -17,6 +17,9 @@ namespace Content.Client.Voting.UI
         [Dependency] private IGameTiming _gameTiming = default!;
         [Dependency] private IVoteManager _voteManager = default!;
         [Dependency] private IEntityNetworkManager _net = default!;
+        [Dependency] private IStylesheetManager _stylesheetManager = default!;
+
+        private StylesheetManager.IStyleAccessor _accessor;
 
         private readonly VoteManager.ActiveVote _vote;
         private readonly Button[] _voteButtons;
@@ -28,7 +31,7 @@ namespace Content.Client.Voting.UI
             IoCManager.InjectDependencies(this);
             RobustXamlLoader.Load(this);
 
-            Stylesheet = IoCManager.Resolve<IStylesheetManager>().SheetSystem;
+            _accessor = _stylesheetManager.GetStyleSubscription("System");
 
             if (_vote.TargetEntity != null && _vote.TargetEntity != 0)
             {
@@ -53,6 +56,25 @@ namespace Content.Client.Voting.UI
                 var i1 = i;
                 button.OnPressed += _ => _voteManager.SendCastVote(vote.Id, i1);
             }
+        }
+
+        protected override void EnteredTree()
+        {
+            base.EnteredTree();
+
+            _accessor.StyleChanged += OnStyleChanged;
+        }
+
+        protected override void ExitedTree()
+        {
+            _accessor.StyleChanged -= OnStyleChanged;
+
+            base.ExitedTree();
+        }
+
+        private void OnStyleChanged(Stylesheet stylesheet, SheetletConfigRegistry configs)
+        {
+            Stylesheet = stylesheet;
         }
 
         public void UpdateData()

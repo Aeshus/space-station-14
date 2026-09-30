@@ -10,12 +10,36 @@ namespace Content.Client.Replay.UI.Loading;
 [GenerateTypedNameReferences]
 public sealed partial class ReplayLoadingFailedControl : Control
 {
+    [Dependency] private IStylesheetManager _stylesheetManager = default!;
+    private StylesheetManager.IStyleAccessor _accessor;
+
+
     public ReplayLoadingFailedControl(IStylesheetManager stylesheet)
     {
         RobustXamlLoader.Load(this);
+        IoCManager.InjectDependencies(this);
+        _accessor = _stylesheetManager.GetStyleSubscription("System");
 
-        Stylesheet = stylesheet.SheetSystem;
         LayoutContainer.SetAnchorPreset(this, LayoutContainer.LayoutPreset.Wide);
+    }
+
+    protected override void EnteredTree()
+    {
+        base.EnteredTree();
+
+        _accessor.StyleChanged += OnStyleChanged;
+    }
+
+    protected override void ExitedTree()
+    {
+        _accessor.StyleChanged -= OnStyleChanged;
+
+        base.ExitedTree();
+    }
+
+    private void OnStyleChanged(Stylesheet stylesheet, SheetletConfigRegistry configs)
+    {
+        Stylesheet = stylesheet;
     }
 
     public void SetData(Exception exception, Action? cancelPressed, Action? retryPressed)

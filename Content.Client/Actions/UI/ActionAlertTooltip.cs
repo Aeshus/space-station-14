@@ -1,4 +1,5 @@
 using Content.Client.Stylesheets;
+using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
@@ -9,12 +10,16 @@ namespace Content.Client.Actions.UI
     /// <summary>
     /// Tooltip for actions or alerts because they are very similar.
     /// </summary>
-    public sealed class ActionAlertTooltip : PanelContainer
+    public sealed partial class ActionAlertTooltip : PanelContainer
     {
+        [Dependency] private IStylesheetManager _stylesheetManager = default!;
+        [Dependency] private IGameTiming _gameTiming = default!;
+
+        private StylesheetManager.IStyleAccessor _accessor;
+
         private const float TooltipTextMaxWidth = 350;
 
         private readonly RichTextLabel _cooldownLabel;
-        private readonly IGameTiming _gameTiming;
 
         /// <summary>
         /// Current cooldown displayed in this tooltip. Set to null to show no cooldown.
@@ -23,8 +28,8 @@ namespace Content.Client.Actions.UI
 
         public ActionAlertTooltip(FormattedMessage name, FormattedMessage? desc, string? requires = null)
         {
-            Stylesheet = IoCManager.Resolve<IStylesheetManager>().SheetSystem;
-            _gameTiming = IoCManager.Resolve<IGameTiming>();
+            IoCManager.InjectDependencies(this);
+            _accessor = _stylesheetManager.GetStyleSubscription("System");
 
             SetOnlyStyleClass(StyleClass.TooltipPanel);
 
@@ -91,7 +96,10 @@ namespace Content.Client.Actions.UI
             {
                 var duration = Cooldown.Value.End - Cooldown.Value.Start;
 
-                if (!FormattedMessage.TryFromMarkup(Loc.GetString("ui-actionslot-duration", ("duration", (int)duration.TotalSeconds), ("timeLeft", (int)timeLeft.TotalSeconds + 1)), out var markup))
+                if (!FormattedMessage.TryFromMarkup(Loc.GetString("ui-actionslot-duration",
+                            ("duration", (int)duration.TotalSeconds),
+                            ("timeLeft", (int)timeLeft.TotalSeconds + 1)),
+                        out var markup))
                     return;
 
                 _cooldownLabel.SetMessage(markup);
@@ -101,6 +109,25 @@ namespace Content.Client.Actions.UI
             {
                 _cooldownLabel.Visible = false;
             }
+        }
+
+        protected override void EnteredTree()
+        {
+            base.EnteredTree();
+
+            _accessor.StyleChanged += OnStyleChanged;
+        }
+
+        protected override void ExitedTree()
+        {
+            _accessor.StyleChanged -= OnStyleChanged;
+
+            base.ExitedTree();
+        }
+
+        private void OnStyleChanged(Stylesheet stylesheet, SheetletConfigRegistry configs)
+        {
+            Stylesheet = stylesheet;
         }
     }
 }

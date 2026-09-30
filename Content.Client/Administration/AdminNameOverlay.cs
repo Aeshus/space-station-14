@@ -2,7 +2,9 @@ using System.Collections.Frozen;
 using System.Linq;
 using System.Numerics;
 using Content.Client.Administration.Systems;
+using Content.Client.Stylesheets;
 using Content.Client.Stylesheets.Fonts;
+using Content.Client.Stylesheets.SheetletConfigs;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
 using Content.Shared.Ghost.Components;
@@ -26,10 +28,12 @@ internal sealed class AdminNameOverlay : Overlay
     private readonly IUserInterfaceManager _userInterfaceManager;
     private readonly SharedRoleSystem _roles;
     private readonly IPrototypeManager _prototypeManager;
-    private readonly Font _font;
-    private readonly Font _fontBold;
+    private readonly IStylesheetManager _stylesheetManager;
+    private Font _font = default!;
+    private Font _fontBold = default!;
     private AdminOverlayAntagFormat _overlayFormat;
     private AdminOverlayAntagSymbolStyle _overlaySymbolStyle;
+    private StylesheetManager.IStyleAccessor _accessor;
     private bool _overlayPlaytime;
     private bool _overlayStartingJob;
     private float _ghostFadeDistance;
@@ -53,7 +57,8 @@ internal sealed class AdminNameOverlay : Overlay
         IUserInterfaceManager userInterfaceManager,
         IConfigurationManager config,
         SharedRoleSystem roles,
-        IPrototypeManager prototypeManager)
+        IPrototypeManager prototypeManager,
+        IStylesheetManager stylesheetmanager)
     {
         _system = system;
         _entityManager = entityManager;
@@ -62,11 +67,12 @@ internal sealed class AdminNameOverlay : Overlay
         _userInterfaceManager = userInterfaceManager;
         _roles = roles;
         _prototypeManager = prototypeManager;
+        _stylesheetManager = stylesheetmanager;
         ZIndex = 200;
         // Setting these to a specific ttf would break the antag symbols
-        var fontStack = new NotoFontFamilyStack(resourceCache);
-        _font = fontStack.GetFont(10);
-        _fontBold = fontStack.GetFont(10, FontKind.Bold);
+
+        _accessor = _stylesheetManager.GetStyleSubscription("Nano");
+        _accessor.StyleChanged += OnStyleChanged;
 
         config.OnValueChanged(CCVars.AdminOverlayAntagFormat, (show) => { _overlayFormat = UpdateOverlayFormat(show); }, true);
         config.OnValueChanged(CCVars.AdminOverlaySymbolStyle, (show) => { _overlaySymbolStyle = UpdateOverlaySymbolStyle(show); }, true);
@@ -76,6 +82,19 @@ internal sealed class AdminNameOverlay : Overlay
         config.OnValueChanged(CCVars.AdminOverlayGhostFadeDistance, (f) => { _ghostFadeDistance = f; }, true);
         config.OnValueChanged(CCVars.AdminOverlayStackMax, (i) => { _overlayStackMax = i; }, true);
         config.OnValueChanged(CCVars.AdminOverlayMergeDistance, (f) => { _overlayMergeDistance = f; }, true);
+    }
+
+    protected override void DisposeBehavior()
+    {
+        _accessor.StyleChanged -= OnStyleChanged;
+
+        base.DisposeBehavior();
+    }
+
+    private void OnStyleChanged(Stylesheet stylesheet, SheetletConfigRegistry configs)
+    {
+        _font = configs.GetConfig<FontConfig>().Main.GetFont(10);
+        _fontBold = configs.GetConfig<FontConfig>().Main.GetFont(10, FontWeight.Bold);
     }
 
     private AdminOverlayAntagFormat UpdateOverlayFormat(string formatString)

@@ -12,6 +12,9 @@ using Robust.Client.UserInterface.CustomControls;
 using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Prototypes;
 using System.Numerics;
+using Content.Client.Stylesheets;
+using Content.Client.Stylesheets.SheetletConfigs;
+using Robust.Client.UserInterface;
 
 namespace Content.Client.TurretController;
 
@@ -21,6 +24,9 @@ public sealed partial class TurretControllerWindow : BaseWindow
     [Dependency] private IEntityManager _entManager = default!;
     [Dependency] private IPlayerManager _playerManager = default!;
     [Dependency] private IResourceCache _cache = default!;
+    [Dependency] private IStylesheetManager _stylesheetManager = default!;
+
+    private StylesheetManager.IStyleAccessor _accessor;
 
     private readonly AccessReaderSystem _accessReaderSystem;
 
@@ -45,6 +51,7 @@ public sealed partial class TurretControllerWindow : BaseWindow
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+        _accessor = _stylesheetManager.GetStyleSubscription("Nano");
 
         _accessReaderSystem = _entManager.System<AccessReaderSystem>();
 
@@ -67,11 +74,27 @@ public sealed partial class TurretControllerWindow : BaseWindow
         AccessConfiguration.SetMonotone(true);
         AccessConfiguration.SetLabelStyleClass("ConsoleText");
         AccessConfiguration.OnAccessLevelsChangedEvent += OnAccessLevelsChanged;
-
-        // Override footer font
-        var smallFont = new NotoFontFamilyStack(_cache).GetFont(8);
-        Footer.FontOverride = smallFont;
     }
+
+    protected override void EnteredTree()
+    {
+        base.EnteredTree();
+
+        _accessor.StyleChanged += OnStyleChanged;
+    }
+
+    protected override void ExitedTree()
+    {
+        _accessor.StyleChanged -= OnStyleChanged;
+
+        base.ExitedTree();
+    }
+
+    private void OnStyleChanged(Stylesheet stylesheet, SheetletConfigRegistry configs)
+    {
+        Footer.FontOverride = configs.GetConfig<FontConfig>().Main.GetFont(8);
+    }
+
 
     private void OnAccessLevelsChanged(HashSet<ProtoId<AccessLevelPrototype>> accessLevels, bool isPressed)
     {
