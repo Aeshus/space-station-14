@@ -98,12 +98,6 @@ public sealed partial class TextLinkTag : IMarkupTagHandler
         // eat my ass about where this magic number comes from
         // our UI stack is awful. Finding this magic number was awful.
         // The entire system is full of TODOs and unhelpful obsoletes that just say to go to another system which is using the EXACT SAME OBSOLETED OBJECTS
-        var boldFont = new NotoFontFamilyStack(_cache).GetFont(FontTag.DefaultSize, FontKind.Bold);
-        if (linkData.LinkEntity is not null)
-        {
-            linkLabel.FontOverride = boldFont;
-        }
-
         _chat ??= _entity.System<SharedChatSystem>();
         linkLabel.UpdateLabelProperties(_chat);
 

@@ -13,4 +13,7 @@ public sealed partial class FontConfig : SheetletConfig
 
     [DataField]
     public IFontFamily Decorative { get; set; }
+
+    [DataField]
+    public IFontFamily Display { get; set; }
 }

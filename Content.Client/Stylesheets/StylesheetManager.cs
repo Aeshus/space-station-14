@@ -18,6 +18,11 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
     private ISawmill _sawmill = default!;
 
+    /// <summary>
+    /// The default stylesheet.
+    /// </summary>
+    public readonly ProtoId<StylesheetPrototype> DefaultStylesheet = "Nano";
+
     /// <inheritdoc/>
     public event Action<SheetletConfigRegistry>? OnStyleReload;
 
@@ -90,10 +95,8 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
         if (proto.Abstract)
             return;
 
-        SheetletConfigRegistry configs;
-        Stylesheet stylesheet;
         // Copy before subscribers mutate the configs, then notify them in subscription order.
-        configs = _serializationManager.CreateCopy(
+        var configs = _serializationManager.CreateCopy(
             proto.Configs,
             notNullableOverride: true);
         OnStyleReload?.Invoke(configs);
@@ -112,7 +115,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
             }
         }
 
-        stylesheet = new Stylesheet(rules);
+        var stylesheet = new Stylesheet(rules);
 
         if (!_styleAccessors.TryGetValue(proto, out var accessor))
         {
@@ -126,7 +129,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     }
 
     /// <summary>
-    /// Allows for accessing/subscribing to the current stylesheet and registry for a protoid.
+    /// Allows for accessing/subscribing to the current stylesheet and registry for a <see cref="ProtoId{T}"/>.
     /// </summary>
     public interface IStyleAccessor
     {
