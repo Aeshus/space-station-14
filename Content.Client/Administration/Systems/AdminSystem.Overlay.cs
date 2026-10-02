@@ -1,4 +1,5 @@
 using Content.Client.Administration.Managers;
+using Content.Client.Stylesheets;
 using Content.Shared.Roles;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
@@ -17,6 +18,7 @@ namespace Content.Client.Administration.Systems
         [Dependency] private IUserInterfaceManager _userInterfaceManager = default!;
         [Dependency] private IConfigurationManager _configurationManager = default!;
         [Dependency] private SharedRoleSystem _roles = default!;
+        [Dependency] private IStylesheetManager _stylesheetManager = default!;
 
         private AdminNameOverlay _adminNameOverlay = default!;
 
@@ -34,7 +36,8 @@ namespace Content.Client.Administration.Systems
                 _userInterfaceManager,
                 _configurationManager,
                 _roles,
-                ProtoMan);
+                ProtoMan,
+                _stylesheetManager);
             _adminManager.AdminStatusUpdated += OnAdminStatusUpdated;
         }
 
