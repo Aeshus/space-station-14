@@ -15,13 +15,16 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     [Dependency] private ISerializationManager _serializationManager = default!;
     [Dependency] private ILogManager _logManager = default!;
 
-    private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
-    private ISawmill _sawmill = default!;
-
     /// <summary>
     /// The default stylesheet.
     /// </summary>
+    /// <remarks>
+    /// This is usually not what you want to use.
+    /// </remarks>
     public readonly ProtoId<StylesheetPrototype> DefaultStylesheet = "Nano";
+
+    private readonly Dictionary<ProtoId<StylesheetPrototype>, StyleAccessor> _styleAccessors = [];
+    private ISawmill _sawmill = default!;
 
     /// <inheritdoc/>
     public event Action<SheetletConfigRegistry>? OnStyleReload;
@@ -30,6 +33,7 @@ public sealed partial class StylesheetManager : IPostInjectInit, IStylesheetMana
     public void Initialize()
     {
         DirtyAll();
+        SetDefaultTheme();
     }
 
     /// <inheritdoc/>
