@@ -18,9 +18,6 @@ public interface IFontFamily
     /// </summary>
     float Scale { get; set; }
 
-    // The ordering of the parameters is to mimic the resolution order used in CSS' font matching algorithm:
-    // https://www.w3.org/TR/css-fonts-3/#font-matching-algorithm
-
     /// <summary>
     /// Gets the font that is the closest to the specified font face variation requested at a given size.
     /// </summary>
