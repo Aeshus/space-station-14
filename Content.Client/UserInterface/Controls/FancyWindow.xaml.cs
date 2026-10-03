@@ -56,7 +56,7 @@ namespace Content.Client.UserInterface.Controls
                 if (value is null)
                     return;
 
-                _accessor = _stylesheetManager.GetStyleSubscription(value.Value);
+                _stylesheetManager.TryGetStyleSubscription(value.Value, out _accessor);
 
                 if (IsInsideTree)
                     _accessor?.StyleChanged += OnStyleChanged;
